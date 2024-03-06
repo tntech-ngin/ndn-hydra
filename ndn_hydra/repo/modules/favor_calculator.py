@@ -41,4 +41,4 @@ class FavorCalculator:
         #    favor += int(val)
         # print('favor:', favor)
         favor = .3*REMAINING_STORAGE + .3*BANDWIDTH + .4*RW_SPEED + 0.0*NUM_USERS + 0.0*NETWORK_COST + 0.0*STORAGE_COST
-        return favor
+        return int(favor)
