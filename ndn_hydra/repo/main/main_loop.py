@@ -76,18 +76,29 @@ class MainLoop:
                 i.lowSeqno = i.lowSeqno + 1
 
     def send_heartbeat(self):
+        favor = 1.85
         heartbeat_message = HeartbeatMessageTlv()
         heartbeat_message.node_name = self.config['node_name'].encode()
-        heartbeat_message.favor_parameters = FavorParameters()
-        heartbeat_message.favor_parameters.rtt = str(self.config['rtt']).encode()
-        heartbeat_message.favor_parameters.num_users = str(self.config['num_users']).encode()
-        heartbeat_message.favor_parameters.bandwidth = str(self.config['bandwidth']).encode()
-        heartbeat_message.favor_parameters.network_cost = str(self.config['network_cost']).encode()
-        heartbeat_message.favor_parameters.storage_cost = str(self.config['storage_cost']).encode()
-        heartbeat_message.favor_parameters.remaining_storage = str(self.config['remaining_storage']).encode()
+        heartbeat_message.favor = str(favor).encode()
         message = Message()
         message.type = MessageTypes.HEARTBEAT
         message.value = heartbeat_message.encode()
+        heartbeat_message = HeartbeatMessageTlv()
+        
+        ##########TODO: We need to update this#############
+        # heartbeat_message = HeartbeatMessageTlv()
+        # heartbeat_message.node_name = self.config['node_name'].encode()
+        # heartbeat_message.favor_parameters = FavorParameters()
+        # heartbeat_message.favor_parameters.rtt = str(self.config['rtt']).encode()
+        # heartbeat_message.favor_parameters.num_users = str(self.config['num_users']).encode()
+        # heartbeat_message.favor_parameters.bandwidth = str(self.config['bandwidth']).encode()
+        # heartbeat_message.favor_parameters.network_cost = str(self.config['network_cost']).encode()
+        # heartbeat_message.favor_parameters.storage_cost = str(self.config['storage_cost']).encode()
+        # heartbeat_message.favor_parameters.remaining_storage = str(self.config['remaining_storage']).encode()
+        # message = Message()
+        # message.type = MessageTypes.HEARTBEAT
+        # message.value = heartbeat_message.encode()
+        
         try:
             next_state_vector = self.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
         except TypeError:
