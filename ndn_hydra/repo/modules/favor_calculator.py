@@ -5,10 +5,10 @@
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
-import logging
 import numpy as np
 from ndn.encoding import *
 import shutil
+
 
 class FavorParameterTypes:
     RTT = 100
@@ -28,6 +28,7 @@ class FavorParameters(TlvModel):
     network_cost = BytesField(FavorParameterTypes.NETWORK_COST)
     storage_cost = BytesField(FavorParameterTypes.STORAGE_COST)
     remaining_storage = BytesField(FavorParameterTypes.REMAINING_STORAGE)
+    rw_speed = BytesField(FavorParameterTypes.RW_SPEED)
 
 
 class FavorCalculator:
@@ -40,5 +41,6 @@ class FavorCalculator:
             # print(param, ':', val)
         #    favor += int(val)
         # print('favor:', favor)
-        favor = .3*REMAINING_STORAGE + .3*BANDWIDTH + .4*RW_SPEED + 0.0*NUM_USERS + 0.0*NETWORK_COST + 0.0*STORAGE_COST
+        favor = (.3*favor_parameters.remaining_storage + .3*favor_parameters.bandwidth + .4*favor_parameters.rw_speed* + 0.0*favor_parameters.num_users
+                 + 0.0*favor_parameters.network_cost + 0.0*favor_parameters.storage_cost)
         return int(favor)
