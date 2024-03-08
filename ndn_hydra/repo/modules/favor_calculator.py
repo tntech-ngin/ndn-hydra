@@ -44,3 +44,4 @@ class FavorCalculator:
         favor = (.3*favor_parameters.remaining_storage + .3*favor_parameters.bandwidth + .4*favor_parameters.rw_speed* + 0.0*favor_parameters.num_users
                  + 0.0*favor_parameters.network_cost + 0.0*favor_parameters.storage_cost)
         return int(favor)
+
