@@ -30,6 +30,7 @@ class HeartbeatMessage(SpecificMessage):
 
     async def apply(self, global_view, fetch_file, svs, config):
         node_name = self.message.node_name.tobytes().decode()
-        favor = FavorCalculator().calculate_favor(self.message.favor_parameters)
-        self.logger.debug(f"[MSG][HB]   nam={node_name};fav={favor}")
+        #favor = FavorCalculator().calculate_favor(self.message.favor_parameters)  # todo: FIXME
+        favor = 1.85
+        self.logger.debug(f"[MSG][HB]   nam={node_name};fav={favor}")        
         global_view.update_node(node_name, favor, self.seqno)
