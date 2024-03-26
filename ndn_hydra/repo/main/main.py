@@ -13,6 +13,7 @@ from argparse import ArgumentParser
 import asyncio as aio
 import random
 import logging
+import yaml
 from typing import Dict
 from threading import Thread
 import pkg_resources
@@ -24,6 +25,7 @@ import sys, os
 from ndn.svs import SVSyncLogger
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
+from utils.update_config import update_config_file
 
 
 def process_cmd_opts():
@@ -156,32 +158,17 @@ class HydraNodeThread(Thread):
             sys.exit()
 
 def main() -> int:
-    default_config = {
-        'repo_prefix': None,
-        'node_name': None,
-        'data_storage_path': None,
-        'global_view_path': None,
-        'svs_storage_path': None,
-        'logging_path': None,
-        'loop_period': 5000,
-        'tracker_rate': 25000,
-        'heartbeat_rate': 20000,
-        'beats_to_renew': 3,
-        'beats_to_fail': 3,
-        'replication_degree': 2,
-        'file_expiration': 0, # in hours, 0 = never expire
-        'rtt': random.randint(0, 100),
-        'num_users': random.randint(0, 10),
-        'bandwidth': random.randint(10, 500),
-        'network_cost': random.randint(1, 100),
-        'storage_cost': random.randint(1, 100),
-        'remaining_storage': random.randint(0, 1000),
-    }
-    cmd_args = process_cmd_opts()
-    config = default_config.copy()
-    config.update(cmd_args)
-    HydraNodeThread(config).start()
-    return 0
+  # Load dynamic values into config file
+  
+  isConfigUpdated = update_config_file()
+  
+  if (isConfigUpdated):
+    with open("config.yaml", "r") as yamlfile:
+      config = yaml.load(yamlfile, Loader=yaml.FullLoader)
+      HydraNodeThread(config).start()
+      return 0
+
+  return 1
 
 
 if __name__ == "__main__":
