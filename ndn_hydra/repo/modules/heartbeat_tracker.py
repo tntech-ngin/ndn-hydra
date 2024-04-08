@@ -18,8 +18,8 @@ class HeartbeatTracker:
         __slots__ = ('past_beat','cycles','alive')
         def __init__(self) -> None:
             self.past_beat, self.cycles, self.alive = 0, 0, False
-    def __init__(self, nn:str, gv:GlobalView, lp:int, hr:int, tr:int, btf:int, btr:int):
-        self.hearts,self.globalview,self.node_name,self.loop_period,self.heartbeat_rate,self.tracker_rate,self.beats_to_fail,self.beats_to_renew,self.logger = {},gv,nn,lp,hr,tr,btf,btr,logging.getLogger()
+    def __init__(self, nn:str, gv: GlobalView, lp: int, hr: int, tr: int, btf: int, btr: int):
+        self.hearts, self.globalview, self.node_name, self.loop_period, self.heartbeat_rate, self.tracker_rate, self.beats_to_fail, self.beats_to_renew, self.logger = {}, gv, nn, lp, hr, tr, btf, btr, logging.getLogger()
     def reset(self, node_name:str):
         try:
             heart = self.hearts[node_name]
@@ -36,6 +36,7 @@ class HeartbeatTracker:
                 heart.alive = True
                 self.globalview.renew_node(node_name)
                 self.logger.info(f"[ACT][RENEW]*   nam={node_name}")
+                self.logger.info(f"Currently {len(self.globalview.get_nodes())} node(s)")
     def detect(self):
         for node_name, heart in self.hearts.items():
             time_past = (time.perf_counter()*1000) - heart.past_beat

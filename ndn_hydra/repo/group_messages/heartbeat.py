@@ -28,9 +28,9 @@ class HeartbeatMessage(SpecificMessage):
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
 
-    async def apply(self, global_view, fetch_file, svs, config):
-        node_name = self.message.node_name.tobytes().decode()
-        #favor = FavorCalculator().calculate_favor(self.message.favor_parameters)  # todo: FIXME
-        favor = 1.85
-        self.logger.debug(f"[MSG][HB]   nam={node_name};fav={favor}")        
-        global_view.update_node(node_name, favor, self.seqno)
+    async def apply(self, global_view: GlobalView):
+        node_name = Name.from_bytes(self.message.node_name)
+        favor = FavorCalculator().calculate_favor(self.message.favor_parameters)
+        self.logger.debug(f"[MSG][HB]   nam={Name.to_str(node_name)};fav={favor}")
+        global_view.update_node(Name.to_str(node_name), favor, self.seqno)
+        self.logger.debug(f"{len(global_view.get_nodes())} nodes")

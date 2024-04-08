@@ -103,7 +103,7 @@ def parse_hydra_cmd_opts() -> Namespace:
 
     # Getting all Arguments
     vars = parser.parse_args()
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     # Configure Arguments
     if vars.function == "insert":
         if not os.path.isfile(vars.path):
@@ -118,9 +118,9 @@ class HydraClient():
         self.cfetch = HydraFetchClient(app, client_prefix, repo_prefix)
         self.cquery = HydraQueryClient(app, client_prefix, repo_prefix)
     async def insert(self, file_name: FormalName, path: str) -> bool:
-        return await self.cinsert.insert_file(file_name, path);
+        return await self.cinsert.insert_file(file_name, path)
     async def delete(self, file_name: FormalName) -> bool:
-        return await self.cdelete.delete_file(file_name);
+        return await self.cdelete.delete_file(file_name)
     async def fetch(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
         return await self.cfetch.fetch_file(file_name, local_filename, overwrite)
     async def query(self, query: Name, node_name: str=None) -> None:
