@@ -18,6 +18,7 @@ import logging
 from ndn.app import NDNApp
 from ndn.types import InterestNack, InterestTimeout
 from ndn.encoding import Name, NonStrictName, Component
+from tqdm.asyncio import tqdm
 from typing import Optional
 
 #An async-generator to fetch data packets concurrently.
@@ -30,6 +31,10 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
     recv_window = cur_id - 1
     seq_to_data_packet = dict() # Buffer for out-of-order delivery
     received_or_fail = aio.Event()
+
+    # Progress bar
+    total_blocks = final_id - start_block_id + 1
+    progress_bar = tqdm(total=total_blocks, desc='Fetching data', unit='block')
 
     async def _retry(seq: int):
         """
@@ -60,6 +65,7 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
                 seq_to_data_packet[seq] = (data_name, meta_info, content, data_bytes, key)
                 if meta_info is not None and meta_info.final_block_id is not None:
                     final_id = Component.to_number(meta_info.final_block_id)
+                progress_bar.update(1)
                 break
             except InterestNack as e:
                 logging.info(f'Nacked with reason={e.reason} {Name.to_str(int_name)}')
@@ -95,7 +101,7 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
         # Return if all data have been fetched, or the fetching process failed
         if recv_window == final_id:
             await aio.gather(*tasks)
-            return
+            break
         if is_failed:
             await aio.gather(*tasks)
             # New data may return during gather(), need to check again
@@ -103,4 +109,5 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
                 yield seq_to_data_packet[recv_window + 1]
                 del seq_to_data_packet[recv_window + 1]
                 recv_window += 1
-            return
+            break
+    progress_bar.close()

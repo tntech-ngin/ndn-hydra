@@ -120,31 +120,29 @@ class HydraNodeThread(Thread):
         console.setLevel(logging.INFO)
         logging.getLogger().addHandler(console)
 
-        # loop + NDN
-        loop = aio.new_event_loop()
-        aio.set_event_loop(loop)
+        # NDN
         app = NDNApp()
-
-        # databases
-        data_storage = SqliteStorage(self.config['data_storage_path'])
-        global_view = GlobalView(self.config['global_view_path'])
-        svs_storage = SqliteStorage(self.config['svs_storage_path'])
-        pb = PubSub(app)
-
-        # file fetcher module
-        file_fetcher = FileFetcher(app, global_view, data_storage, self.config)
-
-        # main_loop (svs)
-        main_loop = MainLoop(app, self.config, global_view, data_storage, svs_storage, file_fetcher)
-
-        # handles (reads, commands & queries)
-        read_handle = ReadHandle(app, data_storage, global_view, self.config)
-        insert_handle = InsertCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
-        delete_handle = DeleteCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
-        query_handle = QueryHandle(app, global_view, self.config)
 
         # Post-start
         async def start_main_loop():
+            # databases
+            data_storage = SqliteStorage(self.config['data_storage_path'])
+            global_view = GlobalView(self.config['global_view_path'])
+            svs_storage = SqliteStorage(self.config['svs_storage_path'])
+            pb = PubSub(app)
+
+            # file fetcher module
+            file_fetcher = FileFetcher(app, global_view, data_storage, self.config)
+
+            # main_loop (svs)
+            main_loop = MainLoop(app, self.config, global_view, data_storage, svs_storage, file_fetcher)
+
+            # handles (reads, commands & queries)
+            read_handle = ReadHandle(app, data_storage, global_view, self.config)
+            insert_handle = InsertCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
+            delete_handle = DeleteCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
+            query_handle = QueryHandle(app, global_view, self.config)
+
             await listen(Name.normalize(self.config['repo_prefix']), pb, insert_handle, delete_handle)
             await main_loop.start()
 
