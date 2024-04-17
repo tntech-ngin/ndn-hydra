@@ -13,6 +13,7 @@ from argparse import ArgumentParser
 import asyncio as aio
 import random
 import logging
+import yaml
 from typing import Dict
 from threading import Thread
 import pkg_resources
@@ -24,6 +25,7 @@ import sys, os
 from ndn.svs import SVSyncLogger
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
+from utils.update_config import update_config_file
 
 
 def process_cmd_opts():
@@ -120,31 +122,29 @@ class HydraNodeThread(Thread):
         console.setLevel(logging.INFO)
         logging.getLogger().addHandler(console)
 
-        # loop + NDN
-        loop = aio.new_event_loop()
-        aio.set_event_loop(loop)
+        # NDN
         app = NDNApp()
-
-        # databases
-        data_storage = SqliteStorage(self.config['data_storage_path'])
-        global_view = GlobalView(self.config['global_view_path'])
-        svs_storage = SqliteStorage(self.config['svs_storage_path'])
-        pb = PubSub(app)
-
-        # file fetcher module
-        file_fetcher = FileFetcher(app, global_view, data_storage, self.config)
-
-        # main_loop (svs)
-        main_loop = MainLoop(app, self.config, global_view, data_storage, svs_storage, file_fetcher)
-
-        # handles (reads, commands & queries)
-        read_handle = ReadHandle(app, data_storage, global_view, self.config)
-        insert_handle = InsertCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
-        delete_handle = DeleteCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
-        query_handle = QueryHandle(app, global_view, self.config)
 
         # Post-start
         async def start_main_loop():
+            # databases
+            data_storage = SqliteStorage(self.config['data_storage_path'])
+            global_view = GlobalView(self.config['global_view_path'])
+            svs_storage = SqliteStorage(self.config['svs_storage_path'])
+            pb = PubSub(app)
+
+            # file fetcher module
+            file_fetcher = FileFetcher(app, global_view, data_storage, self.config)
+
+            # main_loop (svs)
+            main_loop = MainLoop(app, self.config, global_view, data_storage, svs_storage, file_fetcher)
+
+            # handles (reads, commands & queries)
+            read_handle = ReadHandle(app, data_storage, global_view, self.config)
+            insert_handle = InsertCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
+            delete_handle = DeleteCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
+            query_handle = QueryHandle(app, global_view, self.config)
+
             await listen(Name.normalize(self.config['repo_prefix']), pb, insert_handle, delete_handle)
             await main_loop.start()
 
@@ -156,32 +156,17 @@ class HydraNodeThread(Thread):
             sys.exit()
 
 def main() -> int:
-    default_config = {
-        'repo_prefix': None,
-        'node_name': None,
-        'data_storage_path': None,
-        'global_view_path': None,
-        'svs_storage_path': None,
-        'logging_path': None,
-        'loop_period': 5000,
-        'tracker_rate': 25000,
-        'heartbeat_rate': 20000,
-        'beats_to_renew': 3,
-        'beats_to_fail': 3,
-        'replication_degree': 2,
-        'file_expiration': 0, # in hours, 0 = never expire
-        'rtt': random.randint(0, 100),
-        'num_users': random.randint(0, 10),
-        'bandwidth': random.randint(10, 500),
-        'network_cost': random.randint(1, 100),
-        'storage_cost': random.randint(1, 100),
-        'remaining_storage': random.randint(0, 1000),
-    }
-    cmd_args = process_cmd_opts()
-    config = default_config.copy()
-    config.update(cmd_args)
-    HydraNodeThread(config).start()
-    return 0
+  # Load dynamic values into config file
+  
+  isConfigUpdated = update_config_file()
+  
+  if (isConfigUpdated):
+    with open("config.yaml", "r") as yamlfile:
+      config = yaml.load(yamlfile, Loader=yaml.FullLoader)
+      HydraNodeThread(config).start()
+      return 0
+
+  return 1
 
 
 if __name__ == "__main__":
