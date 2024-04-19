@@ -158,15 +158,15 @@ class HydraNodeThread(Thread):
 def main() -> int:
   # Load dynamic values into config file
   
-  isConfigUpdated = update_config_file()
+  # isConfigUpdated = update_config_file()
   
-  if (isConfigUpdated):
-    with open("config.yaml", "r") as yamlfile:
-      config = yaml.load(yamlfile, Loader=yaml.FullLoader)
-      HydraNodeThread(config).start()
-      return 0
+  # if (isConfigUpdated):
+  with open("./ndn_hydra/repo/main/config.yaml", "r") as yamlfile:
+    config = yaml.load(yamlfile, Loader=yaml.FullLoader)
+    HydraNodeThread(config).start()
+    # return 0
 
-  return 1
+  return 0
 
 
 if __name__ == "__main__":

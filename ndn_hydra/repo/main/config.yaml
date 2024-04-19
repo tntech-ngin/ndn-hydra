@@ -1,5 +1,7 @@
+# Make sure the config file are with all values and provide ways to rewrite them in the config file and CLI
+
 default_config:
-  repo_prefix: null
+  repo_prefix: '/hydra'
   node_name: null
   data_storage_path: null
   global_view_path: null

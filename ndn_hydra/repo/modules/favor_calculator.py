@@ -9,11 +9,17 @@ import numpy as np
 from ndn.encoding import *
 import shutil
 
+# TODO:  Update favor objectives weights (NOT PARAMETERS)
+favor_weights = (
+    0.01,  # NETWORK_COST_PER_GB
+    0.014, # STORAGE_COST_PER_GB
+)
+
 
 class FavorParameterTypes:
     RTT = 501
     # NETWORK_COST_PER_GB = 0.01
-    STORAGE_COST_PER_GB = 0.014
+    # STORAGE_COST_PER_GB = 0.014
     NUM_USERS = 502
     BANDWIDTH = 503
     NETWORK_COST = 504
