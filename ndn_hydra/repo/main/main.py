@@ -10,85 +10,138 @@
 # -------------------------------------------------------------
 
 from argparse import ArgumentParser
-import asyncio as aio
-import random
-import logging
-import yaml
 from typing import Dict
 from threading import Thread
 import pkg_resources
 from ndn.app import NDNApp
 from ndn.encoding import Name
-from ndn.utils import gen_nonce
 from ndn.storage import SqliteStorage
 import sys, os
 from ndn.svs import SVSyncLogger
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
-from utils.update_config import update_config_file
+from ndn_hydra.repo.modules.read_config import read_config_file
 
 
 def process_cmd_opts():
     def interpret_version() -> None:
         set = True if "-v" in sys.argv else False
-        if set and (len(sys.argv)-1 < 2):
-            try: print("ndn-hydra " + pkg_resources.require("ndn-hydra")[0].version)
-            except pkg_resources.DistributionNotFound: print("ndn-hydra source,undetermined")
+        if set and (len(sys.argv) - 1 < 2):
+            try:
+                print("ndn-hydra " + pkg_resources.require("ndn-hydra")[0].version)
+            except pkg_resources.DistributionNotFound:
+                print("ndn-hydra source,undetermined")
             sys.exit(0)
+
     def interpret_help() -> None:
         set = True if "-h" in sys.argv else False
         if set:
-            if (len(sys.argv)-1 < 2):
-                print("usage: ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME")
+            if len(sys.argv) - 1 < 2:
+                print("* Basic initialization:")
+                print("    ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME")
+                print("")
                 print("    ndn-hydra-repo: hosting a node for hydra, the NDN distributed repo.")
+                print("* Examples:")
                 print("    ('python3 ./examples/repo.py' instead of 'ndn-hydra-repo' if from source.)")
                 print("")
-                print("* informational args:")
-                print("  -h, --help                       |   shows this help message and exits.")
-                print("  -v, --version                    |   shows the current version and exits.")
+                print("* Informative arguments:")
+                print("    -h, --help                       |   shows this help message and exits.")
+                print("    -v, --version                    |   shows the current version and exits.")
                 print("")
-                print("* required args:")
-                print("  -rp, --repoprefix REPO_PREFIX    |   repo (group) prefix. Example: \"/hydra\"")
-                print("  -n, --nodename NODE_NAME         |   node name. Example: \"node01\"")
+                print("* Optional arguments:")
+                print("    -rp, --repoprefix REPO_PREFIX    |   repo (group) prefix. Example: \"/hydra\"")
+                print("    -n, --nodename NODE_NAME         |   node name. Example: \"node01\"")
+                print("")
+                print("* Default configuration:")
+                print("    The default configuration is in the config.yaml file in the repo folder: ")
+                print("    ndn_hydra/repo/config.yaml")
+                print("    You can update these parameters there and test again: ")
+                print("")
+                print("  ** Parameters **")
+                print("    Repo prefix  | Prefix for all nodes in the repo. Example: \"/hydra\"")
+                print("    Node name    | Name of the node. Example: \"node01\"")
+                print("")
+                print("  ** Paths **")
+                print("    Base         | Base path for all files. Example: \"/home/user/.ndn\"")
+                print("    Data storage | Path for data storage. Example: \"/home/user/.ndn/hydra/node01/data.db\"")
+                print(
+                    "    Global view  | Path for global view. Example: \"/home/user/.ndn/hydra/node01/global_view.db\"")
+                print("    Svs storage  | Path for svs storage. Example: \"/home/user/.ndn/hydra/node01/svs.db\"")
+                print("    Logging      | Path for logging. Example: \"/home/user/.ndn/hydra/node01/session.log\"")
                 print("")
                 print("Thank you for using hydra.")
             sys.exit(0)
+
     def process_name(input_string: str):
         if input_string[-1] == "/":
             input_string = input_string[:-1]
         if input_string[0] != "/":
             input_string = "/" + input_string
         return input_string
-    def parse_cmd_opts():
+
+    def parse_cli_args():
         # Command Line Parser
-        parser = ArgumentParser(prog="ndn-hydra-repo",add_help=False,allow_abbrev=False)
+        parser = ArgumentParser(prog="ndn-hydra-repo", add_help=False, allow_abbrev=False)
+
         # Adding all Command Line Arguments
-        parser.add_argument("-h","--help",action="store_true",dest="help",default=False,required=False)
-        parser.add_argument("-v","--version",action="store_true",dest="version",default=False,required=False)
-        parser.add_argument("-rp","--repoprefix",action="store",dest="repo_prefix",required=True)
-        parser.add_argument("-n","--nodename",action="store",dest="node_name",required=True)
+        parser.add_argument("-h", "--help", action="store_true", dest="help", default=False, required=False)
+        parser.add_argument("-v", "--version", action="store_true", dest="version", default=False, required=False)
+        parser.add_argument("-rp", "--repoprefix", action="store", dest="repo_prefix", default=False, required=False)
+        parser.add_argument("-n", "--nodename", action="store", dest="node_name", default=False, required=False)
+
         # Interpret Informational Arguments
         interpret_version()
         interpret_help()
-        # Getting all Arguments
-        vars = parser.parse_args()
 
-        # Process args
-        args = {}
-        args["repo_prefix"] = process_name(vars.repo_prefix)
-        args["node_name"] = process_name(vars.node_name)
+        # Getting all Arguments
+        cli_args = parser.parse_args()
+
+        return cli_args
+
+    def create_config():
+        cli_args = parse_cli_args()
+        # Get values from YAML file
+        default_config_file = read_config_file()
+
+        default_repo_prefix = default_config_file['default_config']['repo_prefix']
+        default_node_name = default_config_file['default_config']['node_name']
+
+        config_data = {
+            "repo_prefix": default_repo_prefix,
+            "node_name": default_node_name,
+            "loop_period": default_config_file['default_config']['timers']['loop_period'],
+            "heartbeat_rate": default_config_file['default_config']['timers']['heartbeat_rate'],
+            "tracker_rate": default_config_file['default_config']['timers']['tracker_rate'],
+            "beats_to_fail": default_config_file['default_config']['timers']['beats_to_fail'],
+            "beats_to_renew": default_config_file['default_config']['timers']['beats_to_renew'],
+            "replication_degree": default_config_file['default_config']['timers']['replication_degree'],
+            "file_expiration": default_config_file['default_config']['timers']['file_expiration'],
+            "rtt": default_config_file['default_config']['favor']['rtt'],
+            "num_users": default_config_file['default_config']['favor']['num_users'],
+            "bandwidth": default_config_file['default_config']['favor']['bandwidth'],
+            "network_cost": default_config_file['default_config']['favor']['network_cost'],
+            "storage_cost": default_config_file['default_config']['favor']['storage_cost'],
+            "remaining_storage": default_config_file['default_config']['favor']['remaining_storage']
+        }
+
+        if cli_args.repo_prefix is not False:
+            config_data["repo_prefix"] = process_name(cli_args.repo_prefix)
+        if cli_args.node_name is not False:
+            config_data["node_name"] = process_name(cli_args.node_name)
+
         workpath = "{home}/.ndn/repo{repo_prefix}/{node_name}".format(
             home=os.path.expanduser("~"),
-            repo_prefix=args["repo_prefix"],
-            node_name=args["node_name"])
-        args["logging_path"] = "{workpath}/session.log".format(workpath=workpath)
-        args["data_storage_path"] = "{workpath}/data.db".format(workpath=workpath)
-        args["global_view_path"] = "{workpath}/global_view.db".format(workpath=workpath)
-        args["svs_storage_path"] = "{workpath}/svs.db".format(workpath=workpath)
-        return args
+            repo_prefix=config_data["repo_prefix"],
+            node_name=config_data["node_name"])
+        config_data["logging_path"] = "{workpath}/session.log".format(workpath=workpath)
+        config_data["data_storage_path"] = "{workpath}/data.db".format(workpath=workpath)
+        config_data["global_view_path"] = "{workpath}/global_view.db".format(workpath=workpath)
+        config_data["svs_storage_path"] = "{workpath}/svs.db".format(workpath=workpath)
+        return config_data
 
-    args = parse_cmd_opts()
-    return args
+    configuration = create_config()
+    return configuration
+
 
 async def listen(repo_prefix: Name, pb: PubSub, insert_handle: InsertCommandHandle, delete_handle: DeleteCommandHandle):
     # pubsub
@@ -98,17 +151,23 @@ async def listen(repo_prefix: Name, pb: PubSub, insert_handle: InsertCommandHand
     await insert_handle.listen(repo_prefix)
     await delete_handle.listen(repo_prefix)
 
+
 class HydraNodeThread(Thread):
     def __init__(self, config: Dict):
         Thread.__init__(self)
         self.config = config
 
     def run(self) -> None:
-        if len(os.path.dirname(self.config['logging_path'])) > 0 and not os.path.exists(os.path.dirname(self.config['logging_path'])):
+        if 'logging_path' not in self.config or self.config['logging_path'] is None:
+            raise ValueError("The 'logging_path' was not set in the configuration.")
+
+        logging_dir = os.path.dirname(self.config['logging_path'])
+
+        if logging_dir and not os.path.exists(logging_dir):
             try:
-                os.makedirs(os.path.dirname(self.config['logging_path']))
+                os.makedirs(logging_dir)
             except PermissionError:
-                raise PermissionError("Could not create directory: {}".format(self.config['logging_path'])) from None
+                raise PermissionError(f"Could not create directory: {logging_dir}")
             except FileExistsError:
                 pass
 
@@ -155,18 +214,17 @@ class HydraNodeThread(Thread):
             print('Error: could not connect to NFD.')
             sys.exit()
 
-def main() -> int:
-  # Load dynamic values into config file
-  
-  # isConfigUpdated = update_config_file()
-  
-  # if (isConfigUpdated):
-  with open("./ndn_hydra/repo/main/config.yaml", "r") as yamlfile:
-    config = yaml.load(yamlfile, Loader=yaml.FullLoader)
-    HydraNodeThread(config).start()
-    # return 0
 
-  return 0
+def main() -> int:
+    config_args = process_cmd_opts()
+
+    try:
+        HydraNodeThread(config_args).start()
+        return 0
+
+    except Exception as e:
+        print(f"An error occurred running the main thread: {e}")
+        return 1
 
 
 if __name__ == "__main__":

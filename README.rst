@@ -11,7 +11,7 @@ The implementation is on our github-repo_.
 Please see our documentation_.
 
 .. _python-ndn: https://github.com/named-data/python-ndn
-.. _ndn-python-svs: https://github.com/justincpresley/ndn-python-svs
-.. _ndn-python-storage: https://github.com/justincpresley/ndn-python-storage
+.. _ndn-python-svs: https://github.com/tntech-ngin/ndn-python-svs
+.. _ndn-python-storage: https://github.com/tntech-ngin/ndn-python-storage
 .. _documentation: https://ndn-hydra.readthedocs.io
-.. _github-repo: https://github.com/justincpresley/ndn-hydra
+.. _github-repo: https://github.com/tntech-ngin/ndn-hydra/
