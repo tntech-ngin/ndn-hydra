@@ -9,23 +9,22 @@ import numpy as np
 from ndn.encoding import *
 import shutil
 
+
 # TODO:  Update favor objectives weights (NOT PARAMETERS)
-favor_weights = (
-    0.01,  # NETWORK_COST_PER_GB
-    0.014, # STORAGE_COST_PER_GB
-)
+class FavorWeights:
+    NETWORK_COST_PER_GB = 0.01,
+    STORAGE_COST_PER_GB = 0.014,
 
 
 class FavorParameterTypes:
     RTT = 501
-    # NETWORK_COST_PER_GB = 0.01
-    # STORAGE_COST_PER_GB = 0.014
     NUM_USERS = 502
     BANDWIDTH = 503
     NETWORK_COST = 504
     STORAGE_COST = 505
     REMAINING_STORAGE = 506
     RW_SPEED = 507
+
 
 class FavorParameters(TlvModel):
     rtt = UintField(FavorParameterTypes.RTT)
@@ -41,8 +40,10 @@ class FavorCalculator:
     """
     A class for abstracting favor calculations between two nodes.
     """
-    def calculate_favor(self, favor_parameters: FavorParameters) -> float:
+    @staticmethod
+    def calculate_favor(self, favor_parameters: FavorParameters, favor_weights) -> float:
         rw_speed = 6.25 if favor_parameters.rw_speed is None else favor_parameters.rw_speed
-        favor = .3 * favor_parameters.remaining_storage + .3 * favor_parameters.bandwidth + .4 * rw_speed
+        favor = (favor_weights[0] * favor_parameters.remaining_storage
+                 + favor_weights[1] * favor_parameters.bandwidth
+                 + favor_weights[2] * rw_speed)
         return int(favor)
-

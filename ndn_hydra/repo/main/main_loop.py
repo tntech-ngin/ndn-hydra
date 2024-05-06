@@ -27,6 +27,7 @@ from ndn_hydra.repo.utils.garbage_collector import collect_db_garbage
 from ndn_hydra.repo.utils.concurrent_fetcher import concurrent_fetcher
 from ndn_hydra.repo.modules.favor_calculator import favor_weights
 
+
 class MainLoop:
     def __init__(self, app:NDNApp, config:Dict, global_view:GlobalView, data_storage:Storage, svs_storage:Storage, file_fetcher:FileFetcher):
         self.app = app
@@ -40,15 +41,8 @@ class MainLoop:
         self.logger = logging.getLogger()
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
-        self.last_garbage_collect_t = time.time() # time in seconds
-        self.favor = FavorCalculator().calculate_favor({
-            'rtt': config['rtt'],
-            'num_users': config['num_users'],
-            'bandwidth': config['bandwidth'],
-            'network_cost': config['network_cost'],
-            'storage_cost': config['storage_cost'],
-            'remaining_storage': config['remaining_storage']
-        })
+        self.last_garbage_collect_t = time.time()  # time in seconds
+        self.favor = global_view.get_node(self.config['node_name']).favor
 
     async def start(self):
         self.svs = SVSync(self.app, Name.normalize(self.config['repo_prefix'] + "/group"), Name.normalize(self.node_name), self.svs_missing_callback, storage=self.svs_storage)
@@ -94,19 +88,17 @@ class MainLoop:
         heartbeat_message.favor_parameters.network_cost = self.config['network_cost']
         heartbeat_message.favor_parameters.storage_cost = self.config['storage_cost']
         heartbeat_message.favor_parameters.remaining_storage = self.config['remaining_storage']
-        # TODO: Send favor weights through heartbeat message
-        heartbeat_message.favor_parameters.calculation_weights = favor_weights
+        heartbeat_message.favor_weights = [0.14, 0.4, 0.3]
+
         message = Message()
         message.type = MessageTypes.HEARTBEAT
         message.value = heartbeat_message.encode()
         
         try:
-            # next_state_vector = self.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
             next_state_vector = self.svs.getCore().getSeqno() + 1
         except TypeError:
             next_state_vector = 0
-            
-        # TODO: Get self favor from global view value
+
         favor = self.global_view.get_node(self.config['node_name'])['favor']
         self.global_view.update_node(self.config['node_name'], favor, next_state_vector)
         self.svs.publishData(message.encode())
@@ -119,7 +111,7 @@ class MainLoop:
                 if (backuped_by['node_name'] == self.config['node_name']) and (backuped_by['rank'] < deficit):
                     self.fetch_file(underreplicated_file['file_name'], underreplicated_file['packets'], underreplicated_file['packet_size'], underreplicated_file['fetch_path'])
 
-    def claim(self):
+    def claim_heartbeat_message(self):
         # TODO: possibility based on # active sessions and period
         if random.random() < 0.618:
             return
@@ -138,7 +130,7 @@ class MainLoop:
                 if backuped_by['node_name'] == self.config['node_name']:
                     already_in = True
                     break
-            if already_in == True:
+            if already_in:
                 continue
             if len(backupable_file['backups']) == 0 and len(backupable_file['stores']) == 0:
                 continue
@@ -153,16 +145,16 @@ class MainLoop:
                 authorizer = backupable_file['backups'][-1]
             # generate claim (request) msg and send
             # claim tlv
-            favor = 1.85
             claim_message = ClaimMessageTlv()
             claim_message.node_name = self.config['node_name'].encode()
-            claim_message.favor = str(favor).encode()
+            claim_message.favor = self.global_view.get_node(claim_message.node_name)['favor']
             claim_message.file_name = Name.from_str(backupable_file['file_name'])
             claim_message.type = ClaimTypes.REQUEST
             claim_message.claimer_node_name = self.config['node_name'].encode()
             claim_message.claimer_nonce = secrets.token_hex(4).encode()
             claim_message.authorizer_node_name = authorizer['node_name'].encode()
             claim_message.authorizer_nonce = authorizer['nonce'].encode()
+
             # claim msg
             message = Message()
             message.type = MessageTypes.CLAIM
@@ -171,11 +163,11 @@ class MainLoop:
             self.logger.info(f"[MSG][CLAIM.R]* nam={self.config['node_name']};fil={backupable_file['file_name']}")
 
     def store(self, file_name: str):
-        favor = 1.85
         store_message = StoreMessageTlv()
         store_message.node_name = self.config['node_name'].encode()
-        store_message.favor = str(favor).encode()
+        store_message.favor = str(self.global_view.get_node(store_message.node_name)['favor']).encode()
         store_message.file_name = Name.from_str(file_name)
+
         message = Message()
         message.type = MessageTypes.STORE
         message.value = store_message.encode()

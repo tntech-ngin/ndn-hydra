@@ -16,14 +16,16 @@ from ndn.encoding import *
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 
+
 class ClaimTypes:
     REQUEST = 1
     COMMITMENT = 2
+
+
 class ClaimMessageTypes:
     NODE_NAME = 84
     FAVOR = 86
-
-    TYPE = 91 # 1=request; 2=commitment
+    TYPE = 91  # 1=request; 2=commitment
     CLAIMER_NODE_NAME = 92
     CLAIMER_NONCE = 93
     AUTHORIZER_NODE_NAME = 94
