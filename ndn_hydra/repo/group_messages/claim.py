@@ -16,14 +16,16 @@ from ndn.encoding import *
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 
+
 class ClaimTypes:
     REQUEST = 1
     COMMITMENT = 2
+
+
 class ClaimMessageTypes:
     NODE_NAME = 84
     FAVOR = 86
-
-    TYPE = 91 # 1=request; 2=commitment
+    TYPE = 91  # 1=request; 2=commitment
     CLAIMER_NODE_NAME = 92
     CLAIMER_NONCE = 93
     AUTHORIZER_NODE_NAME = 94
@@ -39,6 +41,7 @@ class ClaimMessageTlv(TlvModel):
     claimer_nonce = BytesField(ClaimMessageTypes.CLAIMER_NONCE)
     authorizer_node_name = BytesField(ClaimMessageTypes.AUTHORIZER_NODE_NAME)
     authorizer_nonce = BytesField(ClaimMessageTypes.AUTHORIZER_NONCE)
+
 
 class ClaimMessage(SpecificMessage):
     def __init__(self, nid:str, seqno:int, raw_bytes:bytes):
@@ -69,12 +72,11 @@ class ClaimMessage(SpecificMessage):
                 if (len(file['backuped_bys']) > 0) and (file['backuped_bys'][-1]['node_name'] == config['node_name']) and (authorizer_nonce == file['backuped_bys'][-1]['nonce']):
                     global_view.add_backup(file_name, claimer_node_name, len(file['backuped_bys']), claimer_nonce)
                     commit = True
-                if commit == True:
+                if commit:
                     # claim tlv
-                    favor = 1.85
                     claim_message = copy.copy(self.message)
                     claim_message.node_name = config['node_name'].encode()
-                    claim_message.favor = str(favor).encode()
+                    claim_message.favor = global_view.get_node(claim_message.node_name)['favor'].enconde()
                     claim_message.type = ClaimTypes.COMMITMENT
                     # claim msg
                     claim_message = MessageTlv()
