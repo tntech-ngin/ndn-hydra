@@ -1,0 +1,4 @@
+setuptools~=69.5.1
+PyYAML~=6.0.1
+numpy~=1.26.4
+pymoo~=0.6.1.1
