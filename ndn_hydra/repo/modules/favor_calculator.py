@@ -11,9 +11,10 @@ import shutil
 
 
 # TODO:  Update favor objectives weights (NOT PARAMETERS)
-class FavorWeights:
-    NETWORK_COST_PER_GB = 0.01,
-    STORAGE_COST_PER_GB = 0.014,
+class FavorWeightsTypes:
+    REMAINING_STORAGE = 501,
+    BANDWIDTH = 502,
+    RW_SPEED = 503
 
 
 class FavorParameterTypes:
@@ -24,6 +25,13 @@ class FavorParameterTypes:
     STORAGE_COST = 505
     REMAINING_STORAGE = 506
     RW_SPEED = 507
+
+
+# TODO: Check with Dr. Shannigrahi what I should do becuase TLV don't have a flot type
+class FavorWeights(TlvModel):
+    remaining_storage = UintField(FavorWeightsTypes.REMAINING_STORAGE)
+    bandwidth = UintField(FavorWeightsTypes.BANDWIDTH)
+    rw_speed = UintField(FavorWeightsTypes.RW_SPEED)
 
 
 class FavorParameters(TlvModel):
@@ -41,9 +49,9 @@ class FavorCalculator:
     A class for abstracting favor calculations between two nodes.
     """
     @staticmethod
-    def calculate_favor(self, favor_parameters: FavorParameters, favor_weights) -> float:
+    def calculate_favor(self, favor_parameters: FavorParameters, favor_weights: FavorWeights) -> float:
         rw_speed = 6.25 if favor_parameters.rw_speed is None else favor_parameters.rw_speed
-        favor = (favor_weights[0] * favor_parameters.remaining_storage
-                 + favor_weights[1] * favor_parameters.bandwidth
-                 + favor_weights[2] * rw_speed)
+        favor = (favor_weights.remaining_storage * favor_parameters.remaining_storage
+                 + favor_weights.bandwidth * favor_parameters.bandwidth
+                 + favor_weights.rw_speed * rw_speed)
         return int(favor)

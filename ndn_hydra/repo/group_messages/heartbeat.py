@@ -35,8 +35,11 @@ class HeartbeatMessage(SpecificMessage):
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
 
     async def apply(self, global_view: GlobalView):
-        node_name = Name.from_bytes(self.message.node_name)
+        node_name = self.message.node_name
         favor = FavorCalculator().calculate_favor(self, self.message.favor_parameters, self.message.favor_weights)
-        self.logger.debug(f"[MSG][HB]   nam={Name.to_str(node_name)};fav={favor}")
-        global_view.update_node(Name.to_str(node_name), favor, self.seqno)
+
+        print(f'\nFavor of node {str(node_name)} is {str(favor)} \n')
+
+        self.logger.debug(f"[MSG][HB]   nam={str(node_name)};fav={favor}")
+        global_view.update_node(str(node_name), favor, self.seqno)
         self.logger.debug(f"{len(global_view.get_nodes())} nodes")

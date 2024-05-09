@@ -10,26 +10,24 @@
 # -------------------------------------------------------------
 
 import asyncio as aio
-import logging
 import secrets
-import time
 import random
-from typing import Dict, List
+from typing import Dict
 from ndn.app import NDNApp
 from ndn.encoding import Name, Component
-from ndn.types import InterestNack, InterestTimeout
 from ndn.svs import SVSync
 from ndn.storage import Storage, SqliteStorage
 from ndn_hydra.repo.modules import *
 from ndn_hydra.repo.group_messages import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
 from ndn_hydra.repo.utils.garbage_collector import collect_db_garbage
-from ndn_hydra.repo.utils.concurrent_fetcher import concurrent_fetcher
-from ndn_hydra.repo.modules.favor_calculator import favor_weights
+from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
+from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
 
 
 class MainLoop:
-    def __init__(self, app:NDNApp, config:Dict, global_view:GlobalView, data_storage:Storage, svs_storage:Storage, file_fetcher:FileFetcher):
+    def __init__(self, app: NDNApp, config: Dict, global_view: GlobalView, data_storage: Storage, svs_storage: Storage, file_fetcher: FileFetcher):
+        print(f'\n******* Initial config: {config}\n')
         self.app = app
         self.config = config
         self.global_view = global_view
@@ -62,6 +60,7 @@ class MainLoop:
 
     def svs_missing_callback(self, missing_list):
         aio.ensure_future(self.on_missing_svs_messages(missing_list))
+
     async def on_missing_svs_messages(self, missing_list):
         # if missing list is greater than 100 messages, bootstrap
         for i in missing_list:
@@ -87,8 +86,25 @@ class MainLoop:
         heartbeat_message.favor_parameters.bandwidth = self.config['bandwidth']
         heartbeat_message.favor_parameters.network_cost = self.config['network_cost']
         heartbeat_message.favor_parameters.storage_cost = self.config['storage_cost']
-        heartbeat_message.favor_parameters.remaining_storage = self.config['remaining_storage']
-        heartbeat_message.favor_weights = [0.14, 0.4, 0.3]
+        heartbeat_message.favor_parameters.remaining_storage = get_remaining_space()
+
+        heartbeat_message.favor_weights = {
+            'remaining_storage': 0.14,
+            'bandwidth': 0,
+            'rw_speed': 0
+        }
+
+        favor_before = FavorCalculator.calculate_favor(self, {
+            'remaining_storage': get_remaining_space(),
+            'bandwidth': self.config['bandwidth'],
+            'rw_speed': self.config['rw_speed']
+        }, {
+            'remaining_storage': 0.14,
+            'bandwidth': 0,
+            'rw_speed': 0
+        })
+        print(f'\n Calculated favor at node {self.node_name}: {favor_before}\n')
+
 
         message = Message()
         message.type = MessageTypes.HEARTBEAT
@@ -159,6 +175,7 @@ class MainLoop:
             message = Message()
             message.type = MessageTypes.CLAIM
             message.value = claim_message.encode()
+
             self.svs.publishData(message.encode())
             self.logger.info(f"[MSG][CLAIM.R]* nam={self.config['node_name']};fil={backupable_file['file_name']}")
 
