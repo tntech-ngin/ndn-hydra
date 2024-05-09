@@ -26,11 +26,11 @@ class HeartbeatMessageTypes:
 class HeartbeatMessageTlv(TlvModel):
     node_name = BytesField(HeartbeatMessageTypes.NODE_NAME)
     favor_parameters = ModelField(HeartbeatMessageTypes.FAVOR_PARAMETERS, FavorParameters)
-    favor_weights = RepeatedField(HeartbeatMessageTypes.FAVOR_WEIGHTS, FavorWeights)
+    favor_weights = RepeatedField(UintField(FavorWeights, fixed_len=3))
 
 
 class HeartbeatMessage(SpecificMessage):
-    def __init__(self, nid:str, seqno:int, raw_bytes:bytes):
+    def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
 
