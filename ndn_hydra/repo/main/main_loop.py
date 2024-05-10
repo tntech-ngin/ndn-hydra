@@ -40,7 +40,7 @@ class MainLoop:
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
         self.last_garbage_collect_t = time.time()  # time in seconds
-        self.favor = global_view.get_node(self.config['node_name']).favor
+        self.favor = global_view.get_node(self.config['node_name'])['favor']
 
     async def start(self):
         self.svs = SVSync(self.app, Name.normalize(self.config['repo_prefix'] + "/group"), Name.normalize(self.node_name), self.svs_missing_callback, storage=self.svs_storage)
