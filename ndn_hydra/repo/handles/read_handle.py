@@ -11,11 +11,14 @@
 
 import asyncio as aio
 import logging
+import time
 from secrets import choice
 from ndn.app import NDNApp
 from ndn.encoding import Name, ContentType, Component, parse_data
 from ndn.storage import Storage
 from ndn_hydra.repo.modules.global_view import GlobalView
+from ndn_hydra.repo.group_messages.update import UpdateMessageTlv
+from ndn_hydra.repo.group_messages.message import Message, MessageTypes
 
 class ReadHandle(object):
     """
@@ -76,6 +79,18 @@ class ReadHandle(object):
         best_id = self._best_id_for_file(file_name)
         segment_comp = "/" + Component.to_str(int_name[-1])
 
+        if best_id == None:
+            if segment_comp == "/seg=0":
+                self.logger.info(f'[CMD][FETCH]    nacked due to no file')
+
+            # nack due to lack of avaliability
+            self.app.put_data(int_name, content=None, content_type=ContentType.NACK)
+            self.logger.debug(f'Read handle: data not found {Name.to_str(int_name)}')
+            return
+
+        # File is present, reset the expiration time
+        self._reset_file_expiration(file_name)
+
         if best_id == self.node_name:
             if segment_comp == "/seg=0":
                 self.logger.info(f'[CMD][FETCH]    serving file')
@@ -90,13 +105,6 @@ class ReadHandle(object):
             # print("serve"+file_name + segment_comp+"   "+Name.to_str(name))
             final_id = Component.from_number(int(self.global_view.get_file(file_name)["packets"])-1, Component.TYPE_SEGMENT)
             self.app.put_data(int_name, content=content, content_type=ContentType.BLOB, final_block_id=final_id)
-        elif best_id == None:
-            if segment_comp == "/seg=0":
-                self.logger.info(f'[CMD][FETCH]    nacked due to no file')
-
-            # nack due to lack of avaliability
-            self.app.put_data(int_name, content=None, content_type=ContentType.NACK)
-            self.logger.debug(f'Read handle: data not found {Name.to_str(int_name)}')
         else:
             if segment_comp == "/seg=0":
                 self.logger.info(f'[CMD][FETCH]    linked to another node')
@@ -127,3 +135,25 @@ class ReadHandle(object):
         else:
             on_list = [x for x in on_list if x in active_nodes]
             return choice(on_list)
+
+    def _reset_file_expiration(self, file_name):
+        if self.config['file_expiration'] == 0: # no need to reset if file_expiration in config is set to 0
+            return
+        expiration_time = int(time.time() + (self.config['file_expiration'] * 60 * 60)) # convert hours to seconds
+
+        # update tlv
+        favor = 1.85
+        update_message = UpdateMessageTlv()
+        update_message.node_name = self.config['node_name'].encode()
+        update_message.favor = str(favor).encode()
+        update_message.file_name = file_name
+        update_message.expiration_time = expiration_time
+        # update msg
+        message = Message()
+        message.type = MessageTypes.UPDATE
+        message.value = update_message.encode()
+
+        # publish
+        self.global_view.update_file(file_name, expiration_time)
+        self.main_loop.svs.publishData(message.encode())
+        self.logger.info(f"[MSG][UPDATE]*  fil={file_name}")

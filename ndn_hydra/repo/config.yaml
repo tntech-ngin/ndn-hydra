@@ -14,7 +14,7 @@ default_config:
     beats_to_renew: 3
     beats_to_fail: 3
     replication_degree: 2
-    file_expiration: 0 # in hours, 0 = never expire
+    file_expiration: 2 # in hours, 0 = never expire
 
   favor:  
     rtt: 0

@@ -14,3 +14,4 @@ from .claim import *
 from .heartbeat import *
 from .remove import *
 from .store import *
+from .update import *
