@@ -108,7 +108,7 @@ class MainLoop:
 
         message = Message()
         message.type = MessageTypes.HEARTBEAT
-        message.value = heartbeat_message.encode()
+        message.value = heartbeat_message
         
         try:
             next_state_vector = self.svs.getCore().getSeqno() + 1
