@@ -17,19 +17,23 @@ from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator, FavorParameters, FavorWeights
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 
+
 class FloatArrayField(BytesField):
+    @staticmethod
     def encode(self, values):
         encoded_bytes = b''
         for value in values:
             encoded_bytes += struct.pack('f', value)
         return encoded_bytes
 
+    @staticmethod
     def decode(self, bytes_value):
         decoded_values = []
         for i in range(0, len(bytes_value), 4):
             value_bytes = bytes_value[i:i+4]
             decoded_values.append(struct.unpack('f', value_bytes)[0])
         return decoded_values
+
 
 class HeartbeatMessageTypes:
     NODE_NAME = 84
@@ -41,6 +45,17 @@ class HeartbeatMessageTlv(TlvModel):
     node_name = BytesField(HeartbeatMessageTypes.NODE_NAME)
     favor_parameters = ModelField(HeartbeatMessageTypes.FAVOR_PARAMETERS, FavorParameters)
     favor_weights = RepeatedField(FloatArrayField(HeartbeatMessageTypes.FAVOR_WEIGHTS))
+
+    def __len__(self):
+        length = 0
+        if self.node_name is not None:
+            length += len(self.node_name)
+        if self.favor_parameters is not None:
+            length += len(self.favor_parameters)
+        if self.favor_weights is not None:
+            for weight in self.favor_weights:
+                length += len(weight)
+        return length
 
 
 class HeartbeatMessage(SpecificMessage):
