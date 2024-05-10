@@ -7,6 +7,7 @@
 # -------------------------------------------------------------
 import numpy as np
 from ndn.encoding import *
+import struct
 import shutil
 
 
@@ -29,9 +30,15 @@ class FavorParameterTypes:
 
 # TODO: Check with Dr. Shannigrahi what I should do becuase TLV don't have a flot type
 class FavorWeights(TlvModel):
-    remaining_storage = UintField(FavorWeightsTypes.REMAINING_STORAGE)
-    bandwidth = UintField(FavorWeightsTypes.BANDWIDTH)
-    rw_speed = UintField(FavorWeightsTypes.RW_SPEED)
+    remaining_storage = BytesField(FavorWeightsTypes.REMAINING_STORAGE)
+    bandwidth = BytesField(FavorWeightsTypes.BANDWIDTH)
+    rw_speed = BytesField(FavorWeightsTypes.RW_SPEED)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.remaining_storage = struct.pack('f', self.remaining_storage)
+        self.bandwidth = struct.pack('f', self.bandwidth)
+        self.rw_speed = struct.pack('f', self.rw_speed)
 
     def __len__(self):
         length = 0
