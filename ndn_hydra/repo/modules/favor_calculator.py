@@ -36,9 +36,12 @@ class FavorWeights(TlvModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.remaining_storage = struct.pack('f', self.remaining_storage)
-        self.bandwidth = struct.pack('f', self.bandwidth)
-        self.rw_speed = struct.pack('f', self.rw_speed)
+        if self.remaining_storage is not None:
+            self.remaining_storage = struct.pack('f', self.remaining_storage)
+        if self.bandwidth is not None:
+            self.bandwidth = struct.pack('f', self.bandwidth)
+        if self.rw_speed is not None:
+            self.rw_speed = struct.pack('f', self.rw_speed)
 
     def __len__(self):
         length = 0
