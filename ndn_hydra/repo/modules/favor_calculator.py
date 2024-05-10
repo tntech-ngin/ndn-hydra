@@ -50,9 +50,9 @@ class FavorCalculator:
     """
     @staticmethod
     def calculate_favor(self, favor_parameters: FavorParameters, favor_weights: FavorWeights) -> float:
-        print(f'Received parameters for calculation: {favor_parameters}\n')
+        print(f'\nReceived parameters for calculation: {favor_parameters}\n')
         print(f'Received weights for calculation: {favor_weights}\n')
-        favor = (favor_weights.remaining_storage * favor_parameters.remaining_storage
-                 + favor_weights.bandwidth * favor_parameters.bandwidth
-                 + favor_weights.rw_speed * favor_parameters.rw_speed)
+        favor = (favor_weights['remaining_storage'] * favor_parameters['remaining_storage']
+                 + favor_weights['bandwidth'] * favor_parameters['bandwidth']
+                 + favor_weights['rw_speed'] * favor_parameters['rw_speed'])
         return int(favor)
