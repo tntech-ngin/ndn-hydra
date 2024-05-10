@@ -18,6 +18,7 @@ default_config:
 
   favor:  
     rtt: 0
+    rw_speed: 0
     num_users: 0
     bandwidth: 0
     network_cost: 0
