@@ -11,6 +11,7 @@
 
 from typing import Callable
 from ndn.encoding import *
+import struct
 import json
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator, FavorParameters, FavorWeights
@@ -26,7 +27,15 @@ class HeartbeatMessageTypes:
 class HeartbeatMessageTlv(TlvModel):
     node_name = BytesField(HeartbeatMessageTypes.NODE_NAME)
     favor_parameters = ModelField(HeartbeatMessageTypes.FAVOR_PARAMETERS, FavorParameters)
-    favor_weights = RepeatedField(UintField(FavorWeights, fixed_len=3))
+    favor_weights = RepeatedField(BytesField(HeartbeatMessageTypes.FAVOR_WEIGHTS, fixed_len=4))
+
+    @favor_weights.creator
+    def create_favor_weight(self, value):
+        return struct.pack('f', value)
+
+    @favor_weights.decoder
+    def decode_favor_weight(self, value):
+        return struct.unpack('f', value)[0]
 
 
 class HeartbeatMessage(SpecificMessage):
