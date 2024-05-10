@@ -62,9 +62,9 @@ class FavorParameters(TlvModel):
         if self.bandwidth is not None:
             length += 8
         if self.network_cost is not None:
-            length += len(self.network_cost)
+            length += 8
         if self.storage_cost is not None:
-            length += len(self.storage_cost)
+            length += 8
         if self.remaining_storage is not None:
             length += 8
         return length
