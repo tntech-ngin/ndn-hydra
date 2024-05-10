@@ -106,7 +106,7 @@ class MainLoop:
             'bandwidth': 0,
             'rw_speed': 0
         })
-        print(f'\n Calculated favor at node {self.node_name}: {favor_before}\n')
+        print(f'\nCalculated favor at node {self.node_name}: {favor_before}\n')
 
 
         message = Message()

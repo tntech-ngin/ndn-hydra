@@ -46,6 +46,17 @@ class HeartbeatMessageTlv(TlvModel):
     favor_parameters = ModelField(HeartbeatMessageTypes.FAVOR_PARAMETERS, FavorParameters)
     favor_weights = RepeatedField(FloatArrayField(HeartbeatMessageTypes.FAVOR_WEIGHTS))
 
+    def __len__(self):
+        length = 0
+        if self.node_name is not None:
+            length += len(self.node_name)
+        if self.favor_parameters is not None:
+            length += len(self.favor_parameters)
+        if self.favor_weights is not None:
+            for weight in self.favor_weights:
+                length += len(weight)
+        return length
+
 
 class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
