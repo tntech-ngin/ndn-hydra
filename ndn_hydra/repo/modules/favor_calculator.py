@@ -28,7 +28,6 @@ class FavorParameterTypes:
     RW_SPEED = 507
 
 
-# TODO: Check with Dr. Shannigrahi what I should do becuase TLV don't have a flot type
 class FavorWeights(TlvModel):
     remaining_storage = BytesField(FavorWeightsTypes.REMAINING_STORAGE)
     bandwidth = BytesField(FavorWeightsTypes.BANDWIDTH)
@@ -46,11 +45,11 @@ class FavorWeights(TlvModel):
     def __len__(self):
         length = 0
         if self.remaining_storage is not None:
-            length += 16
+            length += 4
         if self.bandwidth is not None:
-            length += 16
+            length += 4
         if self.rw_speed is not None:
-            length += 16
+            length += 4
         return length
 
 
