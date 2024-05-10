@@ -88,7 +88,8 @@ class MainLoop:
         heartbeat_message.favor_parameters.storage_cost = self.config['storage_cost']
 
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
-        heartbeat_message.favor_parameters.remaining_storage = get_remaining_space(node_path)
+        remaining_space = get_remaining_space(node_path)
+        heartbeat_message.favor_parameters.remaining_storage = remaining_space
 
         heartbeat_message.favor_weights = {
             'remaining_storage': 0.14,
@@ -97,7 +98,7 @@ class MainLoop:
         }
 
         favor_before = FavorCalculator.calculate_favor(self, {
-            'remaining_storage': get_remaining_space(),
+            'remaining_storage': remaining_space,
             'bandwidth': self.config['bandwidth'],
             'rw_speed': self.config['rw_speed']
         }, {
