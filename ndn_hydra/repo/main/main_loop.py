@@ -91,11 +91,10 @@ class MainLoop:
         remaining_space = get_remaining_space(node_path)
         heartbeat_message.favor_parameters.remaining_storage = remaining_space
 
-        heartbeat_message.favor_weights = {
-            'remaining_storage': 0.14,
-            'bandwidth': 0,
-            'rw_speed': 0
-        }
+        heartbeat_message.favor_weights = FavorWeights()
+        heartbeat_message.favor_weights.remaining_storage = 0.14
+        heartbeat_message.favor_weights.bandwidth = 0
+        heartbeat_message.favor_weights.rw_speed = 0
 
         favor_before = FavorCalculator.calculate_favor(self, {
             'remaining_storage': remaining_space,
@@ -111,7 +110,7 @@ class MainLoop:
 
         message = Message()
         message.type = MessageTypes.HEARTBEAT
-        message.value = heartbeat_message
+        message.value = heartbeat_message.enconde()
         
         try:
             next_state_vector = self.svs.getCore().getSeqno() + 1

@@ -16,7 +16,7 @@ def get_remaining_space(current_node):
     disk_usage = shutil.disk_usage(current_node)
     free_space = disk_usage.free
 
-    print(f'Free space at {current_node} is {convert_bytes(free_space)}')
+    print(f'\nFree space at {current_node} is {convert_bytes(free_space)}')
 
     return free_space
 
