@@ -27,7 +27,7 @@ class HeartbeatMessageTypes:
 class HeartbeatMessageTlv(TlvModel):
     node_name = BytesField(HeartbeatMessageTypes.NODE_NAME)
     favor_parameters = ModelField(HeartbeatMessageTypes.FAVOR_PARAMETERS, FavorParameters)
-    favor_weights = RepeatedField(BytesField(HeartbeatMessageTypes.FAVOR_WEIGHTS, fixed_len=4))
+    favor_weights = RepeatedField(BytesField(HeartbeatMessageTypes.FAVOR_WEIGHTS))
 
     @favor_weights.creator
     def create_favor_weight(self, value):
