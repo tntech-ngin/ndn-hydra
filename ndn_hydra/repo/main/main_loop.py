@@ -86,7 +86,9 @@ class MainLoop:
         heartbeat_message.favor_parameters.bandwidth = self.config['bandwidth']
         heartbeat_message.favor_parameters.network_cost = self.config['network_cost']
         heartbeat_message.favor_parameters.storage_cost = self.config['storage_cost']
-        heartbeat_message.favor_parameters.remaining_storage = get_remaining_space()
+
+        node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
+        heartbeat_message.favor_parameters.remaining_storage = get_remaining_space(node_path)
 
         heartbeat_message.favor_weights = {
             'remaining_storage': 0.14,

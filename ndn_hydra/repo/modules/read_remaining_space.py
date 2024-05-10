@@ -2,7 +2,6 @@
 Read the remaining space from the node
 """
 
-import os
 import shutil
 
 
@@ -13,8 +12,7 @@ def convert_bytes(bytes_value):
         bytes_value /= 1024
 
 
-def get_remaining_space():
-    current_node = os.getcwd()
+def get_remaining_space(current_node):
     disk_usage = shutil.disk_usage(current_node)
     free_space = disk_usage.free
 
