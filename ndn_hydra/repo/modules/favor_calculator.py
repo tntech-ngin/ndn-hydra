@@ -50,8 +50,9 @@ class FavorCalculator:
     """
     @staticmethod
     def calculate_favor(self, favor_parameters: FavorParameters, favor_weights: FavorWeights) -> float:
-        rw_speed = 6.25 if favor_parameters.rw_speed is None else favor_parameters.rw_speed
+        print(f'Received parameters for calculation: {favor_parameters}\n')
+        print(f'Received weights for calculation: {favor_weights}\n')
         favor = (favor_weights.remaining_storage * favor_parameters.remaining_storage
                  + favor_weights.bandwidth * favor_parameters.bandwidth
-                 + favor_weights.rw_speed * rw_speed)
+                 + favor_weights.rw_speed * favor_parameters.rw_speed)
         return int(favor)
