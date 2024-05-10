@@ -36,11 +36,11 @@ class FavorWeights(TlvModel):
     def __len__(self):
         length = 0
         if self.remaining_storage is not None:
-            length += len(self.remaining_storage)
+            length += 16
         if self.bandwidth is not None:
-            length += len(self.bandwidth)
+            length += 16
         if self.rw_speed is not None:
-            length += len(self.rw_speed)
+            length += 16
         return length
 
 
@@ -56,17 +56,17 @@ class FavorParameters(TlvModel):
     def __len__(self):
         length = 0
         if self.rtt is not None:
-            length += len(self.rtt)
+            length += 8
         if self.num_users is not None:
-            length += len(self.num_users)
+            length += 8
         if self.bandwidth is not None:
-            length += len(self.bandwidth)
+            length += 8
         if self.network_cost is not None:
             length += len(self.network_cost)
         if self.storage_cost is not None:
             length += len(self.storage_cost)
         if self.remaining_storage is not None:
-            length += len(self.remaining_storage)
+            length += 8
         return length
 
 
