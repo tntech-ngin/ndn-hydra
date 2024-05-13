@@ -12,7 +12,6 @@
 from typing import Callable
 from ndn.encoding import *
 import struct
-import json
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator, FavorParameters, FavorWeights
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
@@ -27,12 +26,15 @@ class FloatArrayField(BytesField):
         return encoded_bytes
 
     @staticmethod
-    def decode(self, bytes_value):
+    def decode(bytes_value):
         decoded_values = []
         for i in range(0, len(bytes_value), 4):
-            value_bytes = bytes_value[i:i + 4]
+            value_bytes = bytes_value[i:i+4]
             decoded_values.append(struct.unpack('f', value_bytes)[0])
         return decoded_values
+
+    def __len__(self):
+        return len(self.get_value())
 
 
 class HeartbeatMessageTypes:
