@@ -34,7 +34,11 @@ class FloatArrayField(BytesField):
         return decoded_values
 
     def __len__(self):
-        return len(self.get_value())
+        value = self.get_value()
+        if value is None:
+            return 0
+        else:
+            return len(value) * 4
 
 
 class HeartbeatMessageTypes:
