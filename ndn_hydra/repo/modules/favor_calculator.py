@@ -11,13 +11,6 @@ import struct
 import shutil
 
 
-# TODO:  Update favor objectives weights (NOT PARAMETERS)
-class FavorWeightsTypes:
-    REMAINING_STORAGE = 501,
-    BANDWIDTH = 502,
-    RW_SPEED = 503
-
-
 class FavorParameterTypes:
     RTT = 501
     NUM_USERS = 502
@@ -28,54 +21,59 @@ class FavorParameterTypes:
     RW_SPEED = 507
 
 
+class FavorWeightsTypes:
+    REMAINING_STORAGE = 508,
+    BANDWIDTH = 509,
+    RW_SPEED = 510
+
+
 class FavorWeights(TlvModel):
     remaining_storage = BytesField(FavorWeightsTypes.REMAINING_STORAGE)
     bandwidth = BytesField(FavorWeightsTypes.BANDWIDTH)
     rw_speed = BytesField(FavorWeightsTypes.RW_SPEED)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.remaining_storage is not None:
-            self.remaining_storage = struct.pack('f', self.remaining_storage)
-        if self.bandwidth is not None:
-            self.bandwidth = struct.pack('f', self.bandwidth)
-        if self.rw_speed is not None:
-            self.rw_speed = struct.pack('f', self.rw_speed)
-
-    def __len__(self):
-        length = 0
-        if self.remaining_storage is not None:
-            length += 4
-        if self.bandwidth is not None:
-            length += 4
-        if self.rw_speed is not None:
-            length += 4
-        return length
+    def encode(self, remaining_storage_str, bandwidth_str, rw_speed_str):
+        self.remaining_storage = remaining_storage_str.encode('utf-8')
+        self.bandwidth = bandwidth_str.encode('utf-8')
+        self.rw_speed = rw_speed_str.encode('utf-8')
+        return super().encode()
 
 
 class FavorParameters(TlvModel):
-    rtt = UintField(FavorParameterTypes.RTT)
-    num_users = UintField(FavorParameterTypes.NUM_USERS)
-    bandwidth = UintField(FavorParameterTypes.BANDWIDTH)
-    network_cost = UintField(FavorParameterTypes.NETWORK_COST)
-    storage_cost = UintField(FavorParameterTypes.STORAGE_COST)
-    remaining_storage = UintField(FavorParameterTypes.REMAINING_STORAGE)
-    rw_speed = UintField(FavorParameterTypes.RW_SPEED)
+    rtt = BytesField(FavorParameterTypes.RTT)
+    num_users = BytesField(FavorParameterTypes.NUM_USERS)
+    bandwidth = BytesField(FavorParameterTypes.BANDWIDTH)
+    network_cost = BytesField(FavorParameterTypes.NETWORK_COST)
+    storage_cost = BytesField(FavorParameterTypes.STORAGE_COST)
+    remaining_storage = BytesField(FavorParameterTypes.REMAINING_STORAGE)
+    rw_speed = BytesField(FavorParameterTypes.RW_SPEED)
+
+    def encode(self, rtt_str, num_users_str, bandwidth_str, network_cost_str, storage_cost_str, remaining_storage_str, rw_speed_str):
+        self.rtt = rtt_str.encode('utf-8') if rtt_str else None
+        self.num_users = num_users_str.encode('utf-8') if num_users_str else None
+        self.bandwidth = bandwidth_str.encode('utf-8') if bandwidth_str else None
+        self.network_cost = network_cost_str.encode('utf-8') if network_cost_str else None
+        self.storage_cost = storage_cost_str.encode('utf-8') if storage_cost_str else None
+        self.remaining_storage = remaining_storage_str.encode('utf-8') if remaining_storage_str else None
+        self.rw_speed = rw_speed_str.encode('utf-8') if rw_speed_str else None
+        return super().encode()
 
     def __len__(self):
         length = 0
         if self.rtt is not None:
-            length += 8
+            length += len(self.rtt)
         if self.num_users is not None:
-            length += 8
+            length += len(self.num_users)
         if self.bandwidth is not None:
-            length += 8
+            length += len(self.bandwidth)
         if self.network_cost is not None:
-            length += 8
+            length += len(self.network_cost)
         if self.storage_cost is not None:
-            length += 8
+            length += len(self.storage_cost)
         if self.remaining_storage is not None:
-            length += 8
+            length += len(self.remaining_storage)
+        if self.rw_speed is not None:
+            length += len(self.rw_speed)
         return length
 
 
