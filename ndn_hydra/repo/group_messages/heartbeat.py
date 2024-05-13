@@ -20,7 +20,7 @@ from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 
 class FloatArrayField(BytesField):
     @staticmethod
-    def encode(self, values):
+    def encode(values):
         encoded_bytes = b''
         for value in values:
             encoded_bytes += struct.pack('f', value)
@@ -30,7 +30,7 @@ class FloatArrayField(BytesField):
     def decode(self, bytes_value):
         decoded_values = []
         for i in range(0, len(bytes_value), 4):
-            value_bytes = bytes_value[i:i+4]
+            value_bytes = bytes_value[i:i + 4]
             decoded_values.append(struct.unpack('f', value_bytes)[0])
         return decoded_values
 
@@ -62,10 +62,14 @@ class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
+        self.message.favor_weights = FloatArrayField.decode(self.message.favor_weights)
 
     async def apply(self, global_view: GlobalView):
         node_name = self.message.node_name
-        favor = FavorCalculator().calculate_favor(self, self.message.favor_parameters, self.message.favor_weights)
+        favor_parameters = self.message.favor_parameters
+        favor_weights = self.message.favor_weights
+
+        favor = FavorCalculator().calculate_favor(self, favor_parameters, favor_weights)
 
         print(f'\nFavor of node {str(node_name)} is {str(favor)} \n')
 
