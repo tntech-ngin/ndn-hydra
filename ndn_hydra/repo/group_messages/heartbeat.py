@@ -25,8 +25,8 @@ class HeartbeatMessageTypes:
 
 class HeartbeatMessageTlv(TlvModel):
     node_name = BytesField(HeartbeatMessageTypes.NODE_NAME)
-    favor_parameters = TlvModelField(HeartbeatMessageTypes.FAVOR_PARAMETERS, FavorParameters)
-    favor_weights = TlvModelField(HeartbeatMessageTypes.FAVOR_WEIGHTS, FavorWeights)
+    favor_parameters = ModelField(HeartbeatMessageTypes.FAVOR_PARAMETERS, FavorParameters)
+    favor_weights = ModelField(HeartbeatMessageTypes.FAVOR_WEIGHTS, FavorWeights)
 
 
 class HeartbeatMessage(SpecificMessage):
