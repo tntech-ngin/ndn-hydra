@@ -116,10 +116,9 @@ class MainLoop:
         })
         print(f'\nCalculated favor at node {self.node_name}: {favor_before}\n')
 
-
-        message = Message()
-        message.type = MessageTypes.HEARTBEAT
-        message.value = heartbeat_message.encode()
+        message_to_send = Message()
+        message_to_send.type = MessageTypes.HEARTBEAT
+        message_to_send.value = heartbeat_message.encode()
         
         try:
             next_state_vector = self.svs.getCore().getSeqno() + 1
@@ -128,7 +127,7 @@ class MainLoop:
 
         favor = self.global_view.get_node(self.config['node_name'])['favor']
         self.global_view.update_node(self.config['node_name'], favor, next_state_vector)
-        self.svs.publishData(message.encode())
+        self.svs.publishData(message_to_send.encode())
 
     def backup_list_check(self):
         underreplicated_files = self.global_view.get_underreplicated_files()
