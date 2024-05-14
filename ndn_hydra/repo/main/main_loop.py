@@ -80,11 +80,12 @@ class MainLoop:
     def send_heartbeat(self):
         heartbeat_message = HeartbeatMessageTlv()
         heartbeat_message.node_name = Name.to_bytes(self.config['node_name'])
-        heartbeat_message.favor_parameters = FavorParameters()
+
+        favor_parameters = FavorParameters()
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        heartbeat_message.favor_parameters.encode(
+        favor_parameters.encode(
             str(self.config['rtt']),
             str(self.config['num_users']),
             str(self.config['bandwidth']),
@@ -93,9 +94,11 @@ class MainLoop:
             str(remaining_space),
             str(self.config['rw_speed'])
         )
+        heartbeat_message.favor_parameters = favor_parameters
 
-        heartbeat_message.favor_weights = FavorWeights()
-        heartbeat_message.favor_weights.encode('0.14', '0', '0')
+        favor_weights = FavorWeights()
+        favor_weights.encode('0.14', '0', '0')
+        heartbeat_message.favor_weights = favor_weights
 
         favor_before = FavorCalculator.calculate_favor(
         {
