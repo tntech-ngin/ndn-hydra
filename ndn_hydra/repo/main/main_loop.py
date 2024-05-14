@@ -97,7 +97,7 @@ class MainLoop:
         heartbeat_message.favor_weights = FavorWeights()
         heartbeat_message.favor_weights.encode('0.14', '0', '0')
 
-        favor_before = FavorCalculator.calculate_favor(self,
+        favor_before = FavorCalculator.calculate_favor(
         {
             'remaining_storage': remaining_space,
             'bandwidth': self.config['bandwidth'],

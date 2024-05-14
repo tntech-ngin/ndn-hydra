@@ -67,7 +67,7 @@ class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
-        self.message.favor_parameters = self.decode_favor_parameters(self.message.favor_parameters)
+        self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)
         self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)
 
     @staticmethod
@@ -91,7 +91,7 @@ class HeartbeatMessage(SpecificMessage):
         }
 
     async def apply(self, global_view: GlobalView):
-        node_name = self.message.node_name
+        node_name = self.message.node_name.decode('utf-8')
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 

@@ -22,8 +22,8 @@ class FavorParameterTypes:
 
 
 class FavorWeightsTypes:
-    REMAINING_STORAGE = 508,
-    BANDWIDTH = 509,
+    REMAINING_STORAGE = 508
+    BANDWIDTH = 509
     RW_SPEED = 510
 
 
@@ -48,8 +48,7 @@ class FavorParameters(TlvModel):
     remaining_storage = BytesField(FavorParameterTypes.REMAINING_STORAGE)
     rw_speed = BytesField(FavorParameterTypes.RW_SPEED)
 
-    def encode(self, rtt_str, num_users_str, bandwidth_str, network_cost_str, storage_cost_str, remaining_storage_str,
-               rw_speed_str):
+    def encode(self, rtt_str, num_users_str, bandwidth_str, network_cost_str, storage_cost_str, remaining_storage_str, rw_speed_str):
         self.rtt = rtt_str.encode('utf-8') if rtt_str else None
         self.num_users = num_users_str.encode('utf-8') if num_users_str else None
         self.bandwidth = bandwidth_str.encode('utf-8') if bandwidth_str else None
