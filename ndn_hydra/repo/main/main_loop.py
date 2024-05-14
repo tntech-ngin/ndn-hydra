@@ -81,23 +81,26 @@ class MainLoop:
         heartbeat_message = HeartbeatMessageTlv()
         heartbeat_message.node_name = Name.to_bytes(self.config['node_name'])
 
-        favor_parameters = FavorParameters()
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        favor_parameters.encode(
-            str(self.config['rtt']),
-            str(self.config['num_users']),
-            str(self.config['bandwidth']),
-            str(self.config['network_cost']),
-            str(self.config['storage_cost']),
-            str(remaining_space),
-            str(self.config['rw_speed'])
-        )
+        favor_parameters = FavorParameters()
+        favor_parameters.rtt = str(self.config['rtt']).encode('utf-8')
+        favor_parameters.num_users = str(self.config['num_users']).encode('utf-8')
+        favor_parameters.bandwidth = str(self.config['bandwidth']).encode('utf-8')
+        favor_parameters.network_cost = str(self.config['network_cost']).encode('utf-8')
+        favor_parameters.storage_cost = str(self.config['storage_cost']).encode('utf-8')
+        favor_parameters.remaining_storage = str(remaining_space).encode('utf-8')
+        favor_parameters.rw_speed = str(self.config['rw_speed']).encode('utf-8')
         heartbeat_message.favor_parameters = favor_parameters
 
+        # Create FavorWeights and set its fields
         favor_weights = FavorWeights()
-        favor_weights.encode('0.14', '0', '0')
+        favor_weights.remaining_storage = '0.14'.encode('utf-8')
+        favor_weights.bandwidth = '0'.encode('utf-8')
+        favor_weights.rw_speed = '0'.encode('utf-8')
+
+        # Assign the encoded FavorWeights
         heartbeat_message.favor_weights = favor_weights
 
         favor_before = FavorCalculator.calculate_favor(
