@@ -59,8 +59,7 @@ class HeartbeatMessageTlv(TlvModel):
         if self.favor_parameters is not None:
             length += len(self.favor_parameters)
         if self.favor_weights is not None:
-            for weight in self.favor_weights:
-                length += len(weight)
+            length += len(self.favor_weights)
         return length
 
 
@@ -68,14 +67,35 @@ class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
-        self.message.favor_weights = FloatArrayField.decode(self.message.favor_weights)
+        self.message.favor_parameters = self.decode_favor_parameters(self.message.favor_parameters)
+        self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)
+
+    @staticmethod
+    def decode_favor_parameters(favor_parameters):
+        return {
+            'rtt': float(favor_parameters.rtt.decode('utf-8')),
+            'num_users': float(favor_parameters.num_users.decode('utf-8')),
+            'bandwidth': float(favor_parameters.bandwidth.decode('utf-8')),
+            'network_cost': float(favor_parameters.network_cost.decode('utf-8')),
+            'storage_cost': float(favor_parameters.storage_cost.decode('utf-8')),
+            'remaining_storage': float(favor_parameters.remaining_storage.decode('utf-8')),
+            'rw_speed': float(favor_parameters.rw_speed.decode('utf-8'))
+        }
+
+    @staticmethod
+    def decode_favor_weights(favor_weights):
+        return {
+            'remaining_storage': float(favor_weights.remaining_storage.decode('utf-8')),
+            'bandwidth': float(favor_weights.bandwidth.decode('utf-8')),
+            'rw_speed': float(favor_weights.rw_speed.decode('utf-8'))
+        }
 
     async def apply(self, global_view: GlobalView):
         node_name = self.message.node_name
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
-        favor = FavorCalculator().calculate_favor(self, favor_parameters, favor_weights)
+        favor = FavorCalculator().calculate_favor(favor_parameters, favor_weights)
 
         print(f'\nFavor of node {str(node_name)} is {str(favor)} \n')
 
