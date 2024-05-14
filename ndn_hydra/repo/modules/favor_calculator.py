@@ -20,12 +20,10 @@ class FavorParameterTypes:
     REMAINING_STORAGE = 506
     RW_SPEED = 507
 
-
 class FavorWeightsTypes:
-    REMAINING_STORAGE = 508,
-    BANDWIDTH = 509,
+    REMAINING_STORAGE = 508
+    BANDWIDTH = 509
     RW_SPEED = 510
-
 
 class FavorWeights(TlvModel):
     remaining_storage = BytesField(FavorWeightsTypes.REMAINING_STORAGE)
@@ -37,7 +35,6 @@ class FavorWeights(TlvModel):
         self.bandwidth = bandwidth_str.encode('utf-8')
         self.rw_speed = rw_speed_str.encode('utf-8')
         return super().encode()
-
 
 class FavorParameters(TlvModel):
     rtt = BytesField(FavorParameterTypes.RTT)
@@ -58,31 +55,13 @@ class FavorParameters(TlvModel):
         self.rw_speed = rw_speed_str.encode('utf-8') if rw_speed_str else None
         return super().encode()
 
-    def __len__(self):
-        length = 0
-        if self.rtt is not None:
-            length += len(self.rtt)
-        if self.num_users is not None:
-            length += len(self.num_users)
-        if self.bandwidth is not None:
-            length += len(self.bandwidth)
-        if self.network_cost is not None:
-            length += len(self.network_cost)
-        if self.storage_cost is not None:
-            length += len(self.storage_cost)
-        if self.remaining_storage is not None:
-            length += len(self.remaining_storage)
-        if self.rw_speed is not None:
-            length += len(self.rw_speed)
-        return length
-
 
 class FavorCalculator:
     """
     A class for abstracting favor calculations between two nodes.
     """
     @staticmethod
-    def calculate_favor(self, favor_parameters: FavorParameters, favor_weights: FavorWeights) -> float:
+    def calculate_favor(favor_parameters: FavorParameters, favor_weights: FavorWeights) -> float:
         print(f'\nReceived parameters for calculation: {favor_parameters}\n')
         print(f'Received weights for calculation: {favor_weights}\n')
         favor = (favor_weights['remaining_storage'] * favor_parameters['remaining_storage']
