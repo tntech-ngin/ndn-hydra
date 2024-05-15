@@ -35,9 +35,9 @@ class Message(TlvModel):
     value = BytesField(HydraTlvTypes.MESSAGE)
 
     def encode(self):
-        print(f'Encoding {self.type} {self.value}')
+        print(f'[Message] Encoding {self.type} {self.value}')
 
-    print(f'\nEncoding message: {type}')
+    print(f'\n[Message] Encoding message of type: {type}')
 
     @staticmethod
     def specify(nid: str, seqno: int, message_bytes: bytes) -> Optional[SpecificMessage]:

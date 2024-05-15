@@ -109,11 +109,12 @@ class MainLoop:
         favor_weights.rw_speed = '0'
 
         # Assign the encoded FavorWeights
-        print(f'\n [Main Loop] [send_heartbeat] Favor weights in the message: \n\t {favor_weights}')
+        print(f'\n[Main Loop] [send_heartbeat] Favor weights in the message: \n\t {favor_weights}')
 
         heartbeat_message.favor_weights = favor_weights
 
-        favor_before = FavorCalculator.calculate_favor(
+
+        self_favor = FavorCalculator.calculate_favor(
         {
             'remaining_storage': remaining_space,
             'bandwidth': self.config['bandwidth'],
@@ -124,7 +125,7 @@ class MainLoop:
             'bandwidth': 0,
             'rw_speed': 0
         })
-        print(f'\n[Main Loop] [send_heartbeat] Calculated favor at node {self.node_name}: {favor_before}\n')
+        print(f'\n[Main Loop] [send_heartbeat] Calculated favor at node {self.node_name}: {self_favor}\n')
 
         print(f'\n[Main Loop] [send_heartbeat] Creating message to encode')
 
@@ -145,9 +146,8 @@ class MainLoop:
         print(f'[Main Loop] [send_heartbeat] Global view at {self.node_name}: '
               f'\n\t\t{self.global_view.get_node(self.node_name)}\t')
 
-        # TODO: Check if it should get from global view here
-        favor = favor_before
-        self.global_view.update_node(self.config['node_name'], favor, next_state_vector)
+        # Update favor for this node in global_view
+        self.global_view.update_node(self.config['node_name'], self_favor, next_state_vector)
         self.svs.publishData(message_to_send.encode())
 
     def backup_list_check(self):
