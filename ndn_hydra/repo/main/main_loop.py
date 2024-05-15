@@ -74,7 +74,7 @@ class MainLoop:
                     continue
                 message = Message.specify(i.nid, i.lowSeqno, message_bytes)
                 self.tracker.reset(i.nid)
-                aio.ensure_future(message.apply(self.global_view, self.fetch_file))
+                aio.ensure_future(message.apply(self.global_view))
                 i.lowSeqno = i.lowSeqno + 1
                 
     def send_heartbeat(self):
