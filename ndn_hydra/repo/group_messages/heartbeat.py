@@ -31,13 +31,20 @@ class HeartbeatMessageTlv(TlvModel):
 
 class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
+        print(f'\nInitializing Heartbeat message with seqno: {seqno}\n')
+
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
         self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)
         self.message.favor_parameters = self.decode_favor_parameters(self.message.favor_parameters)
 
+    def encode(self):
+        print(f'[HeartbeatMessage] Encoding {self.message}')
+
     @staticmethod
     def decode_favor_weights(favor_weights):
+        print(f'\nDecoding favor weights: {favor_weights}\n')
+
         return {
             'remaining_storage': float(favor_weights.remaining_storage.decode('utf-8')),
             'bandwidth': float(favor_weights.bandwidth.decode('utf-8')),
@@ -46,6 +53,8 @@ class HeartbeatMessage(SpecificMessage):
 
     @staticmethod
     def decode_favor_parameters(favor_parameters):
+        print(f'\nDecoding favor parameters: {favor_parameters}\n')
+
         return {
             'rtt': float(favor_parameters.rtt.decode('utf-8')),
             'num_users': float(favor_parameters.num_users.decode('utf-8')),
@@ -60,6 +69,8 @@ class HeartbeatMessage(SpecificMessage):
         node_name = self.message.node_name.decode('utf-8')
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
+
+        print(f'Calculating favor on heartbeat for node: {node_name}\n')
 
         favor_calculator = FavorCalculator()
         favor = favor_calculator.calculate_favor(favor_parameters, favor_weights)

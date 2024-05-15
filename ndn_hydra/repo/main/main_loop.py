@@ -55,7 +55,7 @@ class MainLoop:
             self.send_heartbeat()
             self.tracker.reset(self.node_name)
         self.backup_list_check()
-        self.claim()
+        self.claim_heartbeat_message()
         self.check_garbage()
 
     def svs_missing_callback(self, missing_list):
@@ -78,29 +78,39 @@ class MainLoop:
                 i.lowSeqno = i.lowSeqno + 1
                 
     def send_heartbeat(self):
+        print(f'\n[Main Loop] [send_heartbeat] Sending heartbeat')
+
         heartbeat_message = HeartbeatMessageTlv()
         heartbeat_message.node_name = Name.to_bytes(self.config['node_name'])
 
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
+        print(f'\n[Main Loop] [send_heartbeat] Setting favor_parameter message')
+
         favor_parameters = FavorParameters()
-        favor_parameters.rtt = str(self.config['rtt']).encode('utf-8')
-        favor_parameters.num_users = str(self.config['num_users']).encode('utf-8')
-        favor_parameters.bandwidth = str(self.config['bandwidth']).encode('utf-8')
-        favor_parameters.network_cost = str(self.config['network_cost']).encode('utf-8')
-        favor_parameters.storage_cost = str(self.config['storage_cost']).encode('utf-8')
-        favor_parameters.remaining_storage = str(remaining_space).encode('utf-8')
-        favor_parameters.rw_speed = str(self.config['rw_speed']).encode('utf-8')
+        favor_parameters.rtt = str(self.config['rtt'])
+        favor_parameters.num_users = str(self.config['num_users'])
+        favor_parameters.bandwidth = str(self.config['bandwidth'])
+        favor_parameters.network_cost = str(self.config['network_cost'])
+        favor_parameters.storage_cost = str(self.config['storage_cost'])
+        favor_parameters.remaining_storage = str(remaining_space)
+        favor_parameters.rw_speed = str(self.config['rw_speed'])
+
         heartbeat_message.favor_parameters = favor_parameters
+        print(f'\n[Main Loop] [send_heartbeat] Favor parameters in the message: \n\t {favor_parameters}')
+
+        print(f'\n[Main Loop] [send_heartbeat] Setting favor_weights message')
 
         # Create FavorWeights and set its fields
         favor_weights = FavorWeights()
-        favor_weights.remaining_storage = '0.14'.encode('utf-8')
-        favor_weights.bandwidth = '0'.encode('utf-8')
-        favor_weights.rw_speed = '0'.encode('utf-8')
+        favor_weights.remaining_storage = '0.14'
+        favor_weights.bandwidth = '0'
+        favor_weights.rw_speed = '0'
 
         # Assign the encoded FavorWeights
+        print(f'\n [Main Loop] [send_heartbeat] Favor weights in the message: \n\t {favor_weights}')
+
         heartbeat_message.favor_weights = favor_weights
 
         favor_before = FavorCalculator.calculate_favor(
@@ -114,10 +124,16 @@ class MainLoop:
             'bandwidth': 0,
             'rw_speed': 0
         })
-        print(f'\nCalculated favor at node {self.node_name}: {favor_before}\n')
+        print(f'\n[Main Loop] [send_heartbeat] Calculated favor at node {self.node_name}: {favor_before}\n')
+
+        print(f'\n [Main Loop] [send_heartbeat]Creating message to encode')
 
         message_to_send = Message()
+
+        print(f'\t1. Setting message type')
         message_to_send.type = MessageTypes.HEARTBEAT
+
+        print(f'\t2. Encoding message with value: \n\t\t{heartbeat_message}\n')
         message_to_send.value = heartbeat_message.encode()
         
         try:
