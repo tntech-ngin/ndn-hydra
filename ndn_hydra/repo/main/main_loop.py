@@ -126,7 +126,7 @@ class MainLoop:
         })
         print(f'\n[Main Loop] [send_heartbeat] Calculated favor at node {self.node_name}: {favor_before}\n')
 
-        print(f'\n [Main Loop] [send_heartbeat]Creating message to encode')
+        print(f'\n[Main Loop] [send_heartbeat] Creating message to encode')
 
         message_to_send = Message()
 
@@ -141,7 +141,12 @@ class MainLoop:
         except TypeError:
             next_state_vector = 0
 
-        favor = self.global_view.get_node(self.config['node_name'])['favor']
+        print(f'[Main Loop] [send_heartbeat] Global view: \n\t\t{self.global_view}\t')
+        print(f'[Main Loop] [send_heartbeat] Global view at {self.node_name}: '
+              f'\n\t\t{self.global_view.get_node(self.node_name)}\t')
+
+        # TODO: Check if it should get from global view here
+        favor = favor_before
         self.global_view.update_node(self.config['node_name'], favor, next_state_vector)
         self.svs.publishData(message_to_send.encode())
 
