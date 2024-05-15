@@ -51,17 +51,17 @@ class HeartbeatMessage(SpecificMessage):
         print(f'\nDecoding favor parameters: {favor_parameters}\n')
 
         return {
-            'rtt': float(favor_parameters.rtt.decode('utf-8')),
-            'num_users': float(favor_parameters.num_users.decode('utf-8')),
-            'bandwidth': float(favor_parameters.bandwidth.decode('utf-8')),
-            'network_cost': float(favor_parameters.network_cost.decode('utf-8')),
-            'storage_cost': float(favor_parameters.storage_cost.decode('utf-8')),
-            'remaining_storage': float(favor_parameters.remaining_storage.decode('utf-8')),
-            'rw_speed': float(favor_parameters.rw_speed.decode('utf-8'))
+            'rtt': float(favor_parameters.rtt),
+            'num_users': float(favor_parameters.num_users),
+            'bandwidth': float(favor_parameters.bandwidth),
+            'network_cost': float(favor_parameters.network_cost),
+            'storage_cost': float(favor_parameters.storage_cost),
+            'remaining_storage': float(favor_parameters.remaining_storage),
+            'rw_speed': float(favor_parameters.rw_speed)
         }
 
     async def apply(self, global_view: GlobalView):
-        node_name = self.message.node_name.decode('utf-8')
+        node_name = self.message.node_name
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
