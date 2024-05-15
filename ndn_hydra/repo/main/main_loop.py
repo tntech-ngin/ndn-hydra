@@ -89,13 +89,13 @@ class MainLoop:
         print(f'\nSetting favor_parameter message')
 
         favor_parameters = FavorParameters()
-        favor_parameters.rtt = str(self.config['rtt']).encode('utf-8')
-        favor_parameters.num_users = str(self.config['num_users']).encode('utf-8')
-        favor_parameters.bandwidth = str(self.config['bandwidth']).encode('utf-8')
-        favor_parameters.network_cost = str(self.config['network_cost']).encode('utf-8')
-        favor_parameters.storage_cost = str(self.config['storage_cost']).encode('utf-8')
-        favor_parameters.remaining_storage = str(remaining_space).encode('utf-8')
-        favor_parameters.rw_speed = str(self.config['rw_speed']).encode('utf-8')
+        favor_parameters.rtt = str(self.config['rtt'])
+        favor_parameters.num_users = str(self.config['num_users'])
+        favor_parameters.bandwidth = str(self.config['bandwidth'])
+        favor_parameters.network_cost = str(self.config['network_cost'])
+        favor_parameters.storage_cost = str(self.config['storage_cost'])
+        favor_parameters.remaining_storage = str(remaining_space)
+        favor_parameters.rw_speed = str(self.config['rw_speed'])
 
         heartbeat_message.favor_parameters = favor_parameters
         print(f'\nFavor parameters in the message: {favor_parameters}')
@@ -104,9 +104,9 @@ class MainLoop:
 
         # Create FavorWeights and set its fields
         favor_weights = FavorWeights()
-        favor_weights.remaining_storage = '0.14'.encode('utf-8')
-        favor_weights.bandwidth = '0'.encode('utf-8')
-        favor_weights.rw_speed = '0'.encode('utf-8')
+        favor_weights.remaining_storage = '0.14'
+        favor_weights.bandwidth = '0'
+        favor_weights.rw_speed = '0'
 
         # Assign the encoded FavorWeights
         print(f'\nFavor weights in the message: {favor_weights}')
