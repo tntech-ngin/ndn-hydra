@@ -130,7 +130,7 @@ def process_cmd_opts():
         if cli_args.node_name is not False:
             config_data["node_name"] = process_name(cli_args.node_name)
 
-        workpath = "{home}/.ndn/repo{repo_prefix}/{node_name}".format(
+        workpath = "{home}/.ndn/repo{repo_prefix}{node_name}".format(
             home=os.path.expanduser("~"),
             repo_prefix=config_data["repo_prefix"],
             node_name=config_data["node_name"])
