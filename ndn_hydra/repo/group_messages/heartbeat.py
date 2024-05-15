@@ -38,9 +38,6 @@ class HeartbeatMessage(SpecificMessage):
         self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)
         self.message.favor_parameters = self.decode_favor_parameters(self.message.favor_parameters)
 
-    def encode(self):
-        print(f'[HeartbeatMessage] Encoding {self.message}')
-
     @staticmethod
     def decode_favor_weights(favor_weights):
         print(f'\nDecoding favor weights: {favor_weights}\n')
@@ -70,12 +67,12 @@ class HeartbeatMessage(SpecificMessage):
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
-        print(f'[HeartbeatMesage] Calculating favor on heartbeat for node: {node_name}\n')
+        print(f'[HeartbeatMessage] Calculating favor on heartbeat for node: {node_name}\n')
 
         favor_calculator = FavorCalculator()
         favor = favor_calculator.calculate_favor(favor_parameters, favor_weights)
 
-        print(f'\nFavor of node {node_name} is {favor} \n')
+        print(f'\n[HeartbeatMessage] Favor of node {node_name} is {favor} \n')
 
         self.logger.debug(f"[MSG][HB]   nam={node_name};fav={favor}")
         global_view.update_node(node_name, favor, self.seqno)

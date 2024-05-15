@@ -86,8 +86,7 @@ class MainLoop:
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        print(f'\n[Main Loop] [send_heartbeat] Setting favor_parameter message')
-
+        # Create FavorParameter and fill its fields
         favor_parameters = FavorParameters()
         favor_parameters.rtt = str(self.config['rtt'])
         favor_parameters.num_users = str(self.config['num_users'])
@@ -98,9 +97,6 @@ class MainLoop:
         favor_parameters.rw_speed = str(self.config['rw_speed'])
 
         heartbeat_message.favor_parameters = favor_parameters
-        print(f'\n[Main Loop] [send_heartbeat] Favor parameters in the message: \n\t {favor_parameters}')
-
-        print(f'\n[Main Loop] [send_heartbeat] Setting favor_weights message')
 
         # Create FavorWeights and set its fields
         favor_weights = FavorWeights()
@@ -109,10 +105,7 @@ class MainLoop:
         favor_weights.rw_speed = '0'
 
         # Assign the encoded FavorWeights
-        print(f'\n[Main Loop] [send_heartbeat] Favor weights in the message: \n\t {favor_weights}')
-
         heartbeat_message.favor_weights = favor_weights
-
 
         self_favor = FavorCalculator.calculate_favor(
         {
@@ -130,11 +123,7 @@ class MainLoop:
         print(f'\n[Main Loop] [send_heartbeat] Creating message to encode')
 
         message_to_send = Message()
-
-        print(f'\t1. Setting message type')
         message_to_send.type = MessageTypes.HEARTBEAT
-
-        print(f'\t2. Encoding message with value: \n\t\t{heartbeat_message}\n')
         message_to_send.value = heartbeat_message.encode()
         
         try:
@@ -143,6 +132,7 @@ class MainLoop:
             next_state_vector = 0
 
         print(f'[Main Loop] [send_heartbeat] Global view: \n\t\t{self.global_view}\t')
+        print(f'[Main Loop] [send_heartbeat] Nodes in global view: \n\t\t{self.global_view.get_nodes()}\t')
         print(f'[Main Loop] [send_heartbeat] Global view at {self.node_name}: '
               f'\n\t\t{self.global_view.get_node(self.node_name)}\t')
 
