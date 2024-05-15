@@ -39,7 +39,7 @@ class HeartbeatMessage(SpecificMessage):
         self.message.favor_parameters = self.decode_favor_parameters(self.message.favor_parameters)
 
     def encode(self):
-        print(f'Encoding {self.message}')
+        print(f'[HeartbeatMessage] Encoding {self.message}')
 
     @staticmethod
     def decode_favor_weights(favor_weights):

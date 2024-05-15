@@ -78,7 +78,7 @@ class MainLoop:
                 i.lowSeqno = i.lowSeqno + 1
                 
     def send_heartbeat(self):
-        print(f'\nSending heartbeat')
+        print(f'\n[Main Loop] [send_heartbeat] Sending heartbeat')
 
         heartbeat_message = HeartbeatMessageTlv()
         heartbeat_message.node_name = Name.to_bytes(self.config['node_name'])
@@ -86,7 +86,7 @@ class MainLoop:
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        print(f'\nSetting favor_parameter message')
+        print(f'\n[Main Loop] [send_heartbeat] Setting favor_parameter message')
 
         favor_parameters = FavorParameters()
         favor_parameters.rtt = str(self.config['rtt'])
@@ -98,9 +98,9 @@ class MainLoop:
         favor_parameters.rw_speed = str(self.config['rw_speed'])
 
         heartbeat_message.favor_parameters = favor_parameters
-        print(f'\nFavor parameters in the message: {favor_parameters}')
+        print(f'\n[Main Loop] [send_heartbeat] Favor parameters in the message: \n\t {favor_parameters}')
 
-        print(f'\nSetting favor_weights message')
+        print(f'\n[Main Loop] [send_heartbeat] Setting favor_weights message')
 
         # Create FavorWeights and set its fields
         favor_weights = FavorWeights()
@@ -109,7 +109,7 @@ class MainLoop:
         favor_weights.rw_speed = '0'
 
         # Assign the encoded FavorWeights
-        print(f'\nFavor weights in the message: {favor_weights}')
+        print(f'\n [Main Loop] [send_heartbeat] Favor weights in the message: \n\t {favor_weights}')
 
         heartbeat_message.favor_weights = favor_weights
 
@@ -124,16 +124,16 @@ class MainLoop:
             'bandwidth': 0,
             'rw_speed': 0
         })
-        print(f'\nCalculated favor at node {self.node_name}: {favor_before}\n')
+        print(f'\n[Main Loop] [send_heartbeat] Calculated favor at node {self.node_name}: {favor_before}\n')
 
-        print(f'\nCreating message to encode')
+        print(f'\n [Main Loop] [send_heartbeat]Creating message to encode')
 
         message_to_send = Message()
 
         print(f'\t1. Setting message type')
         message_to_send.type = MessageTypes.HEARTBEAT
 
-        print(f'\t2. Encoding message with value: \n\t{heartbeat_message}\n')
+        print(f'\t2. Encoding message with value: \n\t\t{heartbeat_message}\n')
         message_to_send.value = heartbeat_message.encode()
         
         try:
