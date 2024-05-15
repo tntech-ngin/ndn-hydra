@@ -55,7 +55,7 @@ class MainLoop:
             self.send_heartbeat()
             self.tracker.reset(self.node_name)
         self.backup_list_check()
-        self.claim()
+        self.claim_heartbeat_message()
         self.check_garbage()
 
     def svs_missing_callback(self, missing_list):
@@ -133,7 +133,7 @@ class MainLoop:
         print(f'\t1. Setting message type')
         message_to_send.type = MessageTypes.HEARTBEAT
 
-        print(f'\t2. Encoding message with value: {heartbeat_message}')
+        print(f'\t2. Encoding message with value: \n\t{heartbeat_message}\n')
         message_to_send.value = heartbeat_message.encode()
         
         try:
