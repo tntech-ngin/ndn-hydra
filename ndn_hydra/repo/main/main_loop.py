@@ -98,6 +98,7 @@ class MainLoop:
         favor_parameters.rw_speed = str(self.config['rw_speed']).encode('utf-8')
 
         heartbeat_message.favor_parameters = favor_parameters
+        print(f'\nFavor parameters in the message: {favor_parameters}')
 
         print(f'\nSetting favor_weights message')
 
@@ -108,6 +109,8 @@ class MainLoop:
         favor_weights.rw_speed = '0'.encode('utf-8')
 
         # Assign the encoded FavorWeights
+        print(f'\nFavor weights in the message: {favor_weights}')
+
         heartbeat_message.favor_weights = favor_weights
 
         favor_before = FavorCalculator.calculate_favor(
@@ -130,7 +133,7 @@ class MainLoop:
         print(f'\t1. Setting message type')
         message_to_send.type = MessageTypes.HEARTBEAT
 
-        print(f'\t2. Encoding message')
+        print(f'\t2. Encoding message with value: {heartbeat_message}')
         message_to_send.value = heartbeat_message.encode()
         
         try:
