@@ -41,7 +41,7 @@ class HeartbeatMessage(SpecificMessage):
         print(f'\nDecoding favor weights: {favor_weights}\n')
 
         return {
-            'remaining_storage': float(favor_weights.remaining_storage.decode('utf-8')),
+            'remaining_storage': float(favor_weights.remaining_storage),
             'bandwidth': float(favor_weights.bandwidth.decode('utf-8')),
             'rw_speed': float(favor_weights.rw_speed.decode('utf-8'))
         }
