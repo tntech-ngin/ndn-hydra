@@ -12,6 +12,7 @@
 from typing import Callable
 from ndn.encoding import *
 import time
+from ndn.storage import Storage
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 from ndn_hydra.repo.protocol.base_models import File
@@ -53,7 +54,7 @@ class AddMessage(SpecificMessage):
         super(AddMessage, self).__init__(nid, seqno)
         self.message = AddMessageTlv.parse(raw_bytes)
 
-    async def apply(self, global_view: GlobalView, fetch_file: Callable, svs, config):
+    async def apply(self, global_view: GlobalView, data_storage: Storage, fetch_file: Callable, svs, config):
         node_name = self.message.node_name.tobytes().decode()
         favor = float(self.message.favor.tobytes().decode())
         file = self.message.file

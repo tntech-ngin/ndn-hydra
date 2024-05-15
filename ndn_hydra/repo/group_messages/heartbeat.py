@@ -28,7 +28,7 @@ class HeartbeatMessage(SpecificMessage):
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
 
-    async def apply(self, global_view, fetch_file, svs, config):
+    async def apply(self, global_view, data_storage, fetch_file, svs, config):
         node_name = self.message.node_name.tobytes().decode()
         #favor = FavorCalculator().calculate_favor(self.message.favor_parameters)  # todo: FIXME
         favor = 1.85

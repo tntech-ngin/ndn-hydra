@@ -72,7 +72,7 @@ class MainLoop:
                     continue
                 message = Message.specify(i.nid, i.lowSeqno, message_bytes)
                 self.tracker.reset(i.nid)
-                aio.ensure_future(message.apply(self.global_view, self.fetch_file, self.svs, self.config))
+                aio.ensure_future(message.apply(self.global_view, self.data_storage, self.fetch_file, self.svs, self.config))
                 i.lowSeqno = i.lowSeqno + 1
 
     def send_heartbeat(self):
@@ -190,7 +190,7 @@ class MainLoop:
         Checks for database garbage daily.
         """
         current_time = time.time()
-        hours_since_last_collection = (current_time - self.last_garbage_collect_t) / (60*60)
+        hours_since_last_collection = (current_time - self.last_garbage_collect_t) / (60 * 60)
         if hours_since_last_collection >= 24:
             collect_db_garbage(self.global_view, self.data_storage, self.svs, self.config, self.logger)
             self.last_garbage_collect_t = time.time()

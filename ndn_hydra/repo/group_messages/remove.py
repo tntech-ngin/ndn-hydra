@@ -9,10 +9,12 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
+import os
 from typing import Callable
 from ndn.encoding import *
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
+from ndn_hydra.repo.modules.file_remover import remove_file
 
 class RemoveMessageTypes:
     NODE_NAME = 84
@@ -27,7 +29,7 @@ class RemoveMessage(SpecificMessage):
         super(RemoveMessage, self).__init__(nid, seqno)
         self.message = RemoveMessageTlv.parse(raw_bytes)
 
-    async def apply(self, global_view, fetch_file, svs, config):
+    async def apply(self, global_view, data_storage, fetch_file, svs, config):
         node_name = self.message.node_name.tobytes().decode()
         file_name = Name.to_str(self.message.file_name)
 
@@ -36,7 +38,10 @@ class RemoveMessage(SpecificMessage):
         if (file == None) or (file['is_deleted'] == True):
             self.logger.warning('nothing to remove')
         else:
+            # Delete from global view
             global_view.delete_file(file_name)
-            # TODO: remove from data_storage
+
+            # Remove from data_storage and NDN-DPDK fileserver from this node
+            remove_file(config, data_storage, file)
 
         global_view.update_node(node_name, float(self.message.favor.tobytes().decode()), self.seqno)
