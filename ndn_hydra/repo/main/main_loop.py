@@ -40,7 +40,7 @@ class MainLoop:
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
         self.last_garbage_collect_t = time.time()  # time in seconds
-        if global_view.get_node(self.config['node_name'])['favor']:
+        if global_view.get_node(self.config['node_name'])['favor'] is not None:
             self.favor = global_view.get_node(self.config['node_name'])['favor']
         else:
             self.favor = 0
