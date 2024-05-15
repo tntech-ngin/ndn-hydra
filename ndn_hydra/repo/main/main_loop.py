@@ -70,11 +70,11 @@ class MainLoop:
                 continue
             while i.lowSeqno <= i.highSeqno:
                 message_bytes = await self.svs.fetchData(Name.from_str(i.nid), i.lowSeqno)
-                if message_bytes == None:
+                if message_bytes is None:
                     continue
                 message = Message.specify(i.nid, i.lowSeqno, message_bytes)
                 self.tracker.reset(i.nid)
-                aio.ensure_future(message.apply(self.global_view, self.fetch_file, self.svs, self.config))
+                aio.ensure_future(message.apply(self.global_view, self.fetch_file))
                 i.lowSeqno = i.lowSeqno + 1
                 
     def send_heartbeat(self):
