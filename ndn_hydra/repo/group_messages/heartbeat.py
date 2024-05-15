@@ -31,24 +31,19 @@ class HeartbeatMessageTlv(TlvModel):
 
 class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
-        print(f'\nInitializing Heartbeat message with seqno: {seqno}\n')
-
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
         self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)
         self.message.favor_parameters = self.decode_favor_parameters(self.message.favor_parameters)
-
-    def encode(self):
-        print(f'[HeartbeatMessage] Encoding {self.message}')
 
     @staticmethod
     def decode_favor_weights(favor_weights):
         print(f'\nDecoding favor weights: {favor_weights}\n')
 
         return {
-            'remaining_storage': float(favor_weights.remaining_storage.decode('utf-8')),
-            'bandwidth': float(favor_weights.bandwidth.decode('utf-8')),
-            'rw_speed': float(favor_weights.rw_speed.decode('utf-8'))
+            'remaining_storage': float(favor_weights.remaining_storage),
+            'bandwidth': float(favor_weights.bandwidth),
+            'rw_speed': float(favor_weights.rw_speed)
         }
 
     @staticmethod
@@ -56,26 +51,26 @@ class HeartbeatMessage(SpecificMessage):
         print(f'\nDecoding favor parameters: {favor_parameters}\n')
 
         return {
-            'rtt': float(favor_parameters.rtt.decode('utf-8')),
-            'num_users': float(favor_parameters.num_users.decode('utf-8')),
-            'bandwidth': float(favor_parameters.bandwidth.decode('utf-8')),
-            'network_cost': float(favor_parameters.network_cost.decode('utf-8')),
-            'storage_cost': float(favor_parameters.storage_cost.decode('utf-8')),
-            'remaining_storage': float(favor_parameters.remaining_storage.decode('utf-8')),
-            'rw_speed': float(favor_parameters.rw_speed.decode('utf-8'))
+            'rtt': float(favor_parameters.rtt),
+            'num_users': float(favor_parameters.num_users),
+            'bandwidth': float(favor_parameters.bandwidth),
+            'network_cost': float(favor_parameters.network_cost),
+            'storage_cost': float(favor_parameters.storage_cost),
+            'remaining_storage': float(favor_parameters.remaining_storage),
+            'rw_speed': float(favor_parameters.rw_speed)
         }
 
     async def apply(self, global_view: GlobalView):
-        node_name = self.message.node_name.decode('utf-8')
+        node_name = self.message.node_name
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
-        print(f'[HeartbeatMesage] Calculating favor on heartbeat for node: {node_name}\n')
+        print(f'[HeartbeatMessage] Calculating favor on heartbeat for node: {node_name}\n')
 
         favor_calculator = FavorCalculator()
         favor = favor_calculator.calculate_favor(favor_parameters, favor_weights)
 
-        print(f'\nFavor of node {node_name} is {favor} \n')
+        print(f'\n[HeartbeatMessage] Favor of node {node_name} is {favor} \n')
 
         self.logger.debug(f"[MSG][HB]   nam={node_name};fav={favor}")
         global_view.update_node(node_name, favor, self.seqno)

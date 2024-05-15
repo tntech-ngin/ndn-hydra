@@ -14,9 +14,7 @@ def convert_bytes(bytes_value):
 
 def get_remaining_space(current_node):
     disk_usage = shutil.disk_usage(current_node)
-    free_space = disk_usage.free
-
-    print(f'\nFree space at {current_node} is {convert_bytes(free_space)}')
+    free_space = disk_usage.free / 1024 / 1024 / 1024
 
     return free_space
 
