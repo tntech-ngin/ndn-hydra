@@ -70,7 +70,7 @@ class HeartbeatMessage(SpecificMessage):
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
-        print(f'Calculating favor on heartbeat for node: {node_name}\n')
+        print(f'[HeartbeatMesage] Calculating favor on heartbeat for node: {node_name}\n')
 
         favor_calculator = FavorCalculator()
         favor = favor_calculator.calculate_favor(favor_parameters, favor_weights)
