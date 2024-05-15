@@ -32,12 +32,6 @@ class FavorWeights(TlvModel):
     bandwidth = BytesField(FavorWeightsTypes.BANDWIDTH)
     rw_speed = BytesField(FavorWeightsTypes.RW_SPEED)
 
-    def encode(self, remaining_storage_str, bandwidth_str, rw_speed_str):
-        self.remaining_storage = remaining_storage_str.encode('utf-8')
-        self.bandwidth = bandwidth_str.encode('utf-8')
-        self.rw_speed = rw_speed_str.encode('utf-8')
-        return super().encode()
-
 
 class FavorParameters(TlvModel):
     rtt = BytesField(FavorParameterTypes.RTT)
@@ -47,25 +41,6 @@ class FavorParameters(TlvModel):
     storage_cost = BytesField(FavorParameterTypes.STORAGE_COST)
     remaining_storage = BytesField(FavorParameterTypes.REMAINING_STORAGE)
     rw_speed = BytesField(FavorParameterTypes.RW_SPEED)
-
-    def encode(self, rtt_str, num_users_str, bandwidth_str, network_cost_str, storage_cost_str, remaining_storage_str, rw_speed_str):
-        print(f'\nEncoding favor parameters')
-        print(f'\nrtt_str: {rtt_str}\n')
-        print(f'\nnum_users_str: {num_users_str}\n')
-        print(f'\nbandwidth_str: {bandwidth_str}\n')
-        print(f'\nnetwork_cost_str: {network_cost_str}\n')
-        print(f'\nstorage_cost_str: {storage_cost_str}\n')
-        print(f'\nremaining_storage_str: {remaining_storage_str}\n')
-        print(f'\nrw_speed_str: {rw_speed_str}\n')
-
-        self.rtt = rtt_str.encode('utf-8') if rtt_str else None
-        self.num_users = num_users_str.encode('utf-8') if num_users_str else None
-        self.bandwidth = bandwidth_str.encode('utf-8') if bandwidth_str else None
-        self.network_cost = network_cost_str.encode('utf-8') if network_cost_str else None
-        self.storage_cost = storage_cost_str.encode('utf-8') if storage_cost_str else None
-        self.remaining_storage = remaining_storage_str.encode('utf-8') if remaining_storage_str else None
-        self.rw_speed = rw_speed_str.encode('utf-8') if rw_speed_str else None
-        return super().encode()
 
 
 class FavorCalculator:
