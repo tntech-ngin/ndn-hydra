@@ -34,6 +34,9 @@ class Message(TlvModel):
     type = UintField(HydraTlvTypes.MESSAGE_TYPE)
     value = BytesField(HydraTlvTypes.MESSAGE)
 
+    def encode(self):
+        print(f'Encoding {self.type} {self.value}')
+
     print(f'\nEncoding message: {type}')
 
     @staticmethod

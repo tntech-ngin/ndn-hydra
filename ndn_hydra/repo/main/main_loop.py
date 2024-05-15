@@ -78,7 +78,7 @@ class MainLoop:
                 i.lowSeqno = i.lowSeqno + 1
                 
     def send_heartbeat(self):
-        print(f'\nStarting sending heartbeat')
+        print(f'\nSending heartbeat')
 
         heartbeat_message = HeartbeatMessageTlv()
         heartbeat_message.node_name = Name.to_bytes(self.config['node_name'])
