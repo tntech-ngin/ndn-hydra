@@ -31,8 +31,6 @@ class HeartbeatMessageTlv(TlvModel):
 
 class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
-        print(f'\nInitializing Heartbeat message with seqno: {seqno}\n')
-
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
         self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)

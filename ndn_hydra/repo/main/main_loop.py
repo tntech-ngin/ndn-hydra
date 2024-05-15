@@ -120,8 +120,6 @@ class MainLoop:
         })
         print(f'\n[Main Loop] [send_heartbeat] Calculated favor at node {self.node_name}: {self_favor}\n')
 
-        print(f'\n[Main Loop] [send_heartbeat] Creating message to encode')
-
         message_to_send = Message()
         message_to_send.type = MessageTypes.HEARTBEAT
         message_to_send.value = heartbeat_message.encode()
@@ -131,8 +129,8 @@ class MainLoop:
         except TypeError:
             next_state_vector = 0
 
-        print(f'[Main Loop] [send_heartbeat] Global view: \n\t\t{self.global_view}\t')
-        print(f'[Main Loop] [send_heartbeat] Nodes in global view: \n\t\t{self.global_view.get_nodes()}\t')
+        print(f'[Main Loop] [send_heartbeat] Global view: \n\t\t{self.global_view}\n')
+        print(f'[Main Loop] [send_heartbeat] Nodes in global view: \n\t\t{self.global_view.get_nodes()}\n')
         print(f'[Main Loop] [send_heartbeat] Global view at {self.node_name}: '
               f'\n\t\t{self.global_view.get_node(self.node_name)}\t')
 
