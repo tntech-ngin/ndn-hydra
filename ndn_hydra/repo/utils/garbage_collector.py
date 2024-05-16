@@ -1,6 +1,7 @@
 import time
 import logging
 import os
+import asyncio as aio
 from ndn.svs import SVSync
 from ndn.storage import Storage
 from ndn.encoding import Name, Component
@@ -25,9 +26,8 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
             # Delete from global view
             global_view.delete_file(file['file_name'])
             logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from global view.")
-
             # Remove from data_storage and NDN-DPDK fileserver from this node
-            remove_file(config, data_storage, file)
+            aio.get_event_loop().run_in_executor(None, remove_file, config, data_storage, file)
             logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
 
     logger.info("GARBAGE COLLECTOR: Finished collecting DB garbage.")

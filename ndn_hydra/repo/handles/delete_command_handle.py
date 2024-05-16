@@ -91,7 +91,7 @@ class DeleteCommandHandle(ProtocolHandle):
         # Delete from global view
         self.global_view.delete_file(file_name)
         # Remove from data_storage and NDN-DPDK fileserver from this node
-        remove_file(self.config, self.data_storage, file)
+        aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
 
         self.main_loop.svs.publishData(message.encode())
         self.logger.info(f"[MSG][REMOVE]*  fil={file_name}")
