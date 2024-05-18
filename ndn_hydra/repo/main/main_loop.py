@@ -97,6 +97,7 @@ class MainLoop:
         favor_parameters.rw_speed = str(self.config['rw_speed'])
 
         heartbeat_message.favor_parameters = favor_parameters
+        print(f'Favor parameters: {favor_parameters}')
 
         # Create FavorWeights and set its fields
         favor_weights = FavorWeights()
@@ -106,6 +107,7 @@ class MainLoop:
 
         # Assign the encoded FavorWeights
         heartbeat_message.favor_weights = favor_weights
+        print(f'Favor weights: {favor_weights}')
 
         self_favor = FavorCalculator.calculate_favor(
         {
