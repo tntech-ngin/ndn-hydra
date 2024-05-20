@@ -33,6 +33,7 @@ class HeartbeatMessage(SpecificMessage):
     def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(HeartbeatMessage, self).__init__(nid, seqno)
         self.message = HeartbeatMessageTlv.parse(raw_bytes)
+
         self.message.favor_weights = self.decode_favor_weights(self.message.favor_weights)
         self.message.favor_parameters = self.decode_favor_parameters(self.message.favor_parameters)
 
@@ -41,9 +42,9 @@ class HeartbeatMessage(SpecificMessage):
         print(f'\nDecoding favor weights: {favor_weights}\n')
 
         return {
-            'remaining_storage': float(favor_weights.remaining_storage),
-            'bandwidth': float(favor_weights.bandwidth),
-            'rw_speed': float(favor_weights.rw_speed)
+            'remaining_storage': float(favor_weights.remaining_storage.to_str()),
+            'bandwidth': float(favor_weights.bandwidth.to_str()),
+            'rw_speed': float(favor_weights.rw_speed.to_str())
         }
 
     @staticmethod
@@ -51,17 +52,17 @@ class HeartbeatMessage(SpecificMessage):
         print(f'\nDecoding favor parameters: {favor_parameters}\n')
 
         return {
-            'rtt': float(favor_parameters.rtt),
-            'num_users': float(favor_parameters.num_users),
-            'bandwidth': float(favor_parameters.bandwidth),
-            'network_cost': float(favor_parameters.network_cost),
-            'storage_cost': float(favor_parameters.storage_cost),
-            'remaining_storage': float(favor_parameters.remaining_storage),
-            'rw_speed': float(favor_parameters.rw_speed)
+            'rtt': float(favor_parameters.rtt.to_str()),
+            'num_users': float(favor_parameters.num_users.to_str()),
+            'bandwidth': float(favor_parameters.bandwidth.to_str()),
+            'network_cost': float(favor_parameters.network_cost.to_str()),
+            'storage_cost': float(favor_parameters.storage_cost.to_str()),
+            'remaining_storage': float(favor_parameters.remaining_storage.to_str()),
+            'rw_speed': float(favor_parameters.rw_speed.to_str())
         }
 
     async def apply(self, global_view: GlobalView):
-        node_name = self.message.node_name
+        node_name = self.message.node_name.to_str()
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
