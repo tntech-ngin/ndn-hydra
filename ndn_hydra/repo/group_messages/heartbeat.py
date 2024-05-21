@@ -42,9 +42,9 @@ class HeartbeatMessage(SpecificMessage):
         print(f'\nDecoding favor weights: {favor_weights}\n')
 
         return {
-            'remaining_storage': float(favor_weights.remaining_storage.to_str()),
-            'bandwidth': float(favor_weights.bandwidth.to_str()),
-            'rw_speed': float(favor_weights.rw_speed.to_str())
+            'remaining_storage': float(bytes(favor_weights.remaining_storage)),
+            'bandwidth': float(bytes(favor_weights.bandwidth)),
+            'rw_speed': float(bytes(favor_weights.rw_speed))
         }
 
     @staticmethod
@@ -52,17 +52,17 @@ class HeartbeatMessage(SpecificMessage):
         print(f'\nDecoding favor parameters: {favor_parameters}\n')
 
         return {
-            'rtt': float(favor_parameters.rtt.to_str()),
-            'num_users': float(favor_parameters.num_users.to_str()),
-            'bandwidth': float(favor_parameters.bandwidth.to_str()),
-            'network_cost': float(favor_parameters.network_cost.to_str()),
-            'storage_cost': float(favor_parameters.storage_cost.to_str()),
-            'remaining_storage': float(favor_parameters.remaining_storage.to_str()),
-            'rw_speed': float(favor_parameters.rw_speed.to_str())
+            'rtt': float(bytes(favor_parameters.rtt)),
+            'num_users': float(bytes(favor_parameters.num_users)),
+            'bandwidth': float(bytes(favor_parameters.bandwidth)),
+            'network_cost': float(bytes(favor_parameters.network_cost)),
+            'storage_cost': float(bytes(favor_parameters.storage_cost)),
+            'remaining_storage': float(bytes(favor_parameters.remaining_storage)),
+            'rw_speed': float(bytes(favor_parameters.rw_speed))
         }
 
     async def apply(self, global_view: GlobalView):
-        node_name = self.message.node_name.to_str()
+        node_name = str(bytes(self.message.node_name))
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
