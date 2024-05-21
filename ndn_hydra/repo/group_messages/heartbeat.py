@@ -39,19 +39,20 @@ class HeartbeatMessage(SpecificMessage):
 
     @staticmethod
     def decode_favor_weights(favor_weights):
-        print(f'\nDecoding favor weights: {favor_weights}\n')
-
-        return {
+        decoded_weights = {
             'remaining_storage': float(bytes(favor_weights.remaining_storage)),
             'bandwidth': float(bytes(favor_weights.bandwidth)),
             'rw_speed': float(bytes(favor_weights.rw_speed))
         }
 
+        print(f'\nDecoding favor weights: {decoded_weights}\n')
+
+        return decoded_weights
+
     @staticmethod
     def decode_favor_parameters(favor_parameters):
-        print(f'\nDecoding favor parameters: {favor_parameters}\n')
 
-        return {
+        decoded_params = {
             'rtt': float(bytes(favor_parameters.rtt)),
             'num_users': float(bytes(favor_parameters.num_users)),
             'bandwidth': float(bytes(favor_parameters.bandwidth)),
@@ -61,8 +62,12 @@ class HeartbeatMessage(SpecificMessage):
             'rw_speed': float(bytes(favor_parameters.rw_speed))
         }
 
+        print(f'\nDecoding favor parameters: {decoded_params}\n')
+
+        return decoded_params
+
     async def apply(self, global_view: GlobalView):
-        node_name = str(bytes(self.message.node_name))
+        node_name = bytes(self.message.node_name).decode('utf-8')
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
