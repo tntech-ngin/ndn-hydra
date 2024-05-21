@@ -97,7 +97,6 @@ class MainLoop:
         favor_parameters.rw_speed = str(self.config['rw_speed'])
 
         heartbeat_message.favor_parameters = favor_parameters
-        print(f'Favor parameters: {favor_parameters}')
 
         # Create FavorWeights and set its fields
         favor_weights = FavorWeights()
@@ -107,7 +106,6 @@ class MainLoop:
 
         # Assign the encoded FavorWeights
         heartbeat_message.favor_weights = favor_weights
-        print(f'Favor weights: {favor_weights}')
 
         self_favor = FavorCalculator.calculate_favor(
         {
@@ -132,7 +130,8 @@ class MainLoop:
             next_state_vector = 0
 
         print(f'[Main Loop] [send_heartbeat] Global view: \n\t\t{self.global_view}\n')
-        print(f'[Main Loop] [send_heartbeat] Nodes in global view: \n\t\t{self.global_view.get_nodes()}\n')
+        print(f'[Main Loop] [send_heartbeat] Nodes in global view: '
+              f'\n\t\t{global_view.GlobalView.get_nodes(self.global_view, include_expired=False)}\n')
         print(f'[Main Loop] [send_heartbeat] Global view at {self.node_name}: '
               f'\n\t\t{self.global_view.get_node(self.node_name)}\t')
 
