@@ -17,6 +17,7 @@ from ndn_hydra.repo.protocol.tlv import HydraTlvTypes
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 from ndn_hydra.repo.group_messages.add import AddMessage
 from ndn_hydra.repo.group_messages.remove import RemoveMessage
+from ndn_hydra.repo.group_messages.update import UpdateMessage
 from ndn_hydra.repo.group_messages.store import StoreMessage
 from ndn_hydra.repo.group_messages.claim import ClaimMessage
 from ndn_hydra.repo.group_messages.heartbeat import HeartbeatMessage
@@ -24,9 +25,10 @@ from ndn_hydra.repo.group_messages.heartbeat import HeartbeatMessage
 class MessageTypes:
     ADD = 1
     REMOVE = 2
-    STORE = 3
-    CLAIM = 4
-    HEARTBEAT = 5
+    UPDATE = 3
+    STORE = 4
+    CLAIM = 5
+    HEARTBEAT = 6
 
 class Message(TlvModel):
     type = UintField(HydraTlvTypes.MESSAGE_TYPE)
@@ -39,6 +41,8 @@ class Message(TlvModel):
             return AddMessage(nid, seqno, message_bytes)
         elif message_type == MessageTypes.REMOVE:
             return RemoveMessage(nid, seqno, message_bytes)
+        elif message_type == MessageTypes.UPDATE:
+            return UpdateMessage(nid, seqno, message_bytes)
         elif message_type == MessageTypes.STORE:
             return StoreMessage(nid, seqno, message_bytes)
         elif message_type == MessageTypes.CLAIM:

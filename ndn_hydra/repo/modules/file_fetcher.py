@@ -13,6 +13,7 @@ import asyncio as aio
 import logging
 import random
 import time
+import os
 from ndn.app import NDNApp
 from ndn.storage import Storage
 from ndn_hydra.repo.modules import *
@@ -69,8 +70,10 @@ class FileFetcher:
     async def _fetch_file_helper(self, file_name: str, packets: int, packet_size: int, fetch_path: str):        
         self.logger.info(f"[ACT][FETCH]*   fil={file_name};pcks={packets};fetch_path={fetch_path}")
         start = time.time()
+
         async for (_, _, content, data_bytes, key) in concurrent_fetcher(self.app, fetch_path, file_name, 0, packets-1, aio.Semaphore(15)):
             self.data_storage.put_packet(key, data_bytes) #TODO: check digest
+
         end = time.time()
         duration = end - start
         self.logger.info(f"[ACT][FETCHED]* pcks={packets};duration={duration}")

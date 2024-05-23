@@ -45,7 +45,7 @@ class ClaimMessage(SpecificMessage):
         super(ClaimMessage, self).__init__(nid, seqno)
         self.message = ClaimMessageTlv.parse(raw_bytes)
 
-    async def apply(self, global_view, fetch_file, svs, config):
+    async def apply(self, global_view, data_storage, fetch_file, svs, config):
         node_name = self.message.node_name.tobytes().decode()
         favor = float(self.message.favor.tobytes().decode())
         file_name = Name.to_str(self.message.file_name)

@@ -1,37 +1,34 @@
 import time
 import logging
+import os
+import asyncio as aio
 from ndn.svs import SVSync
+from ndn.storage import Storage
+from ndn.encoding import Name, Component
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.remove import RemoveMessageTlv
 from ndn_hydra.repo.group_messages.message import Message, MessageTypes
+from ndn_hydra.repo.modules.file_remover import remove_file
 
 
-def collect_db_garbage(global_view: GlobalView, svs: SVSync, config: dict, logger: logging.Logger) -> None:
+def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSync, config: dict, logger: logging.Logger) -> None:
     """
     Removes files that have not been accessed in the last month from a node's databases.
     """
     logger.info("GARBAGE COLLECTOR: Collecting DB garbage...")    
     
-    current_time = time.time()
-
-    # Find files that have not been accessed in the last month
-    all_files = global_view.get_files()
-    files_to_remove = []
-    for file in all_files:
+    # Remove files that have expired (as based on the expiration_time configuration) 
+    for file in global_view.get_files():
+        current_time = time.time()
         expire_time = int(file['expiration_time'])
         # If expire_time is 0, file is set to not expire
         if current_time >= expire_time and expire_time != 0:
-            files_to_remove.append(file['file_name'])
-
-    # TODO: Implement logger. Check if files were accessed by another node before deleting.
-
-    # Remove files from storage
-    for file_name in files_to_remove:
-        # Delete from global view
-        global_view.delete_file(file_name)
-        logger.info(f"GARBAGE COLLECTOR: Removed {file_name} from global view.")
-
-        # TODO: Remove from data storage
+            # Delete from global view
+            global_view.delete_file(file['file_name'])
+            logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from global view.")
+            # Remove from data_storage from this node
+            aio.get_event_loop().run_in_executor(None, remove_file, config, data_storage, file)
+            logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
 
     logger.info("GARBAGE COLLECTOR: Finished collecting DB garbage.")
 

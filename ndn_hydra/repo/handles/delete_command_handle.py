@@ -22,6 +22,7 @@ from ndn_hydra.repo.group_messages.message import Message, MessageTypes
 from ndn_hydra.repo.main.main_loop import MainLoop
 from ndn_hydra.repo.handles.protocol_handle_base import ProtocolHandle
 from ndn_hydra.repo.modules.global_view import GlobalView
+from ndn_hydra.repo.modules.file_remover import remove_file
 
 class DeleteCommandHandle(ProtocolHandle):
     """
@@ -86,6 +87,11 @@ class DeleteCommandHandle(ProtocolHandle):
         message = Message()
         message.type = MessageTypes.REMOVE
         message.value = remove_message.encode()
+
+        # Delete from global view
         self.global_view.delete_file(file_name)
+        # Remove from data_storage from this node
+        aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
+
         self.main_loop.svs.publishData(message.encode())
         self.logger.info(f"[MSG][REMOVE]*  fil={file_name}")

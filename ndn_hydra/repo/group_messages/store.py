@@ -27,7 +27,7 @@ class StoreMessage(SpecificMessage):
         super(StoreMessage, self).__init__(nid, seqno)
         self.message = StoreMessageTlv.parse(raw_bytes)
 
-    async def apply(self, global_view, fetch_file, svs, config):
+    async def apply(self, global_view, data_storage, fetch_file, svs, config):
         node_name = self.message.node_name.tobytes().decode()
         file_name = Name.to_str(self.message.file_name)
 

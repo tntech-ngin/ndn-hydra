@@ -341,6 +341,14 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (file_name,))
 
+    def update_file(self, file_name:str, expiration_time:int):
+        sql = """
+        UPDATE files
+        SET expiration_time = ?
+        WHERE file_name = ?
+        """
+        self.__execute_sql_qmark(sql, (expiration_time, file_name))
+
     def store_file(self, file_name:str, node_name:str):
         # rerank backuped_by
         self.__rerank_backups(file_name, node_name)

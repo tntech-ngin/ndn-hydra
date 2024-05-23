@@ -80,7 +80,7 @@ class InsertCommandHandle(ProtocolHandle):
         packet_size = cmd.file.packet_size
         size = cmd.file.size
         fetch_path = cmd.fetch_path
-        expiration_time = int(time.time() + (self.config['file_expiration'] * 60)) # convert hours to seconds
+        expiration_time = int(time.time() + (self.config['file_expiration'] * 60 * 60)) # convert hours to seconds
         # Set file to not expire if file_expiration in config is set to 0
         if self.config['file_expiration'] == 0:
             expiration_time = 0
