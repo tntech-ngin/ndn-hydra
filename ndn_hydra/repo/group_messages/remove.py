@@ -41,7 +41,7 @@ class RemoveMessage(SpecificMessage):
         else:
             # Delete from global view
             global_view.delete_file(file_name)
-            # Remove from data_storage from this node
+            # Remove from data_storage and NDN-DPDK fileserver from this node
             aio.get_event_loop().run_in_executor(None, remove_file, config, data_storage, file)
 
         global_view.update_node(node_name, float(self.message.favor.tobytes().decode()), self.seqno)
