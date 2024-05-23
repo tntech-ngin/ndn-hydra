@@ -30,9 +30,6 @@ class FileFetcher:
         self.data_storage = data_storage
         self.config = config
         self.repo_prefix = config['repo_prefix']
-        # Custom: save files for dpdk fileserver
-        self.fileserver_path = config['fileserver_path']
-        # custom: end
         self.logger = logging.getLogger()
         self.store_func = None # This function must be initialized to store properly store
         self.fetching = []
@@ -74,22 +71,8 @@ class FileFetcher:
         self.logger.info(f"[ACT][FETCH]*   fil={file_name};pcks={packets};fetch_path={fetch_path}")
         start = time.time()
 
-        # Custom: save files for dpdk fileserver
-        file_path = f"{self.fileserver_path}/{file_name}"
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        f = open(file_path, "wb")
-        # Custom: end
-
         async for (_, _, content, data_bytes, key) in concurrent_fetcher(self.app, fetch_path, file_name, 0, packets-1, aio.Semaphore(15)):
             self.data_storage.put_packet(key, data_bytes) #TODO: check digest
-
-            # Custom: save files for dpdk fileserver
-            f.write(content)
-            # Custom: end
-
-        # Custom: save files for dpdk fileserver
-        f.close()
-        # Custom: end
 
         end = time.time()
         duration = end - start

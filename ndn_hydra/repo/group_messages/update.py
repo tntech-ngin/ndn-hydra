@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# NDN Hydra Remove Group Message
+# NDN Hydra Update Group Message
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
 #  @Date:    2021-01-25

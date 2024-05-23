@@ -133,7 +133,6 @@ def process_cmd_opts():
             home=os.path.expanduser("~"),
             repo_prefix=config_data["repo_prefix"],
             node_name=config_data["node_name"])
-        config_data["fileserver_path"] = "{workpath}/fileserver".format(workpath=workpath)
         config_data["logging_path"] = "{workpath}/session.log".format(workpath=workpath)
         config_data["data_storage_path"] = "{workpath}/data.db".format(workpath=workpath)
         config_data["global_view_path"] = "{workpath}/global_view.db".format(workpath=workpath)
