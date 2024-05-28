@@ -55,8 +55,8 @@ class FileFetcher:
         # Randomly select a node to fetch file from
         file_info = self.global_view.get_file(file_name)
         on_list = file_info["stores"]
-        if file_info["is_deleted"] == True or not on_list:
-            self.logger.info("FileFetcher: File is deleted or not in stores")
+        if not on_list:
+            self.logger.info("FileFetcher: File not in stores")
             return
         active_nodes = set([node['node_name'] for node in self.global_view.get_nodes()])
         on_list = [x for x in on_list if x in active_nodes]

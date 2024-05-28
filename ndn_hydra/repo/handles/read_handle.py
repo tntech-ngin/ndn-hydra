@@ -128,7 +128,7 @@ class ReadHandle(object):
         if file_name == None:
             return None
         on_list = file_info["stores"]
-        if file_info["is_deleted"] == True or not on_list:
+        if not on_list:
             return None
         if self.node_name in on_list:
             return self.node_name
