@@ -81,6 +81,6 @@ class HeartbeatMessage(SpecificMessage):
         self.logger.debug(f"[MSG][HB]   nam={node_name};fav={favor}")
         global_view.update_node(node_name, favor, self.seqno)
 
-        self.logger.debug(f'\nGlobal view updated: {global_view}')
+        print(f'\nGlobal view updated: {global_view}')
 
         self.logger.debug(f"{len(global_view.get_nodes())} nodes")
