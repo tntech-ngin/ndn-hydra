@@ -207,6 +207,8 @@ class MainLoop:
 
         print(f'[STORE MSG] {store_message.node_name}')
 
+        print(f'\nGlobal view: {self.global_view}')
+
         store_message.favor = str(self.global_view.get_node(self.config['node_name'])['favor']).encode()
         store_message.file_name = Name.from_str(file_name)
         message = Message()

@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS pending_stores (
 
 class GlobalView:
     def __init__(self, db:str):
+
         self.db = os.path.expanduser(db)
         if len(os.path.dirname(self.db)) > 0 and not os.path.exists(os.path.dirname(self.db)):
             try:
@@ -70,6 +71,35 @@ class GlobalView:
             except FileExistsError:
                 pass
         self.__create_tables()
+
+    def __repr__(self):
+        tables = self.get_tables()
+        db_repr = []
+        for table in tables:
+            db_repr.append(f"Table: {table}")
+            columns = self.get_columns(table)
+            db_repr.append(f"Columns: {', '.join(columns)}")
+            rows = self.get_rows(table)
+            for row in rows:
+                db_repr.append(f"Row: {row}")
+            db_repr.append("\n")
+        return "\n".join(db_repr)
+
+    def get_tables(self):
+        return ["files", "stores", "backups", "nodes", "pending_stores"]
+
+    def get_columns(self, table_name):
+        self.cursor.execute(f"PRAGMA table_info({table_name});")
+        return [column[1] for column in self.cursor.fetchall()]
+
+    def get_rows(self, table_name):
+        self.cursor.execute(f"SELECT * FROM {table_name};")
+        return self.cursor.fetchall()
+
+    def close(self):
+        self.connection.close()
+
+
     def __get_connection(self):
         try:
             return sqlite3.connect(self.db)
