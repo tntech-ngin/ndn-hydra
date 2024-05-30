@@ -61,9 +61,6 @@ CREATE TABLE IF NOT EXISTS pending_stores (
 
 class GlobalView:
     def __init__(self, db:str):
-        connection = self.__get_connection()
-        self.cursor = connection.cursor()
-
         self.db = os.path.expanduser(db)
         if len(os.path.dirname(self.db)) > 0 and not os.path.exists(os.path.dirname(self.db)):
             try:
@@ -75,6 +72,9 @@ class GlobalView:
         self.__create_tables()
 
     def __repr__(self):
+        self.connection = sqlite3.connect(self.db)
+        self.cursor = self.connection.cursor()
+
         tables = self.get_tables()
         db_repr = []
         for table in tables:
