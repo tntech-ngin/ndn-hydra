@@ -204,7 +204,10 @@ class MainLoop:
     def store(self, file_name: str):
         store_message = StoreMessageTlv()
         store_message.node_name = self.config['node_name'].encode()
-        store_message.favor = str(self.global_view.get_node(store_message.node_name)['favor']).encode()
+
+        print(f'[STORE MSG] {store_message.node_name}')
+
+        store_message.favor = str(self.global_view.get_node(self.config['node_name'])['favor']).encode()
         store_message.file_name = Name.from_str(file_name)
         message = Message()
         message.type = MessageTypes.STORE
