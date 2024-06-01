@@ -31,10 +31,9 @@ CREATE TABLE IF NOT EXISTS files (
     size INTEGER NOT NULL,
     origin_node_name TEXT NOT NULL,
     fetch_path TEXT NOT NULL,
-    is_deleted INTEGER NOT NULL DEFAULT 0,
     expiration_time INTEGER NOT NULL
 );
-""" # remove origin_node_name, fetch_path, and is_deleted
+""" # remove origin_node_name, and fetch_path
 sql_create_stores_tables = """
 CREATE TABLE IF NOT EXISTS stores (
     id INTEGER PRIMARY KEY,
@@ -224,7 +223,7 @@ class GlobalView:
     def get_file(self, file_name:str):
         sql = """
         SELECT DISTINCT
-            file_name, desired_copies, packets, size, origin_node_name, fetch_path, is_deleted, packet_size, expiration_time
+            file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time
         FROM files
         WHERE file_name = ?
         """
@@ -238,27 +237,18 @@ class GlobalView:
             'size': result[0][3],
             'origin_node_name': result[0][4],
             'fetch_path': result[0][5],
-            'is_deleted': False if (result[0][6] == 0) else True,
-            'packet_size': result[0][7],
+            'packet_size': result[0][6],
             'stores': self.get_stores(result[0][0]),
             'backups': self.get_backups(result[0][0]),
-            'expiration_time': result[0][8],
+            'expiration_time': result[0][7],
         }
 
-    def get_files(self, including_deleted:bool=False):
-        if including_deleted:
-            sql = """
-            SELECT DISTINCT
-                file_name, desired_copies, packets, size, origin_node_name, fetch_path, is_deleted, packet_size, expiration_time
-            FROM files
-            """
-        else:
-            sql = """
-            SELECT DISTINCT
-                file_name, desired_copies, packets, size, origin_node_name, fetch_path, is_deleted, packet_size, expiration_time
-            FROM files
-            WHERE is_deleted = 0
-            """
+    def get_files(self):
+        sql = """
+        SELECT DISTINCT
+            file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time
+        FROM files
+        """
         results = self.__execute_sql(sql)
         files = []
         for result in results:
@@ -269,11 +259,10 @@ class GlobalView:
                 'size': result[3],
                 'origin_node_name': result[4],
                 'fetch_path': result[5],
-                'is_deleted': False if (result[6] == 0) else True,
-                'packet_size': result[7],
+                'packet_size': result[6],
                 'stores': self.get_stores(result[0]),
                 'backups': self.get_backups(result[0]),
-                'expiration_time': result[8],
+                'expiration_time': result[7],
             })
         return files
 
@@ -296,9 +285,9 @@ class GlobalView:
     def add_file(self, file_name:str, size:int, origin_node_name:str, fetch_path:str, packet_size:int, packets:int, desired_copies:int, expiration_time:int):
         sql = """
         INSERT OR IGNORE INTO files
-            (file_name, desired_copies, packets, size, origin_node_name, fetch_path, is_deleted, packet_size, expiration_time)
+            (file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time)
         VALUES
-            (?, ?, ?, ?, ?, ?, 0, ?, ?)
+            (?, ?, ?, ?, ?, ?, ?, ?)
         """
         self.__execute_sql_qmark(sql, (file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time))
 
@@ -335,9 +324,7 @@ class GlobalView:
         self.__execute_sql_qmark(sql, (file_name,))
         # insertions
         sql = """
-        UPDATE files
-        SET is_deleted = 1
-        WHERE file_name = ?
+        DELETE FROM files WHERE file_name = ?
         """
         self.__execute_sql_qmark(sql, (file_name,))
 

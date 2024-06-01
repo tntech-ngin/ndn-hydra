@@ -200,7 +200,7 @@ class HydraNodeThread(Thread):
             main_loop = MainLoop(app, self.config, global_view, data_storage, svs_storage, file_fetcher)
 
             # handles (reads, commands & queries)
-            read_handle = ReadHandle(app, data_storage, global_view, self.config)
+            read_handle = ReadHandle(app, data_storage, global_view, main_loop, self.config)
             insert_handle = InsertCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
             delete_handle = DeleteCommandHandle(app, data_storage, pb, self.config, main_loop, global_view)
             query_handle = QueryHandle(app, global_view, self.config)

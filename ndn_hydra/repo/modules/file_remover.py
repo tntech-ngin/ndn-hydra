@@ -1,5 +1,3 @@
-import os
-
 # Responsible for removing data from the data storage 
 # and NDN-DPDK fileserver from all associated nodes
 def remove_file(config, data_storage, file):

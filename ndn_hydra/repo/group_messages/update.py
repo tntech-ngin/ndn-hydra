@@ -37,7 +37,7 @@ class UpdateMessage(SpecificMessage):
 
         self.logger.info(f"[MSG][UPDATE]   fil={file_name}")
         file = global_view.get_file(file_name)
-        if (file == None) or (file['is_deleted'] == True):
+        if not file:
             self.logger.warning('nothing to update')
         else:
             global_view.update_file(file_name, expiration_time)
