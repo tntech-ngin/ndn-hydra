@@ -16,6 +16,7 @@ from secrets import choice
 from ndn.app import NDNApp
 from ndn.encoding import Name, ContentType, Component, parse_data
 from ndn.storage import Storage
+from ndn_hydra.repo.main.main_loop import MainLoop
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.update import UpdateMessageTlv
 from ndn_hydra.repo.group_messages.message import Message, MessageTypes
@@ -24,7 +25,7 @@ class ReadHandle(object):
     """
     ReadHandle processes ordinary interests, and return corresponding data if exists.
     """
-    def __init__(self, app: NDNApp, data_storage: Storage, global_view: GlobalView, config: dict):
+    def __init__(self, app: NDNApp, data_storage: Storage, global_view: GlobalView, main_loop: MainLoop, config: dict):
         """
         :param app: NDNApp.
         :param data_storage: Storage.
@@ -34,8 +35,10 @@ class ReadHandle(object):
         self.app = app
         self.data_storage = data_storage
         self.global_view = global_view
+        self.main_loop = main_loop
         self.node_name = config['node_name']
         self.repo_prefix = config['repo_prefix']
+        self.file_expiration = config['file_expiration']
 
         self.logger = logging.getLogger()
 
@@ -88,12 +91,10 @@ class ReadHandle(object):
             self.logger.debug(f'Read handle: data not found {Name.to_str(int_name)}')
             return
 
-        # File is present, reset the expiration time
-        self._reset_file_expiration(file_name)
-
         if best_id == self.node_name:
             if segment_comp == "/seg=0":
                 self.logger.info(f'[CMD][FETCH]    serving file')
+                self._reset_file_expiration(file_name)
 
             # serving my own data
             data_bytes = self.data_storage.get_packet(file_name + segment_comp, int_param.can_be_prefix)
@@ -124,9 +125,9 @@ class ReadHandle(object):
 
     def _best_id_for_file(self, file_name: str):
         file_info = self.global_view.get_file(file_name)
-        active_nodes = set( [x['node_name'] for x in self.global_view.get_nodes()] )
-        if file_name == None:
+        if not file_name or not file_info:
             return None
+        active_nodes = set( [x['node_name'] for x in self.global_view.get_nodes()] )
         on_list = file_info["stores"]
         if not on_list:
             return None
@@ -137,14 +138,14 @@ class ReadHandle(object):
             return choice(on_list)
 
     def _reset_file_expiration(self, file_name):
-        if self.config['file_expiration'] == 0: # no need to reset if file_expiration in config is set to 0
+        if self.file_expiration == 0: # no need to reset if file_expiration in config is set to 0
             return
-        expiration_time = int(time.time() + (self.config['file_expiration'] * 60 * 60)) # convert hours to seconds
+        expiration_time = int(time.time() + (self.file_expiration * 60 * 60)) # convert hours to seconds
 
         # update tlv
         favor = 1.85
         update_message = UpdateMessageTlv()
-        update_message.node_name = self.config['node_name'].encode()
+        update_message.node_name = self.node_name.encode()
         update_message.favor = str(favor).encode()
         update_message.file_name = file_name
         update_message.expiration_time = expiration_time
