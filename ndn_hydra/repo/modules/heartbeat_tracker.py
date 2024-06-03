@@ -36,6 +36,7 @@ class HeartbeatTracker:
                 heart.alive = True
                 self.globalview.renew_node(node_name)
                 self.logger.info(f"[ACT][RENEW]*   nam={node_name}")
+                self.logger.info(f"Currently {len(self.globalview.get_nodes())} node(s)")
     def detect(self):
         for node_name, heart in self.hearts.items():
             time_past = (time.perf_counter()*1000) - heart.past_beat

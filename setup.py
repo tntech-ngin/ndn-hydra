@@ -21,9 +21,11 @@ with io.open("docs/version.py", "rt", encoding="utf8") as f:
 with io.open("README.rst", "rt", encoding="utf8") as f:
     long_description = f.read()
 
+
 def _parse_requirements(filename: str) -> List[str]:
     with open(filename, 'r') as f:
-        return [s for s in [ line.split('#', 1)[0].strip(' \t\n') for line in f ] if s != '']
+        return [s for s in [line.split('#', 1)[0].strip(' \t\n') for line in f] if s != '']
+
 
 setup(
     name='ndn-hydra',
@@ -54,7 +56,9 @@ setup(
         'Programming Language :: Python :: 3.10'
     ],
     keywords='NDN HYDRA',
-    packages=find_packages(exclude=['tests','examples','docs','notes']),
+    packages=find_packages(exclude=['tests', 'examples', 'docs', 'notes']),
+    include_package_data=True,
+    package_data={'ndn_hydra.repo': ['config.yaml']},
     install_requires=_parse_requirements('docs/requirements.txt'),
     python_requires=">=3.8",
     entry_points={
@@ -63,4 +67,5 @@ setup(
             'ndn-hydra-client = ndn_hydra.client.main:main'
         ]
     },
-    zip_safe=False)
+    zip_safe=False
+)

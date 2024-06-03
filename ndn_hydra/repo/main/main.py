@@ -121,7 +121,8 @@ def process_cmd_opts():
             "bandwidth": default_config_file['default_config']['favor']['bandwidth'],
             "network_cost": default_config_file['default_config']['favor']['network_cost'],
             "storage_cost": default_config_file['default_config']['favor']['storage_cost'],
-            "remaining_storage": default_config_file['default_config']['favor']['remaining_storage']
+            "remaining_storage": default_config_file['default_config']['favor']['remaining_storage'],
+            "rw_speed": default_config_file['default_config']['favor']['rw_speed']
         }
 
         if cli_args.repo_prefix is not False:
