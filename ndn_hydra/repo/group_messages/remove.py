@@ -36,7 +36,7 @@ class RemoveMessage(SpecificMessage):
 
         self.logger.info(f"[MSG][REMOVE]   fil={file_name}")
         file = global_view.get_file(file_name)
-        if (file == None) or (file['is_deleted'] == True):
+        if not file:
             self.logger.warning('nothing to remove')
         else:
             # Delete from global view

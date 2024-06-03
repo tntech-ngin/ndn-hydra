@@ -33,7 +33,7 @@ class StoreMessage(SpecificMessage):
 
         self.logger.info(f"[MSG][STORE]    nam={node_name};fil={file_name}")
         file = global_view.get_file(file_name)
-        if (file == None) or (file['is_deleted'] == True):
+        if not file:
             self.logger.warning('add to pending store')
             global_view.add_pending_store(file_name, node_name)
         else:
