@@ -44,7 +44,7 @@ class HydraInsertClient(object):
 
         # Check if the file name already exists
         fetch_client = HydraFetchClient(self.app, self.client_prefix, self.repo_prefix)
-        local_file_name = fetch_client.fetch_file(file_name)
+        local_file_name = await fetch_client.fetch_file(file_name)
 
         if not local_file_name == file_name:
             tic = time.perf_counter()
