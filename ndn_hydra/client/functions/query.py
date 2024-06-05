@@ -57,7 +57,7 @@ class HydraQueryClient(object):
                     filelist = FileList.parse(content)
                     counter = 1
                     if filelist.list:
-                        print(f'List of All Files')
+                        print(f'\nList of All Files')
                         for file in filelist.list:
                             print(f'File {counter} meta-info')
                             print(f'\tfile_name: {Name.to_str(file.file_name)}')
@@ -76,7 +76,7 @@ class HydraQueryClient(object):
 
                         return Name.to_str(file.file_name)
                     else:
-                        print(f'File Does Not Exists in The Repo')
+                        print(f'\nFile Does Not Exists in The Repo Yet')
                     return
                 elif querytype == "prefix":
                     filelist = FileList.parse(content)

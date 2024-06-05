@@ -165,7 +165,7 @@ async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
         tic = time.perf_counter()
         await client.query(Name.from_str(str(args.query)), args.nodename)
         toc = time.perf_counter()
-        print(f"Client finished Query Command! - total time (with disk): {toc - tic:0.4f} secs")
+        print(f"\nClient finished Query Command! - total time (with disk): {toc - tic:0.4f} secs")
     else:
         print("Not Implemented Yet / Unknown Command.")
 

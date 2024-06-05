@@ -47,7 +47,7 @@ class HydraInsertClient(object):
         query = [Component.from_str("file")] + file_name
         query_result = await query_client.send_query(query)
 
-        target_file_name = Name.to_str(query)[5: ]
+        target_file_name = Name.to_str(query)[5:]
 
         if query_result != target_file_name:
             tic = time.perf_counter()
