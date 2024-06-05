@@ -44,7 +44,7 @@ class HydraInsertClient(object):
 
         # Check if the file name already exists
         query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
-        query = self.client_prefix + [Component.from_str("query")] + file_name
+        query = self.client_prefix + [Component.from_str("file")] + file_name
 
         local_file_name = await query_client.send_query(query)
 
