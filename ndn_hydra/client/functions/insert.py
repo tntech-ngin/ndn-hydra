@@ -46,9 +46,9 @@ class HydraInsertClient(object):
         query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
         query = [Component.from_str("file")] + file_name
 
-        print(f'Send Query: {query}')
-
         local_file_name = await query_client.send_query(query)
+
+        print(f'File name: {local_file_name}')
 
         if not local_file_name == file_name:
             tic = time.perf_counter()

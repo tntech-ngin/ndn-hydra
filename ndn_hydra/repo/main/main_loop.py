@@ -75,6 +75,8 @@ class MainLoop:
                 message_bytes = await self.svs.fetchData(Name.from_str(i.nid), i.lowSeqno)
                 if message_bytes is None:
                     continue
+
+                # TODO: Fix bug #29
                 message = Message.specify(i.nid, i.lowSeqno, message_bytes)
                 self.tracker.reset(i.nid)
                 aio.ensure_future(message.apply(self.global_view, self.data_storage, self.fetch_file, self.svs, self.config))
