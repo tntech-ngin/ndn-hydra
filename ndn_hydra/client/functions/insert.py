@@ -62,8 +62,6 @@ class HydraInsertClient(object):
                                 for i in range(seg_cnt)]
 
             print(f'\nCreated {seg_cnt} chunks under name {Name.to_str(fetch_file_prefix)}')
-        else:
-            print(f'\nFile {file_name} already exists')
 
         def on_interest(int_name, _int_param, _app_param):
             seg_no = Component.to_number(int_name[-1]) if Component.get_type(int_name[-1]) == Component.TYPE_SEGMENT else 0

@@ -40,8 +40,6 @@ class HydraQueryClient(object):
         try:
             data_name, meta_info, content = await self.app.express_interest(named_query, Name.to_bytes(query), can_be_prefix=True, must_be_fresh=True, lifetime=3000)
 
-            print(f'Received Query: {Name.to_str(query)}')
-
             if meta_info.content_type == ContentType.NACK:
                 print("Distributed Repo does not know that query.")
                 return
@@ -71,7 +69,8 @@ class HydraQueryClient(object):
                 elif querytype == "file":
                     if content:
                         file = File.parse(content)
-                        print(f'File Exists, File meta-info')
+                        print(f'\nFile already exists')
+                        print(f'File meta-info:')
                         print(f'\tfile_name: {Name.to_str(file.file_name)}')
                         print(f'\tsize: {file.size} | packets: {file.packets} | packet_size: {file.packet_size}')
 
