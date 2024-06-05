@@ -53,7 +53,7 @@ class HydraInsertClient(object):
 
         # /file/insert/test-file
         # local_file_name: /insert/test-file
-        if not local_file_name == query[]:
+        if not local_file_name == file_name:
             tic = time.perf_counter()
             with open(path, "rb") as f:
                 data = f.read()
