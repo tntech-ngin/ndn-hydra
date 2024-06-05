@@ -45,15 +45,11 @@ class HydraInsertClient(object):
         # Check if the file name already exists
         query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
         query = [Component.from_str("file")] + file_name
-        local_file_name = await query_client.send_query(query)
+        query_result = await query_client.send_query(query)
 
         target_file_name = Name.to_str(query)[5: ]
-        print(f'target_file_name: {target_file_name}')
-        print(f'local_file_name: {local_file_name}')
 
-        # /file/insert/test-file
-        # local_file_name: /insert/test-file
-        if not local_file_name == file_name:
+        if query_result != target_file_name:
             tic = time.perf_counter()
             with open(path, "rb") as f:
                 data = f.read()
