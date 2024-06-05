@@ -149,25 +149,25 @@ async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
 
     if args.function == "insert":
         await client.insert(filename, args.path)
-        print("Client finished Insert Command!")
+        print("\nClient finished Insert Command!")
         await asyncio.sleep(float(args.wait))
     elif args.function == "delete":
         tic = time.perf_counter()
         await client.delete(filename)
         toc = time.perf_counter()
-        print("Client finished Delete Command! - total time (with disk): {toc - tic:0.4f} secs")
+        print("\nClient finished Delete Command! - total time (with disk): {toc - tic:0.4f} secs")
     elif args.function == "fetch":
         tic = time.perf_counter()
         await client.fetch(filename, args.path, True)
         toc = time.perf_counter()
-        print(f"Client finished Fetch Command! - total time (with disk): {toc - tic:0.4f} secs")
+        print(f"\nClient finished Fetch Command! - total time (with disk): {toc - tic:0.4f} secs")
     elif args.function == "query":
         tic = time.perf_counter()
         await client.query(Name.from_str(str(args.query)), args.nodename)
         toc = time.perf_counter()
         print(f"\nClient finished Query Command! - total time (with disk): {toc - tic:0.4f} secs")
     else:
-        print("Not Implemented Yet / Unknown Command.")
+        print("\nNot Implemented Yet / Unknown Command.")
 
     app.shutdown()
 
