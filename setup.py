@@ -4,7 +4,7 @@
 #  @Project: NDN Hydra
 #  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -33,15 +33,15 @@ setup(
     description='ndn-hydra: An NDN distributed repository with resiliency coded in python.',
     long_description=long_description,
     long_description_content_type='text/x-rst',
-    url='https://github.com/justincpresley/ndn-hydra',
-    author='Justin C Presley',
-    author_email='justincpresley@gmail.com',
-    maintainer='Justin C Presley',
-    maintainer_email='justincpresley@gmail.com',
+    url='https://github.com/tntech-ngin/ndn-hydra',
+    author='See GitHub',
+    author_email='sshannigrahi@tntech.edu',
+    maintainer='see GitHub',
+    maintainer_email='sshannigrahi@tntech.edu',
     download_url='https://pypi.python.org/pypi/ndn-hydra',
     project_urls={
-        "Bug Tracker": "https://github.com/justincpresley/ndn-hydra/issues",
-        "Source Code": "https://github.com/justincpresley/ndn-hydra",
+        "Bug Tracker": "https://github.com/tntech-ngin/ndn-hydra/issues",
+        "Source Code": "https://github.com/tntech-ngin/ndn-hydra",
     },
     license='Apache License 2.0',
     classifiers=[
