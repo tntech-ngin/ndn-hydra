@@ -157,4 +157,3 @@ class ReadHandle(object):
         # publish
         self.global_view.update_file(file_name, expiration_time)
         self.main_loop.svs.publishData(message.encode())
-        self.logger.info(f"[MSG][UPDATE]*  fil={file_name}")

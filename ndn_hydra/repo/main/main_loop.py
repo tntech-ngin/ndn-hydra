@@ -81,8 +81,6 @@ class MainLoop:
                 i.lowSeqno = i.lowSeqno + 1
 
     def send_heartbeat(self):
-        print(f'\n[Main Loop] [send_heartbeat] Sending heartbeat')
-
         heartbeat_message = HeartbeatMessageTlv()
         heartbeat_message.node_name = Name.to_bytes(self.config['node_name'])
 
@@ -121,7 +119,6 @@ class MainLoop:
                 'bandwidth': 0,
                 'rw_speed': 0
             })
-        print(f'\n[Main Loop] [send_heartbeat] Calculated favor at node {self.node_name}: {self_favor}\n')
 
         message_to_send = Message()
         message_to_send.type = MessageTypes.HEARTBEAT
@@ -131,12 +128,6 @@ class MainLoop:
             next_state_vector = self.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
         except TypeError:
             next_state_vector = 0
-
-        print(f'\n[Main Loop] [send_heartbeat] Global view: '
-              f'\n\t\t{global_view}\n')
-
-        print(f'[Main Loop] [send_heartbeat] Global view at {self.node_name}: '
-              f'\n\t\t{self.global_view.get_node(self.node_name)}\t')
 
         # Update favor for this node in global_view
         self.global_view.update_node(self.config['node_name'], self_favor, next_state_vector)
@@ -186,7 +177,7 @@ class MainLoop:
             # claim tlv
             claim_message = ClaimMessageTlv()
             claim_message.node_name = self.config['node_name'].encode()
-            claim_message.favor = self.global_view.get_node(claim_message.node_name)['favor']
+            claim_message.favor = str(self.global_view.get_node(self.config['node_name'])['favor']).encode()
             claim_message.file_name = Name.from_str(backupable_file['file_name'])
             claim_message.type = ClaimTypes.REQUEST
             claim_message.claimer_node_name = self.config['node_name'].encode()
@@ -204,10 +195,6 @@ class MainLoop:
     def store(self, file_name: str):
         store_message = StoreMessageTlv()
         store_message.node_name = self.config['node_name'].encode()
-
-        print(f'[STORE MSG] {store_message.node_name}')
-
-        print(f'\nGlobal view: {self.global_view}')
 
         store_message.favor = str(self.global_view.get_node(self.config['node_name'])['favor']).encode()
         store_message.file_name = Name.from_str(file_name)

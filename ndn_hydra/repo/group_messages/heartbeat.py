@@ -44,14 +44,10 @@ class HeartbeatMessage(SpecificMessage):
             'bandwidth': float(bytes(favor_weights.bandwidth)),
             'rw_speed': float(bytes(favor_weights.rw_speed))
         }
-
-        print(f'\nReceived favor weights: {decoded_weights}\n')
-
         return decoded_weights
 
     @staticmethod
     def decode_favor_parameters(favor_parameters):
-
         decoded_params = {
             'rtt': float(bytes(favor_parameters.rtt)),
             'num_users': float(bytes(favor_parameters.num_users)),
@@ -61,9 +57,6 @@ class HeartbeatMessage(SpecificMessage):
             'remaining_storage': float(bytes(favor_parameters.remaining_storage)),
             'rw_speed': float(bytes(favor_parameters.rw_speed))
         }
-
-        print(f'\nReceived favor parameters: {decoded_params}\n')
-
         return decoded_params
 
     async def apply(self, global_view, data_storage, fetch_file, svs, config):
@@ -71,16 +64,8 @@ class HeartbeatMessage(SpecificMessage):
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 
-        print(f'[HeartbeatMessage] Calculating favor on heartbeat for:   {node_name}\n')
-
         favor_calculator = FavorCalculator()
         favor = favor_calculator.calculate_favor(favor_parameters, favor_weights)
 
-        print(f'\n[HeartbeatMessage] Favor of node  {node_name} is {favor} \n')
-
         self.logger.debug(f"[MSG][HB]   nam={node_name};fav={favor}")
         global_view.update_node(node_name, favor, self.seqno)
-
-        print(f'\nGlobal view updated: {global_view}')
-
-        self.logger.debug(f"{len(global_view.get_nodes())} nodes")
