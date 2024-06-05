@@ -16,7 +16,7 @@ from ndn.app import NDNApp
 from ndn.encoding import Name, Component, FormalName
 from ndn_hydra.repo.protocol.base_models import InsertCommand, File
 from ndn_hydra.repo.utils.pubsub import PubSub
-from ndn_hydra.client.functions.fetch import HydraFetchClient
+from ndn_hydra.client.functions.query import HydraQueryClient
 
 SEGMENT_SIZE = 8192
 
@@ -43,8 +43,8 @@ class HydraInsertClient(object):
         fetch_file_prefix = self.client_prefix + [Component.from_str("upload")] + file_name
 
         # Check if the file name already exists
-        fetch_client = HydraFetchClient(self.app, self.client_prefix, self.repo_prefix)
-        local_file_name = await fetch_client.fetch_file(file_name)
+        query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
+        local_file_name = await query_client.send_query([f'/file/{file_name}'])
 
         if not local_file_name == file_name:
             tic = time.perf_counter()

@@ -96,6 +96,6 @@ class HydraFetchClient(object):
             with open(local_filename, 'wb') as f:
                 f.write(b_array)
 
-            return local_filename
+            return name_at_repo
         else:
             print("Client Fetch Command Failed.")
