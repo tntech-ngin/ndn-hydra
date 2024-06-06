@@ -54,20 +54,22 @@ class ClaimMessage(SpecificMessage):
         authorizer_node_name = self.message.authorizer_node_name.tobytes().decode()
         authorizer_nonce = self.message.authorizer_nonce.tobytes().decode()
         file = global_view.get_file(file_name)
+        backuped_bys = global_view.get_backups(file_name)
+        stored_bys = global_view.get_stores(file_name)
         if self.message.type == ClaimTypes.COMMITMENT:
-            rank = len(file['backuped_bys'])
+            rank = len(backuped_bys)
             self.logger.info(f"[MSG][CLAIM.C]  nam={claimer_node_name};fil={file_name}")
             global_view.add_backup(file_name, claimer_node_name, rank, claimer_nonce)
         else:
             self.logger.info(f"[MSG][CLAIM.R]  nam={claimer_node_name};fil={file_name}")
             if authorizer_node_name == config['node_name']:
-                from .message import MessageTlv, MessageTypes
+                from .message import Message, MessageTypes
                 commit = False
-                if (len(file['backuped_bys']) == 0) and (file['stored_bys'][-1] == config['node_name']) and (authorizer_nonce == file['id']):
+                if (len(backuped_bys) == 0) and (stored_bys[-1] == config['node_name']) and (authorizer_nonce == file['id']):
                     global_view.add_backup(file_name, claimer_node_name, 0, claimer_nonce)
                     commit = True
-                if (len(file['backuped_bys']) > 0) and (file['backuped_bys'][-1]['node_name'] == config['node_name']) and (authorizer_nonce == file['backuped_bys'][-1]['nonce']):
-                    global_view.add_backup(file_name, claimer_node_name, len(file['backuped_bys']), claimer_nonce)
+                if (len(backuped_bys) > 0) and (backuped_bys[-1]['node_name'] == config['node_name']) and (authorizer_nonce == backuped_bys[-1]['nonce']):
+                    global_view.add_backup(file_name, claimer_node_name, len(backuped_bys), claimer_nonce)
                     commit = True
                 if commit == True:
                     # claim tlv
@@ -77,9 +79,9 @@ class ClaimMessage(SpecificMessage):
                     claim_message.favor = str(favor).encode()
                     claim_message.type = ClaimTypes.COMMITMENT
                     # claim msg
-                    claim_message = MessageTlv()
-                    claim_message.type = MessageTypes.CLAIM
-                    claim_message.value = claim_message.encode()
-                    svs.publishData(claim_message.encode())
+                    message = Message()
+                    message.type = MessageTypes.CLAIM
+                    message.value = claim_message.encode()
+                    svs.publishData(message.encode())
                     self.logger.info(f"[MSG][CLAIM.C]* nam={claimer_node_name};fil={file_name}")
         global_view.update_node(node_name, favor, self.seqno)
