@@ -17,6 +17,7 @@ from ndn.storage import Storage
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.protocol.base_models import FileList, File
 
+
 class QueryHandle(object):
     """
     QueryHandle processes query interests, and return informational data.
@@ -38,7 +39,7 @@ class QueryHandle(object):
         self.node_comp = "/node"
 
         self.listen(Name.from_str(self.repo_prefix + self.command_comp))
-        self.listen(Name.from_str(self.repo_prefix + self.node_comp  + self.node_name + self.command_comp))
+        self.listen(Name.from_str(self.repo_prefix + self.node_comp + self.node_name + self.command_comp))
 
     def listen(self, prefix):
         """
