@@ -42,17 +42,14 @@ class HydraQueryClient(object):
 
             if meta_info.content_type == ContentType.NACK:
                 print("Distributed Repo does not know that query.")
-                return
             else:
                 querytype = Component.to_str(query[0])
                 if querytype == "nodes":
                     print(f'List of All Node Names')
                     print(f'{bytes(content).decode().split()}')
-                    return
                 elif querytype == "exnodes":
                     print(f'List of All Expired Node Names')
                     print(f'{bytes(content).decode().split()}')
-                    return
                 elif querytype == "files":
                     filelist = FileList.parse(content)
                     counter = 1
@@ -65,19 +62,13 @@ class HydraQueryClient(object):
                             counter = counter + 1
                     else:
                         print(f'No files inserted in the remote repo.')
-                    return
                 elif querytype == "file":
                     if content:
                         file = File.parse(content)
-                        print(f'\nFile already exists')
                         print(f'File meta-info:')
                         print(f'\tfile_name: {Name.to_str(file.file_name)}')
                         print(f'\tsize: {file.size} | packets: {file.packets} | packet_size: {file.packet_size}')
-
                         return Name.to_str(file.file_name)
-                    else:
-                        print(f'\nFile Does Not Exists in The Repo Yet')
-                    return
                 elif querytype == "prefix":
                     filelist = FileList.parse(content)
                     counter = 1
@@ -90,10 +81,7 @@ class HydraQueryClient(object):
                             counter = counter + 1
                     else:
                         print(f'No files inserted in the remote repo with prefix {Name.to_str(query[1:])}.')
-                    return
                 else:
                     print("Client does not know that query.")
-                    return
         except (InterestNack, InterestTimeout, InterestCanceled, ValidationFailure) as e:
             print("Query command received no data packet back")
-            return

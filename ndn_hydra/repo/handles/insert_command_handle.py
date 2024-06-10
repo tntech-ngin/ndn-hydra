@@ -92,9 +92,8 @@ class InsertCommandHandle(ProtocolHandle):
             self.logger.warning("not enough nodes") # TODO: notify the client?
             return
 
-        # select sessions
-        random.shuffle(nodes)
-        picked_nodes = random.sample(nodes, (desired_copies * 2))
+        # select sessions based on the top k favor nodes
+        picked_nodes = self.global_view.get_top_k_nodes(desired_copies * 2)
         pickself = False
         for i in range(desired_copies):
             if picked_nodes[i]['node_name'] == self.config['node_name']:

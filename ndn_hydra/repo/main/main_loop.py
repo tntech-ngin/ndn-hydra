@@ -82,7 +82,7 @@ class MainLoop:
 
     def send_heartbeat(self):
         heartbeat_message = HeartbeatMessageTlv()
-        heartbeat_message.node_name = Name.to_bytes(self.config['node_name'])
+        heartbeat_message.node_name = self.config['node_name'].encode()
 
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
