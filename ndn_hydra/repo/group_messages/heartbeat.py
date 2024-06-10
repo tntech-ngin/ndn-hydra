@@ -60,7 +60,7 @@ class HeartbeatMessage(SpecificMessage):
         return decoded_params
 
     async def apply(self, global_view, data_storage, fetch_file, svs, config):
-        node_name = bytes(self.message.node_name).decode('utf-8')
+        node_name = self.message.node_name.tobytes().decode()
         favor_parameters = self.message.favor_parameters
         favor_weights = self.message.favor_weights
 

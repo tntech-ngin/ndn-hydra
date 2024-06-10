@@ -197,6 +197,25 @@ class GlobalView:
             })
         return nodes
 
+    def get_top_k_nodes(self, k:int):
+        # Get top k nodes based on the favor value
+        sql = """
+        SELECT DISTINCT node_name, favor, state_vector, expired
+        FROM nodes
+        WHERE expired = 0
+        ORDER BY favor DESC
+        LIMIT ?
+        """
+        results = self.__execute_sql_qmark(sql, (k,))
+        nodes = []
+        for result in results:
+            nodes.append({
+                'node_name': result[0],
+                'favor': result[1],
+                'state_vector': result[2]
+            })
+        return nodes
+
     def update_node(self, node_name:str, favor:float, state_vector:int):
         sql = """
         INSERT OR REPLACE INTO nodes

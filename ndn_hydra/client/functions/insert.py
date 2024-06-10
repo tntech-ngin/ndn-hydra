@@ -42,26 +42,28 @@ class HydraInsertClient(object):
         size, seg_cnt = 0, 0
         fetch_file_prefix = self.client_prefix + [Component.from_str("upload")] + file_name
 
-        # Check if the file name already exists
+        # Check if the file already exists
         query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
         query = [Component.from_str("file")] + file_name
         query_result = await query_client.send_query(query)
-
         target_file_name = Name.to_str(query)[5:]
 
-        if query_result != target_file_name:
-            tic = time.perf_counter()
-            with open(path, "rb") as f:
-                data = f.read()
-                size = len(data)
-                seg_cnt = (len(data) + SEGMENT_SIZE - 1) // SEGMENT_SIZE
-                self.packets = [self.app.prepare_data(fetch_file_prefix + [Component.from_segment(i)],
-                                                      data[i*SEGMENT_SIZE:(i+1)*SEGMENT_SIZE],
-                                                      freshness_period=10000,
-                                                      final_block_id=Component.from_segment(seg_cnt - 1))
-                                for i in range(seg_cnt)]
+        if query_result == target_file_name:
+            print('File already exists, aborted insertion.')
+            return
 
-            print(f'\nCreated {seg_cnt} chunks under name {Name.to_str(fetch_file_prefix)}')
+        tic = time.perf_counter()
+        with open(path, "rb") as f:
+            data = f.read()
+            size = len(data)
+            seg_cnt = (len(data) + SEGMENT_SIZE - 1) // SEGMENT_SIZE
+            self.packets = [self.app.prepare_data(fetch_file_prefix + [Component.from_segment(i)],
+                                                    data[i*SEGMENT_SIZE:(i+1)*SEGMENT_SIZE],
+                                                    freshness_period=10000,
+                                                    final_block_id=Component.from_segment(seg_cnt - 1))
+                            for i in range(seg_cnt)]
+
+        print(f'\nCreated {seg_cnt} chunks under name {Name.to_str(fetch_file_prefix)}')
 
         def on_interest(int_name, _int_param, _app_param):
             seg_no = Component.to_number(int_name[-1]) if Component.get_type(int_name[-1]) == Component.TYPE_SEGMENT else 0
