@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix/version-numbers
     paths:
       - 'docs/version.py'
   pull_request:
