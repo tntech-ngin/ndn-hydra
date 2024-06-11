@@ -88,12 +88,12 @@ class InsertCommandHandle(ProtocolHandle):
 
         nodes = self.global_view.get_nodes()
         desired_copies = self.replication_degree
-        if len(nodes) < (desired_copies * 2):
+        if len(nodes) < (desired_copies + 2):
             self.logger.warning("not enough nodes") # TODO: notify the client?
             return
 
         # select sessions based on the top k favor nodes
-        picked_nodes = self.global_view.get_top_k_nodes(desired_copies * 2)
+        picked_nodes = self.global_view.get_top_k_nodes(desired_copies + 2)
         pickself = False
         for i in range(desired_copies):
             if picked_nodes[i]['node_name'] == self.config['node_name']:
@@ -117,26 +117,6 @@ class InsertCommandHandle(ProtocolHandle):
             backups.append(backup)
             backup_list.append((node_name, nonce))
 
-        # add tlv
-        favor = 1.85
-        add_message = AddMessageTlv()
-        add_message.node_name = self.config['node_name'].encode()
-        add_message.favor = str(favor).encode()
-        add_message.file = File()
-        add_message.file.file_name = cmd.file.file_name
-        add_message.file.packets = packets
-        add_message.file.packet_size = packet_size
-        add_message.file.size = size
-        add_message.desired_copies = desired_copies
-        add_message.fetch_path = FetchPathTlv()
-        add_message.fetch_path.prefix = fetch_path
-        add_message.is_stored_by_origin = 0
-        add_message.expiration_time = expiration_time
-        add_message.backup_list = backups
-        # add msg
-        message = Message()
-        message.type = MessageTypes.ADD
-        message.value = add_message.encode()
         # apply globalview and send msg thru SVS
         try:
             next_state_vector = self.main_loop.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
@@ -156,6 +136,27 @@ class InsertCommandHandle(ProtocolHandle):
             # self.global_view.store_file(insertion_id, self.config['session_id'])
             self.main_loop.fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
         self.global_view.set_backups(file_name, backup_list)
+
+        # add tlv
+        favor = calculate_favor() # TODO
+        add_message = AddMessageTlv()
+        add_message.node_name = self.config['node_name'].encode()
+        add_message.favor = str(favor).encode()
+        add_message.file = File()
+        add_message.file.file_name = cmd.file.file_name
+        add_message.file.packets = packets
+        add_message.file.packet_size = packet_size
+        add_message.file.size = size
+        add_message.desired_copies = desired_copies
+        add_message.fetch_path = FetchPathTlv()
+        add_message.fetch_path.prefix = fetch_path
+        add_message.is_stored_by_origin = 0
+        add_message.expiration_time = expiration_time
+        add_message.backup_list = backups
+        # add msg
+        message = Message()
+        message.type = MessageTypes.ADD
+        message.value = add_message.encode()
         self.main_loop.svs.publishData(message.encode())
         bak = ""
         for backup in backup_list:

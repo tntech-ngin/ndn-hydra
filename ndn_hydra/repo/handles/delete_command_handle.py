@@ -79,19 +79,22 @@ class DeleteCommandHandle(ProtocolHandle):
         if file == None:
             self.logger.debug("file does not exist")
             return
-        favor = 1.85
-        remove_message = RemoveMessageTlv()
-        remove_message.node_name = self.config['node_name'].encode()
-        remove_message.favor = str(favor).encode()
-        remove_message.file_name = cmd.file_name
-        message = Message()
-        message.type = MessageTypes.REMOVE
-        message.value = remove_message.encode()
 
         # Delete from global view
         self.global_view.delete_file(file_name)
         # Remove from data_storage from this node
         aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
+
+        # add tlv
+        favor = favor_calculator() # TODO
+        remove_message = RemoveMessageTlv()
+        remove_message.node_name = self.config['node_name'].encode()
+        remove_message.favor = str(favor).encode()
+        remove_message.file_name = cmd.file_name
+        # add msg
+        message = Message()
+        message.type = MessageTypes.REMOVE
+        message.value = remove_message.encode()
 
         self.main_loop.svs.publishData(message.encode())
         self.logger.info(f"[MSG][REMOVE]*  fil={file_name}")
