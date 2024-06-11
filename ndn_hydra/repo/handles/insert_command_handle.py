@@ -24,6 +24,8 @@ from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.add import FetchPathTlv, BackupTlv, AddMessageTlv
 from ndn_hydra.repo.group_messages.message import Message, MessageTypes
 from ndn_hydra.repo.main.main_loop import MainLoop
+from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
+from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
 
 class InsertCommandHandle(ProtocolHandle):
     """
@@ -117,26 +119,6 @@ class InsertCommandHandle(ProtocolHandle):
             backups.append(backup)
             backup_list.append((node_name, nonce))
 
-        # add tlv
-        favor = self.global_view.get_node(self.config['node_name'])['favor']
-        add_message = AddMessageTlv()
-        add_message.node_name = self.config['node_name'].encode()
-        add_message.favor = str(favor).encode()
-        add_message.file = File()
-        add_message.file.file_name = cmd.file.file_name
-        add_message.file.packets = packets
-        add_message.file.packet_size = packet_size
-        add_message.file.size = size
-        add_message.desired_copies = desired_copies
-        add_message.fetch_path = FetchPathTlv()
-        add_message.fetch_path.prefix = fetch_path
-        add_message.is_stored_by_origin = 0
-        add_message.expiration_time = expiration_time
-        add_message.backup_list = backups
-        # add msg
-        message = Message()
-        message.type = MessageTypes.ADD
-        message.value = add_message.encode()
         # apply globalview and send msg thru SVS
         try:
             next_state_vector = self.main_loop.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
@@ -156,7 +138,44 @@ class InsertCommandHandle(ProtocolHandle):
             # self.global_view.store_file(insertion_id, self.config['session_id'])
             self.main_loop.fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
         self.global_view.set_backups(file_name, backup_list)
+
+        # add tlv
+        node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
+        remaining_space = get_remaining_space(node_path)
+
+        favor = FavorCalculator.calculate_favor(
+            {
+                'remaining_storage': remaining_space,
+                'bandwidth': self.config['bandwidth'],
+                'rw_speed': self.config['rw_speed']
+            },
+            {
+                'remaining_storage': 0.14,
+                'bandwidth': 0.0,
+                'rw_speed': 0.0
+            }
+        )
+
+        add_message = AddMessageTlv()
+        add_message.node_name = self.config['node_name'].encode()
+        add_message.favor = str(favor).encode()
+        add_message.file = File()
+        add_message.file.file_name = cmd.file.file_name
+        add_message.file.packets = packets
+        add_message.file.packet_size = packet_size
+        add_message.file.size = size
+        add_message.desired_copies = desired_copies
+        add_message.fetch_path = FetchPathTlv()
+        add_message.fetch_path.prefix = fetch_path
+        add_message.is_stored_by_origin = 0
+        add_message.expiration_time = expiration_time
+        add_message.backup_list = backups
+        # add msg
+        message = Message()
+        message.type = MessageTypes.ADD
+        message.value = add_message.encode()
         self.main_loop.svs.publishData(message.encode())
+
         bak = ""
         for backup in backup_list:
             bak = bak + backup[0] + ","
