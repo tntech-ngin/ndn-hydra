@@ -143,7 +143,7 @@ class ReadHandle(object):
         expiration_time = int(time.time() + (self.file_expiration * 60 * 60)) # convert hours to seconds
 
         # update tlv
-        favor = 1.85
+        favor = self.global_view.get_node(self.node_name)['favor']
         update_message = UpdateMessageTlv()
         update_message.node_name = self.node_name.encode()
         update_message.favor = str(favor).encode()

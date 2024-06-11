@@ -118,7 +118,7 @@ class InsertCommandHandle(ProtocolHandle):
             backup_list.append((node_name, nonce))
 
         # add tlv
-        favor = 1.85
+        favor = self.global_view.get_node(self.config['node_name'])['favor']
         add_message = AddMessageTlv()
         add_message.node_name = self.config['node_name'].encode()
         add_message.favor = str(favor).encode()

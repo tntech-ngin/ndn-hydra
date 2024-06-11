@@ -79,7 +79,7 @@ class DeleteCommandHandle(ProtocolHandle):
         if file == None:
             self.logger.debug("file does not exist")
             return
-        favor = 1.85
+        favor = self.global_view.get_node(self.config['node_name'])['favor']
         remove_message = RemoveMessageTlv()
         remove_message.node_name = self.config['node_name'].encode()
         remove_message.favor = str(favor).encode()
