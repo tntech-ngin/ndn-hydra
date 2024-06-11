@@ -2,6 +2,7 @@ Authors
 =======
 
 Hydra (ndn-hydra) is a mutli-unviersity project between Tennessee Tech, UCLA, FIU, and Clemson
+
 * Susmit Shannigrahi   <https://github.com/tntech-ngin>
 * Sankalpa Timilsina   <https://github.com/sankalpatimilsina12>
 * Gabriel Porteiro     <https://github.com/GportDev>
