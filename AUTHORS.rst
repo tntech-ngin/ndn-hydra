@@ -1,8 +1,10 @@
 Authors
 =======
 
-Hydra (ndn-hydra) is a mutli-unviersity project between UCLA and TTU.
-
+Hydra (ndn-hydra) is a mutli-unviersity project between Tennessee Tech, UCLA, FIU, and Clemson
+* Susmit Shannigrahi   <https://github.com/tntech-ngin>
+* Sankalpa Timilsina   <https://github.com/sankalpatimilsina12>
+* Gabriel Porteiro     <https://github.com/GportDev>
 * Justin Presley       <https://github.com/justincpresley>
 * Zixuan Zhong         <https://github.com/ZixuanZhong>
 * Tianyuan Yu          <https://github.com/tianyuan129
