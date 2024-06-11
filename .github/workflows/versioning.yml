@@ -60,7 +60,7 @@ jobs:
       - name: Bump version and commit
         if: steps.determine_version.outputs.increment != 'none'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SERVICE_ACCOUNT_PAT }}
         run: |
           git fetch --all
           git checkout main
