@@ -12,6 +12,9 @@ on:
     paths:
       - 'docs/version.py'
   pull_request:
+    branches:
+      - main
+      - fix/version-numbers
     types:
       - closed
 
@@ -44,11 +47,11 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMIT_MESSAGE"
-          if [[ "$COMMIT_MESSAGE" == *"increment:major"* ]]; then
+          if [[ "$COMMIT_MESSAGE" == *"increment: major"* ]]; then
             echo "::set-output name=increment::major"
-          elif [[ "$COMMIT_MESSAGE" == *"increment:minor"* ]]; then
+          elif [[ "$COMMIT_MESSAGE" == *"increment: minor"* ]]; then
             echo "::set-output name=increment::minor"
-          elif [[ "$COMMIT_MESSAGE" == *"increment:patch"* ]]; then
+          elif [[ "$COMMIT_MESSAGE" == *"increment: patch"* ]]; then
             echo "::set-output name=increment::patch"
           else
             echo "::set-output name=increment::none"
