@@ -1,0 +1,66 @@
+name: Version Increment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/version.py'
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  bump-version:
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # Specify the Python version you need
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bump2version
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+      - name: Determine version increment
+        id: determine_version
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MESSAGE"
+          if [[ "$COMMIT_MESSAGE" == *"increment: major"* ]]; then
+            echo "::set-output name=increment::major"
+          elif [[ "$COMMIT_MESSAGE" == *"increment: minor"* ]]; then
+            echo "::set-output name=increment::minor"
+          elif [[ "$COMMIT_MESSAGE" == *"increment: patch"* ]]; then
+            echo "::set-output name=increment::patch"
+          else
+            echo "::set-output name=increment::none"
+          fi
+
+      - name: Bump version and commit
+        if: steps.determine_version.outputs.increment != 'none'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch --all
+          git checkout main
+          if [ "${{ steps.determine_version.outputs.increment }}" == "major" ]; then
+            bump2version major
+          elif [ "${{ steps.determine_version.outputs.increment }}" == "minor" ]; then
+            bump2version minor
+          elif [ "${{ steps.determine_version.outputs.increment }}" == "patch" ]; then
+            bump2version patch
+          fi
+          git push origin main --tags
