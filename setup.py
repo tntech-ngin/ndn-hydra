@@ -2,7 +2,7 @@
 # NDN Hydra Pip Setup
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
+#  @Date:    2024-06-11
 #  @Authors: Please check AUTHORS.rst
 #  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
@@ -15,18 +15,20 @@ import re
 from setuptools import setup, find_packages
 from typing import List
 
+# Read the version from the version file
 with io.open("docs/version.py", "rt", encoding="utf8") as f:
     version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
+# Read the long description from the README file
 with io.open("README.rst", "rt", encoding="utf8") as f:
     long_description = f.read()
 
-
+# Function to parse requirements from a file
 def _parse_requirements(filename: str) -> List[str]:
     with open(filename, 'r') as f:
         return [s for s in [line.split('#', 1)[0].strip(' \t\n') for line in f] if s != '']
 
-
+# Setup configuration
 setup(
     name='ndn-hydra',
     version=version,
@@ -36,7 +38,7 @@ setup(
     url='https://github.com/tntech-ngin/ndn-hydra',
     author='See GitHub',
     author_email='sshannigrahi@tntech.edu',
-    maintainer='see GitHub',
+    maintainer='See GitHub',
     maintainer_email='sshannigrahi@tntech.edu',
     download_url='https://pypi.python.org/pypi/ndn-hydra',
     project_urls={
@@ -63,8 +65,8 @@ setup(
     python_requires=">=3.8",
     entry_points={
         'console_scripts': [
-            'ndn-hydra-repo = ndn_hydra.repo.main.main:main',
-            'ndn-hydra-client = ndn_hydra.client.main:main'
+            f'ndn-hydra-repo-{version} = ndn_hydra.repo.main.main:main',
+            f'ndn-hydra-client-{version} = ndn_hydra.client.main:main'
         ]
     },
     zip_safe=False
