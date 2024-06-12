@@ -27,6 +27,7 @@ from ndn_hydra.repo.main.main_loop import MainLoop
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
 from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
 
+
 class InsertCommandHandle(ProtocolHandle):
     """
     InsertCommandHandle processes insert command handles, and deletes corresponding data stored
@@ -64,7 +65,7 @@ class InsertCommandHandle(ProtocolHandle):
     def _on_insert_msg(self, msg):
         try:
             cmd = InsertCommand.parse(msg)
-            #if cmd.file == None:
+            # if cmd.file == None:
             #    raise DecodeError()
         except (DecodeError, IndexError) as exc:
             logging.warning('Parameter interest decoding failed')
@@ -90,12 +91,12 @@ class InsertCommandHandle(ProtocolHandle):
 
         nodes = self.global_view.get_nodes()
         desired_copies = self.replication_degree
-        if len(nodes) < (desired_copies * 2):
-            self.logger.warning("not enough nodes") # TODO: notify the client?
+        if len(nodes) < (desired_copies + 2):
+            self.logger.warning("not enough nodes")  # TODO: notify the client?
             return
 
         # select sessions based on the top k favor nodes
-        picked_nodes = self.global_view.get_top_k_nodes(desired_copies * 2)
+        picked_nodes = self.global_view.get_top_k_nodes(desired_copies + 2)
         pickself = False
         for i in range(desired_copies):
             if picked_nodes[i]['node_name'] == self.config['node_name']:

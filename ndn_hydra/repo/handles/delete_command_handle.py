@@ -23,6 +23,8 @@ from ndn_hydra.repo.main.main_loop import MainLoop
 from ndn_hydra.repo.handles.protocol_handle_base import ProtocolHandle
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.file_remover import remove_file
+from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
+from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
 
 class DeleteCommandHandle(ProtocolHandle):
     """
@@ -79,7 +81,28 @@ class DeleteCommandHandle(ProtocolHandle):
         if file == None:
             self.logger.debug("file does not exist")
             return
-        favor = self.global_view.get_node(self.config['node_name'])['favor']
+
+        # Delete from global view
+        self.global_view.delete_file(file_name)
+        # Remove from data_storage from this node
+        aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
+
+        node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
+        remaining_space = get_remaining_space(node_path)
+
+        favor = FavorCalculator.calculate_favor(
+            {
+                'remaining_storage': remaining_space,
+                'bandwidth': self.config['bandwidth'],
+                'rw_speed': self.config['rw_speed']
+            },
+            {
+                'remaining_storage': 0.14,
+                'bandwidth': 0.0,
+                'rw_speed': 0.0
+            }
+        )
+
         remove_message = RemoveMessageTlv()
         remove_message.node_name = self.config['node_name'].encode()
         remove_message.favor = str(favor).encode()
@@ -87,11 +110,6 @@ class DeleteCommandHandle(ProtocolHandle):
         message = Message()
         message.type = MessageTypes.REMOVE
         message.value = remove_message.encode()
-
-        # Delete from global view
-        self.global_view.delete_file(file_name)
-        # Remove from data_storage from this node
-        aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
 
         self.main_loop.svs.publishData(message.encode())
         self.logger.info(f"[MSG][REMOVE]*  fil={file_name}")
