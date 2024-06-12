@@ -125,6 +125,9 @@ class InsertCommandHandle(ProtocolHandle):
             next_state_vector = self.main_loop.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
         except TypeError:
             next_state_vector = 0
+
+        print(f"\n[Insert handle] Favor for node {self.config['node_name']} before insertion: {self.global_view.get_node(self.config['node_name'])['favor']}")
+
         self.global_view.add_file(
             file_name,
             size,
@@ -138,6 +141,7 @@ class InsertCommandHandle(ProtocolHandle):
         if pickself:
             # self.global_view.store_file(insertion_id, self.config['session_id'])
             self.main_loop.fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
+
         self.global_view.set_backups(file_name, backup_list)
 
         # add tlv
@@ -156,6 +160,8 @@ class InsertCommandHandle(ProtocolHandle):
                 'rw_speed': 0.0
             }
         )
+
+        print(f"\nFavor for node {self.config['node_name']} while inserting: {favor}\n")
 
         add_message = AddMessageTlv()
         add_message.node_name = self.config['node_name'].encode()

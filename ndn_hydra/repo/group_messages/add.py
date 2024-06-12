@@ -17,6 +17,7 @@ from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 from ndn_hydra.repo.protocol.base_models import File
 
+
 class AddMessageTypes:
     NODE_NAME = 84
     FAVOR = 86
@@ -31,12 +32,15 @@ class AddMessageTypes:
     BACKUP_NODE_NAME = 101
     BACKUP_NONCE = 102
 
+
 class FetchPathTlv(TlvModel):
     prefix = NameField()
+
 
 class BackupTlv(TlvModel):
     node_name = BytesField(AddMessageTypes.BACKUP_NODE_NAME)
     nonce = BytesField(AddMessageTypes.BACKUP_NONCE)
+
 
 class AddMessageTlv(TlvModel):
     node_name = BytesField(AddMessageTypes.NODE_NAME)
@@ -48,6 +52,7 @@ class AddMessageTlv(TlvModel):
     is_stored_by_origin = UintField(AddMessageTypes.IS_STORED_BY_ORIGIN)
     expiration_time = UintField(AddMessageTypes.EXPIRATION_DATE)
     backup_list = RepeatedField(ModelField(AddMessageTypes.BACKUP, BackupTlv))
+
 
 class AddMessage(SpecificMessage):
     def __init__(self, nid:str, seqno:int, raw_bytes:bytes):
@@ -72,7 +77,11 @@ class AddMessage(SpecificMessage):
         for backup in backups:
             backup_list.append((backup.node_name.tobytes().decode(), backup.nonce.tobytes().decode()))
             bak = bak + backup.node_name.tobytes().decode() + ","
+
         self.logger.info(f"[MSG][ADD]      nam={node_name};fil={file_name};cop={desired_copies};pck={packets};pck_size={packet_size};siz={size};bak={bak};exp={expiration_time}")
+
+        print(f"\n[Add] Favor for node {node_name} before insertion: {global_view.get_node(node_name)['favor']}")
+
         global_view.add_file(
             file_name,
             size,
@@ -103,8 +112,10 @@ class AddMessage(SpecificMessage):
             if backup[0] == config['node_name']:
                 need_to_store = True
                 break
-        if need_to_store == True:
+        if need_to_store:
             fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
 
         # update session
         global_view.update_node(node_name, favor, self.seqno)
+
+        print(f"\n[Add] Favor for node {node_name} after insertion: {global_view.get_node(node_name)['favor']}")

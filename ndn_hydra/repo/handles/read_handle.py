@@ -138,9 +138,9 @@ class ReadHandle(object):
             return choice(on_list)
 
     def _reset_file_expiration(self, file_name):
-        if self.file_expiration == 0: # no need to reset if file_expiration in config is set to 0
+        if self.file_expiration == 0:  # no need to reset if file_expiration in config is set to 0
             return
-        expiration_time = int(time.time() + (self.file_expiration * 60 * 60)) # convert hours to seconds
+        expiration_time = int(time.time() + (self.file_expiration * 60 * 60))  # convert hours to seconds
 
         # update tlv
         favor = self.global_view.get_node(self.node_name)['favor']
