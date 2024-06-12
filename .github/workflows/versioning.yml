@@ -7,14 +7,14 @@ name: Version Increment
 on:
   push:
     branches:
-      - main
-      - fix/version-numbers
+      - 'main'
+      - 'fix/version-numbers'
     paths:
       - 'docs/version.py'
   pull_request:
     branches:
-      - main
-      - fix/version-numbers
+      - 'main'
+      - 'fix/version-numbers'
     types:
       - closed
 
