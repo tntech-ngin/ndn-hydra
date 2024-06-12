@@ -78,9 +78,9 @@ class AddMessage(SpecificMessage):
             backup_list.append((backup.node_name.tobytes().decode(), backup.nonce.tobytes().decode()))
             bak = bak + backup.node_name.tobytes().decode() + ","
 
-        self.logger.info(f"[MSG][ADD]      nam={node_name};fil={file_name};cop={desired_copies};pck={packets};pck_size={packet_size};siz={size};bak={bak};exp={expiration_time}")
+        self.logger.info(f"\n[MSG][ADD]      nam={node_name};fil={file_name};cop={desired_copies};pck={packets};pck_size={packet_size};siz={size};bak={bak};exp={expiration_time}")
 
-        print(f"\n[Add] Favor for node {node_name} before insertion: {global_view.get_node(node_name)['favor']}")
+        print(f"\n[Add] Favor for node {node_name} before insertion: {global_view.get_node(node_name)['favor']}\n")
 
         global_view.add_file(
             file_name,
@@ -118,4 +118,4 @@ class AddMessage(SpecificMessage):
         # update session
         global_view.update_node(node_name, favor, self.seqno)
 
-        print(f"\n[Add] Favor for node {node_name} after insertion: {global_view.get_node(node_name)['favor']}")
+        print(f"\n[Add] Favor for node {node_name} after insertion: {global_view.get_node(node_name)['favor']}\n")

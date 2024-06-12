@@ -68,7 +68,7 @@ class FileFetcher:
         aio.ensure_future(self._fetch_file_helper(file_name, packets, packet_size, fetch_path))
 
     async def _fetch_file_helper(self, file_name: str, packets: int, packet_size: int, fetch_path: str):        
-        self.logger.info(f"[ACT][FETCH]*   fil={file_name};pcks={packets};fetch_path={fetch_path}")
+        self.logger.info(f"\n[ACT][FETCH]*   fil={file_name};pcks={packets};fetch_path={fetch_path}")
         start = time.time()
 
         async for (_, _, content, data_bytes, key) in concurrent_fetcher(self.app, fetch_path, file_name, 0, packets-1, aio.Semaphore(15)):
@@ -76,11 +76,9 @@ class FileFetcher:
 
         end = time.time()
         duration = end - start
-        self.logger.info(f"[ACT][FETCHED]* pcks={packets};duration={duration}")
+        self.logger.info(f"\n[ACT][FETCHED]* pcks={packets};duration={duration}")
         self.store_func(file_name)
         try:
             self.fetching.remove(file_name)
         except:
             pass
-
-    
