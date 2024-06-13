@@ -26,6 +26,7 @@ from ndn_hydra.repo.modules.file_remover import remove_file
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
 from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
 
+
 class DeleteCommandHandle(ProtocolHandle):
     """
     DeleteCommandHandle processes delete command handles, and deletes corresponding data stored
@@ -47,7 +48,7 @@ class DeleteCommandHandle(ProtocolHandle):
         self.main_loop = main_loop
         self.global_view = global_view
         self.repo_prefix = config['repo_prefix']
-        #self.register_root = config['repo_config']['register_root']
+        # self.register_root = config['repo_config']['register_root']
 
     async def listen(self, prefix: NonStrictName):
         """

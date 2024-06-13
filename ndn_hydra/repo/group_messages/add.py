@@ -46,7 +46,6 @@ class AddMessageTlv(TlvModel):
     node_name = BytesField(AddMessageTypes.NODE_NAME)
     favor = BytesField(AddMessageTypes.FAVOR)
     file = ModelField(AddMessageTypes.FILE, File)
-
     desired_copies = UintField(AddMessageTypes.DESIRED_COPIES)
     fetch_path = ModelField(AddMessageTypes.FETCH_PATH, FetchPathTlv)
     is_stored_by_origin = UintField(AddMessageTypes.IS_STORED_BY_ORIGIN)
@@ -79,8 +78,6 @@ class AddMessage(SpecificMessage):
             bak = bak + backup.node_name.tobytes().decode() + ","
 
         self.logger.info(f"\n[MSG][ADD]      nam={node_name};fil={file_name};cop={desired_copies};pck={packets};pck_size={packet_size};siz={size};bak={bak};exp={expiration_time}")
-
-        print(f"\n[Add] Favor for node {node_name} before insertion: {global_view.get_node(node_name)['favor']}\n")
 
         global_view.add_file(
             file_name,
@@ -117,5 +114,3 @@ class AddMessage(SpecificMessage):
 
         # update session
         global_view.update_node(node_name, favor, self.seqno)
-
-        print(f"\n[Add] Favor for node {node_name} after insertion: {global_view.get_node(node_name)['favor']}\n")

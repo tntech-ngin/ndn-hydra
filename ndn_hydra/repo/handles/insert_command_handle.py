@@ -126,7 +126,6 @@ class InsertCommandHandle(ProtocolHandle):
         except TypeError:
             next_state_vector = 0
 
-        print(f"\n[Insert handle] Favor for node {self.config['node_name']} before insertion: {self.global_view.get_node(self.config['node_name'])['favor']}\n")
 
         self.global_view.add_file(
             file_name,
@@ -160,8 +159,6 @@ class InsertCommandHandle(ProtocolHandle):
                 'rw_speed': 0.0
             }
         )
-
-        print(f"\nFavor for node {self.config['node_name']} while inserting: {favor}\n")
 
         add_message = AddMessageTlv()
         add_message.node_name = self.config['node_name'].encode()
