@@ -112,5 +112,31 @@ class AddMessage(SpecificMessage):
         if need_to_store:
             fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
 
+            # from .message import MessageTlv, MessageTypes
+            # # generate store msg and send
+            # # store tlv
+            # expire_at = int(time.time()+(config['period']*2))
+            # favor = 1.85
+            # store_message = StoreMessageTlv()
+            # store_message.session_id = config['session_id'].encode()
+            # store_message.node_name = config['node_name'].encode()
+            # store_message.expire_at = expire_at
+            # store_message.favor = str(favor).encode()
+            # store_message.insertion_id = insertion_id.encode()
+            # # store msg
+            # store_message = MessageTlv()
+            # store_message.type = MessageTypes.STORE
+            # store_message.value = store_message.encode()
+            # # apply globalview and send msg thru SVS
+            # # next_state_vector = svs.getCore().getStateVector().get(config['session_id']) + 1
+
+            # # global_view.store_file(insertion_id, config['session_id'])
+            # svs.publishData(store_message.encode())
+            # val = "[MSG][STORE]*  sid={sid};iid={iid}".format(
+            #     sid=config['session_id'],
+            #     iid=insertion_id
+            # )
+            # self.logger.info(val)
+
         # update session
         global_view.update_node(node_name, favor, self.seqno)

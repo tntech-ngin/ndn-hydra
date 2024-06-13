@@ -85,29 +85,16 @@ class DeleteCommandHandle(ProtocolHandle):
 
         # Delete from global view
         self.global_view.delete_file(file_name)
-        # Remove from data_storage from this node
+        # Remove from data_storage from this node if present
         aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
 
-        node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
-        remaining_space = get_remaining_space(node_path)
-
-        favor = FavorCalculator.calculate_favor(
-            {
-                'remaining_storage': remaining_space,
-                'bandwidth': self.config['bandwidth'],
-                'rw_speed': self.config['rw_speed']
-            },
-            {
-                'remaining_storage': 0.14,
-                'bandwidth': 0.0,
-                'rw_speed': 0.0
-            }
-        )
-
+        # remove tlv
+        favor = self.global_view.get_node(self.config['node_name'])['favor']
         remove_message = RemoveMessageTlv()
         remove_message.node_name = self.config['node_name'].encode()
         remove_message.favor = str(favor).encode()
         remove_message.file_name = cmd.file_name
+        # remove msg
         message = Message()
         message.type = MessageTypes.REMOVE
         message.value = remove_message.encode()

@@ -47,7 +47,7 @@ class HeartbeatTracker:
                     heart.cycles = 0
                     heart.alive = False
                     self.globalview.expire_node(node_name)
-                    self.logger.info(f"[\nACT][EXPIRE]*  nam={node_name}")
+                    self.logger.info(f"\n[ACT][EXPIRE]*  nam={node_name}")
     def beat(self):
         try:
             time_past = (time.perf_counter()*1000) - self.hearts[self.node_name].past_beat

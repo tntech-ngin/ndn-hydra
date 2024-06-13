@@ -126,7 +126,6 @@ class InsertCommandHandle(ProtocolHandle):
         except TypeError:
             next_state_vector = 0
 
-
         self.global_view.add_file(
             file_name,
             size,
@@ -144,22 +143,7 @@ class InsertCommandHandle(ProtocolHandle):
         self.global_view.set_backups(file_name, backup_list)
 
         # add tlv
-        node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
-        remaining_space = get_remaining_space(node_path)
-
-        favor = FavorCalculator.calculate_favor(
-            {
-                'remaining_storage': remaining_space,
-                'bandwidth': self.config['bandwidth'],
-                'rw_speed': self.config['rw_speed']
-            },
-            {
-                'remaining_storage': 0.14,
-                'bandwidth': 0.0,
-                'rw_speed': 0.0
-            }
-        )
-
+        favor = self.global_view.get_node(self.config['node_name'])['favor']
         add_message = AddMessageTlv()
         add_message.node_name = self.config['node_name'].encode()
         add_message.favor = str(favor).encode()
