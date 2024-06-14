@@ -1,4 +1,4 @@
-# When a pull request is merged into the main branch and includes "increment: major", "increment: minor", or "increment: patch" 
+# When a pull request is merged into the main branch and includes "increment:major", "increment:minor", or "increment:patch" 
 # in the commit message, or when you push directly to the main branch, the workflow will automatically run, incrementing the 
 # version number accordingly and pushing the changes back to the repository.
 
@@ -50,11 +50,11 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMIT_MESSAGE"
-          if [[ "$COMMIT_MESSAGE" == *"increment: major"* ]]; then
+          if [[ "$COMMIT_MESSAGE" == *"increment:major"* ]]; then
             echo "::set-output name=increment::major"
-          elif [[ "$COMMIT_MESSAGE" == *"increment: minor"* ]]; then
+          elif [[ "$COMMIT_MESSAGE" == *"increment:minor"* ]]; then
             echo "::set-output name=increment::minor"
-          elif [[ "$COMMIT_MESSAGE" == *"increment: patch"* ]]; then
+          elif [[ "$COMMIT_MESSAGE" == *"increment:patch"* ]]; then
             echo "::set-output name=increment::patch"
           else
             echo "::set-output name=increment::none"
