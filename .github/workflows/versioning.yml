@@ -2,74 +2,69 @@
 # in the commit message, or when you push directly to the main branch, the workflow will automatically run, incrementing the 
 # version number accordingly and pushing the changes back to the repository.
 
-name: Version Increment
+name: Upload Python Package
 
 on:
   push:
     branches:
-      - 'main'
-      - 'fix/version-numbers'
+      - main
     paths:
-      - 'docs/version.py'
+      - '**.py'
   pull_request:
     branches:
-      - 'main'
-      - 'fix/version-numbers'
-    types:
-      - closed
+      - main
+    types: [closed]
 
 jobs:
-  bump-version:
-    if: github.event.pull_request.merged == true || github.event_name == 'push'
+  determine-version:
+    name: Determine Version Increment
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      increment: ${{ steps.get_version.outputs.increment }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          GITHUB_TOKEN: ${{ github.token }}     
-          
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'  # Specify the Python version you need
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.x"
+    - name: Determine version increment
+      id: get_version
+      run: |
+        # Extract commit messages
+        messages=$(git log --format=%B -n 1 $GITHUB_SHA)
+        
+        # Set default increment
+        increment="patch"
+        
+        # Determine increment based on commit messages
+        if echo "$messages" | grep -q "increment:major"; then
+          increment="major"
+        elif echo "$messages" | grep -q "increment:minor"; then
+          increment="minor"
+        elif echo "$messages" | grep -q "increment:patch"; then
+          increment="patch"
+        fi
+        
+        echo "increment=$increment" >> $GITHUB_ENV
+        
+        # Get current version
+        current_version=$(python setup.py --version)
+        
+        # Increment version
+        new_version=$(python -c "import semver; print(semver.VersionInfo.parse('$current_version').bump_$increment())")
+        
+        echo "version=$new_version" >> $GITHUB_ENV
+        echo "::set-output name=version::$new_version"
+        echo "::set-output name=increment::$increment"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install bump2version
-
-      - name: Configure Git
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-
-      - name: Determine version increment
-        id: determine_version
-        run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-          echo "Commit message: $COMMIT_MESSAGE"
-          if [[ "$COMMIT_MESSAGE" == *"increment:major"* ]]; then
-            echo "::set-output name=increment::major"
-          elif [[ "$COMMIT_MESSAGE" == *"increment:minor"* ]]; then
-            echo "::set-output name=increment::minor"
-          elif [[ "$COMMIT_MESSAGE" == *"increment:patch"* ]]; then
-            echo "::set-output name=increment::patch"
-          else
-            echo "::set-output name=increment::none"
-          fi
-
-      - name: Bump version and commit
-        if: steps.determine_version.outputs.increment != 'none'
-        run: |
-          git fetch --all
-          git checkout main
-          if [ "${{ steps.determine_version.outputs.increment }}" == "major" ]; then
-            bump2version major
-          elif [ "${{ steps.determine_version.outputs.increment }}" == "minor" ]; then
-            bump2version minor
-          elif [ "${{ steps.determine_version.outputs.increment }}" == "patch" ]; then
-            bump2version patch
-          fi
-          git push origin main --tags
+    - name: Update version in setup.py
+      run: |
+        sed -i "s/version=.*,/version='$VERSION',/" setup.py
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add setup.py
+        git commit -m "Bump version to ${{ steps.get_version.outputs.version }}"
+        git push origin main
