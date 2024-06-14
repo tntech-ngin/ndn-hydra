@@ -73,7 +73,7 @@ class ClaimMessage(SpecificMessage):
                     commit = True
                 if commit == True:
                     # claim tlv
-                    favor = 1.85
+                    favor = global_view.get_node(config['node_name'])['favor']
                     claim_message = copy.copy(self.message)
                     claim_message.node_name = config['node_name'].encode()
                     claim_message.favor = str(favor).encode()

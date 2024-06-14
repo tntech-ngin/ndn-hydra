@@ -23,6 +23,9 @@ from ndn_hydra.repo.main.main_loop import MainLoop
 from ndn_hydra.repo.handles.protocol_handle_base import ProtocolHandle
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.file_remover import remove_file
+from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
+from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
+
 
 class DeleteCommandHandle(ProtocolHandle):
     """
@@ -45,7 +48,7 @@ class DeleteCommandHandle(ProtocolHandle):
         self.main_loop = main_loop
         self.global_view = global_view
         self.repo_prefix = config['repo_prefix']
-        #self.register_root = config['repo_config']['register_root']
+        # self.register_root = config['repo_config']['register_root']
 
     async def listen(self, prefix: NonStrictName):
         """
@@ -79,19 +82,22 @@ class DeleteCommandHandle(ProtocolHandle):
         if file == None:
             self.logger.debug("file does not exist")
             return
-        favor = 1.85
+
+        # Delete from global view
+        self.global_view.delete_file(file_name)
+        # Remove from data_storage from this node if present
+        aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
+
+        # remove tlv
+        favor = self.global_view.get_node(self.config['node_name'])['favor']
         remove_message = RemoveMessageTlv()
         remove_message.node_name = self.config['node_name'].encode()
         remove_message.favor = str(favor).encode()
         remove_message.file_name = cmd.file_name
+        # remove msg
         message = Message()
         message.type = MessageTypes.REMOVE
         message.value = remove_message.encode()
-
-        # Delete from global view
-        self.global_view.delete_file(file_name)
-        # Remove from data_storage from this node
-        aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
 
         self.main_loop.svs.publishData(message.encode())
         self.logger.info(f"[MSG][REMOVE]*  fil={file_name}")

@@ -24,6 +24,9 @@ from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.add import FetchPathTlv, BackupTlv, AddMessageTlv
 from ndn_hydra.repo.group_messages.message import Message, MessageTypes
 from ndn_hydra.repo.main.main_loop import MainLoop
+from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
+from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
+
 
 class InsertCommandHandle(ProtocolHandle):
     """
@@ -62,7 +65,7 @@ class InsertCommandHandle(ProtocolHandle):
     def _on_insert_msg(self, msg):
         try:
             cmd = InsertCommand.parse(msg)
-            #if cmd.file == None:
+            # if cmd.file == None:
             #    raise DecodeError()
         except (DecodeError, IndexError) as exc:
             logging.warning('Parameter interest decoding failed')
@@ -88,12 +91,12 @@ class InsertCommandHandle(ProtocolHandle):
 
         nodes = self.global_view.get_nodes()
         desired_copies = self.replication_degree
-        if len(nodes) < (desired_copies * 2):
-            self.logger.warning("not enough nodes") # TODO: notify the client?
+        if len(nodes) < (desired_copies + 2):
+            self.logger.warning("not enough nodes")  # TODO: notify the client?
             return
 
         # select sessions based on the top k favor nodes
-        picked_nodes = self.global_view.get_top_k_nodes(desired_copies * 2)
+        picked_nodes = self.global_view.get_top_k_nodes(desired_copies + 2)
         pickself = False
         for i in range(desired_copies):
             if picked_nodes[i]['node_name'] == self.config['node_name']:
@@ -117,8 +120,30 @@ class InsertCommandHandle(ProtocolHandle):
             backups.append(backup)
             backup_list.append((node_name, nonce))
 
+        # apply globalview and send msg thru SVS
+        try:
+            next_state_vector = self.main_loop.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
+        except TypeError:
+            next_state_vector = 0
+
+        self.global_view.add_file(
+            file_name,
+            size,
+            self.config['node_name'],
+            Name.to_str(fetch_path),
+            packet_size,
+            packets=packets,
+            desired_copies=desired_copies,
+            expiration_time=expiration_time,
+        )
+        if pickself:
+            # self.global_view.store_file(insertion_id, self.config['session_id'])
+            self.main_loop.fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
+
+        self.global_view.set_backups(file_name, backup_list)
+
         # add tlv
-        favor = 1.85
+        favor = self.global_view.get_node(self.config['node_name'])['favor']
         add_message = AddMessageTlv()
         add_message.node_name = self.config['node_name'].encode()
         add_message.favor = str(favor).encode()
@@ -137,26 +162,8 @@ class InsertCommandHandle(ProtocolHandle):
         message = Message()
         message.type = MessageTypes.ADD
         message.value = add_message.encode()
-        # apply globalview and send msg thru SVS
-        try:
-            next_state_vector = self.main_loop.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
-        except TypeError:
-            next_state_vector = 0
-        self.global_view.add_file(
-            file_name,
-            size,
-            self.config['node_name'],
-            Name.to_str(fetch_path),
-            packet_size,
-            packets=packets,
-            desired_copies=desired_copies,
-            expiration_time=expiration_time,
-        )
-        if pickself:
-            # self.global_view.store_file(insertion_id, self.config['session_id'])
-            self.main_loop.fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
-        self.global_view.set_backups(file_name, backup_list)
         self.main_loop.svs.publishData(message.encode())
+
         bak = ""
         for backup in backup_list:
             bak = bak + backup[0] + ","

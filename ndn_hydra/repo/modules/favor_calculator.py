@@ -7,6 +7,7 @@
 # -------------------------------------------------------------
 import numpy as np
 from ndn.encoding import *
+from typing import Union, Dict
 import shutil
 
 
@@ -48,7 +49,10 @@ class FavorCalculator:
     """
 
     @staticmethod
-    def calculate_favor(favor_parameters: FavorParameters, favor_weights: FavorWeights) -> float:
+    def calculate_favor(
+            favor_parameters: Union[FavorParameters, Dict[str, float]],
+            favor_weights: Union[FavorWeights, Dict[str, float]]
+    ) -> float:
         favor = (favor_weights['remaining_storage'] * favor_parameters['remaining_storage']
                  + favor_weights['bandwidth'] * favor_parameters['bandwidth']
                  + favor_weights['rw_speed'] * favor_parameters['rw_speed'])
