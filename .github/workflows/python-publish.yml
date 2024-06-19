@@ -32,16 +32,22 @@ jobs:
       run: |
         minor_message="minor version to"
         major_message="major version to"
-        new_version=$(git log --format=%B -n 1 | grep -oP "$minor_message \K[0-9]+\.[0-9]+" || git log --format=%B -n 1 | grep -oP "$major_message \K[0-9]+")
+        commit_messages=$(git log --format=%B -n 10)
+        
+        echo "Commit messages: $commit_messages"
+        
+        new_version=$(echo "$commit_messages" | grep -oP "$minor_message \K[0-9]+\.[0-9]+" || echo "$commit_messages" | grep -oP "$major_message \K[0-9]+")
         
         if [[ $new_version ]]; then
-          if git log --format=%B -n 1 | grep -q "$minor_message"; then
-            echo "::set-output name=version::$new_version.0"
-          elif git log --format=%B -n 1 | grep -q "$major_message"; then
-            echo "::set-output name=version::$new_version.0.0"
+          if echo "$commit_messages" | grep -q "$minor_message"; then
+            new_version="$new_version.0"
+          elif echo "$commit_messages" | grep -q "$major_message"; then
+            new_version="$new_version.0.0"
           fi
+          echo "Version bump detected: $new_version"
+          echo "::set-output name=version::$new_version"
         else
-          echo "No version bump found."
+          echo "No version bump found in the commit messages."
           exit 1
         fi
 
