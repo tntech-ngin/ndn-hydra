@@ -79,10 +79,14 @@ jobs:
           exit 1
         fi
         
-        # Bump version in your project files
-        echo "Bumping version to $version"
-        # Example for a Python project with setup.py
-        sed -i "s/version='[0-9.]*'/version='$version'/" setup.py
+        # Update version in docs/version.py
+        echo "Updating docs/version.py to version $version"
+        sed -i "s/__version__ = \".*\"/__version__ = \"$version\"/" docs/version.py
+        
+        if git diff --quiet; then
+          echo "No changes to commit."
+          exit 0
+        fi
 
     - name: Commit and push version bump
       run: |
