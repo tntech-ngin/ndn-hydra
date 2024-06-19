@@ -30,10 +30,12 @@ jobs:
     - name: Determine version bump
       id: version
       run: |
-        minor_message="minor version to"
+                minor_message="minor version to"
         major_message="major version to"
         patch_message="patch version to"
-        commit_messages=$(git log --format=%B)
+        
+        # Get the latest commit messages from the branch
+        commit_messages=$(git log -1 --pretty=format:%B)
         
         echo "Commit messages: $commit_messages"
         
