@@ -33,25 +33,38 @@ jobs:
         minor_message="minor version to"
         major_message="major version to"
         patch_message="patch version to"
-        commit_messages=$(git log --format=%B -n 10)
+        commit_messages=$(git log --format=%B)
         
         echo "Commit messages: $commit_messages"
         
-        minor_version=$(echo "$commit_messages" | grep -oP "$minor_message \K[0-9]+\.[0-9]+")
-        major_version=$(echo "$commit_messages" | grep -oP "$major_message \K[0-9]+")
-        patch_version=$(echo "$commit_messages" | grep -oP "$patch_message \K[0-9]+\.[0-9]+\.[0-9]+")
+        # Extract versions from commit messages
+        minor_versions=$(echo "$commit_messages" | grep -oP "$minor_message \K[0-9]+\.[0-9]+" | sort -V | tail -n 1)
+        major_versions=$(echo "$commit_messages" | grep -oP "$major_message \K[0-9]+" | sort -V | tail -n 1)
+        patch_versions=$(echo "$commit_messages" | grep -oP "$patch_message \K[0-9]+\.[0-9]+\.[0-9]+" | sort -V | tail -n 1)
+
+        new_version=""
         
-        if [[ $patch_version ]]; then
-          new_version="$patch_version"
-          echo "Patch version bump detected: $new_version"
-          echo "::set-output name=version::$new_version"
-        elif [[ $minor_version ]]; then
-          new_version="$minor_version.0"
-          echo "Minor version bump detected: $new_version"
-          echo "::set-output name=version::$new_version"
-        elif [[ $major_version ]]; then
-          new_version="$major_version.0.0"
-          echo "Major version bump detected: $new_version"
+        # Determine the highest version bump
+        if [[ $patch_versions ]]; then
+          new_version="$patch_versions"
+        fi
+
+        if [[ $minor_versions ]]; then
+          minor_version="$minor_versions.0"
+          if [[ ! $new_version || $(echo -e "$minor_version\n$new_version" | sort -V | tail -n 1) == $minor_version ]]; then
+            new_version="$minor_version"
+          fi
+        fi
+
+        if [[ $major_versions ]]; then
+          major_version="$major_versions.0.0"
+          if [[ ! $new_version || $(echo -e "$major_version\n$new_version" | sort -V | tail -n 1) == $major_version ]]; then
+            new_version="$major_version"
+          fi
+        fi
+        
+        if [[ $new_version ]]; then
+          echo "Version bump detected: $new_version"
           echo "::set-output name=version::$new_version"
         else
           echo "No version bump found in the commit messages."
