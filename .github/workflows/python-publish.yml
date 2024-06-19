@@ -30,7 +30,7 @@ jobs:
     - name: Determine version bump
       id: version
       run: |
-                minor_message="minor version to"
+        minor_message="minor version to"
         major_message="major version to"
         patch_message="patch version to"
         
