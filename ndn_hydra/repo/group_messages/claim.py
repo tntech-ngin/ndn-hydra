@@ -65,7 +65,7 @@ class ClaimMessage(SpecificMessage):
             if authorizer_node_name == config['node_name']:
                 from .message import Message, MessageTypes
                 commit = False
-                if (len(backuped_bys) == 0) and (stored_bys[-1] == config['node_name']) and (authorizer_nonce == file['id']):
+                if (len(backuped_bys) == 0) and (stored_bys[-1] == config['node_name']) and (authorizer_nonce == file['file_name']):
                     global_view.add_backup(file_name, claimer_node_name, 0, claimer_nonce)
                     commit = True
                 if (len(backuped_bys) > 0) and (backuped_bys[-1]['node_name'] == config['node_name']) and (authorizer_nonce == backuped_bys[-1]['nonce']):
