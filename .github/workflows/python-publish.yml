@@ -86,9 +86,14 @@ jobs:
           exit 1
         fi
         
-        # Update version in docs/version.py
-        echo "Updating docs/version.py to version $version"
-        sed -i "s/__version__ = \".*\"/__version__ = \"$version\"/" docs/version.py
+        # Ensure docs/version.py exists
+        if [ ! -f docs/version.py ]; then
+          echo "__version__ = \"$version\"" > docs/version.py
+        else
+          # Update version in docs/version.py
+          echo "Updating docs/version.py to version $version"
+          sed -i "s/__version__ = \".*\"/__version__ = \"$version\"/" docs/version.py
+        fi
         
         if git diff --quiet; then
           echo "No changes to commit."
