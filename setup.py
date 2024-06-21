@@ -14,6 +14,7 @@ import re
 from setuptools import setup, find_packages
 from typing import List
 
+
 with io.open("./docs/version.py", "rt", encoding="utf8") as f:
     version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
