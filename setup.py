@@ -9,7 +9,6 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
-# !/usr/bin/env python3
 import io
 import re
 from setuptools import setup, find_packages
