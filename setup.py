@@ -9,13 +9,13 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 import io
 import re
 from setuptools import setup, find_packages
 from typing import List
 
-with io.open("docs/version.py", "rt", encoding="utf8") as f:
+with io.open("./docs/version.py", "rt", encoding="utf8") as f:
     version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 with io.open("README.rst", "rt", encoding="utf8") as f:
