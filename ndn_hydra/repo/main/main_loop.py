@@ -240,5 +240,5 @@ class MainLoop:
                                self.data_storage,
                                self.svs,
                                self.config,
-                               logging.getLogger('garbage_collector'))
+                               self.logger)
             self.last_garbage_collect_t = time.time()

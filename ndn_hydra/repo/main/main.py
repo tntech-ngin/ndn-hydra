@@ -193,6 +193,10 @@ class HydraNodeThread(Thread):
         console.setLevel(log_level)
         logging.getLogger().addHandler(console)
 
+        SVSyncLogger.config(False, None, logging.CRITICAL)
+
+        logging.getLogger('python-ndn').setLevel(logging.WARNING)
+
         # NDN
         app = NDNApp()
 
