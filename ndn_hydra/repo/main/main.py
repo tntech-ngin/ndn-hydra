@@ -193,7 +193,7 @@ class HydraNodeThread(Thread):
         console.setLevel(log_level)
         logging.getLogger().addHandler(console)
 
-        for lib_logger in 'ndn':
+        for lib_logger in ['ndn', 'ndn.svs']:
             logging.getLogger(lib_logger).setLevel(logging.WARNING)
 
         # NDN
