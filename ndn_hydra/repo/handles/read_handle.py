@@ -21,6 +21,7 @@ from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.update import UpdateMessageTlv
 from ndn_hydra.repo.group_messages.message import Message, MessageTypes
 
+
 class ReadHandle(object):
     """
     ReadHandle processes ordinary interests, and return corresponding data if exists.
@@ -55,14 +56,14 @@ class ReadHandle(object):
         :param prefix: NonStrictName.
         """
         self.app.route(prefix)(self._on_interest)
-        self.logger.info(f'Read handle: listening to {Name.to_str(prefix)}')
+        self.logger.info(f'\nRead handle: listening to {Name.to_str(prefix)}')
 
     def unlisten(self, prefix):
         """
         :param name: NonStrictName.
         """
         aio.ensure_future(self.app.unregister(prefix))
-        self.logger.info(f'Read handle: stop listening to {Name.to_str(prefix)}')
+        self.logger.info(f'\nRead handle: stop listening to {Name.to_str(prefix)}')
 
     def _on_interest(self, int_name, int_param, _app_param):
         """
@@ -82,18 +83,18 @@ class ReadHandle(object):
         best_id = self._best_id_for_file(file_name)
         segment_comp = "/" + Component.to_str(int_name[-1])
 
-        if best_id == None:
+        if best_id is None:
             if segment_comp == "/seg=0":
-                self.logger.info(f'[CMD][FETCH]    nacked due to no file')
+                self.logger.info(f'\n[CMD][FETCH]    nacked due to no file')
 
             # nack due to lack of avaliability
             self.app.put_data(int_name, content=None, content_type=ContentType.NACK)
-            self.logger.debug(f'Read handle: data not found {Name.to_str(int_name)}')
+            self.logger.debug(f"\nRead handle: data not found {Name.to_str(int_name)}")
             return
 
         if best_id == self.node_name:
             if segment_comp == "/seg=0":
-                self.logger.info(f'[CMD][FETCH]    serving file')
+                self.logger.info(f'\n[CMD][FETCH]    serving file')
                 self._reset_file_expiration(file_name)
 
             # serving my own data
@@ -101,14 +102,14 @@ class ReadHandle(object):
             if data_bytes == None:
                 return
 
-            self.logger.debug(f'Read handle: serve data {Name.to_str(int_name)}')
+            self.logger.debug(f'\nRead handle: serve data {Name.to_str(int_name)}')
             _, _, content, _ = parse_data(data_bytes)
             # print("serve"+file_name + segment_comp+"   "+Name.to_str(name))
             final_id = Component.from_number(int(self.global_view.get_file(file_name)["packets"])-1, Component.TYPE_SEGMENT)
             self.app.put_data(int_name, content=content, content_type=ContentType.BLOB, final_block_id=final_id)
         else:
             if segment_comp == "/seg=0":
-                self.logger.info(f'[CMD][FETCH]    linked to another node')
+                self.logger.info(f'\n[CMD][FETCH]    linked to another node')
 
             # create a link to a node who has the content
             new_name = self.repo_prefix + self.node_comp + best_id + self.command_comp + file_name

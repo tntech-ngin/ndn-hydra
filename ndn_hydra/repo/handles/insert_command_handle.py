@@ -58,7 +58,7 @@ class InsertCommandHandle(ProtocolHandle):
         :param name: NonStrictName. The name prefix to listen on.
         """
         self.prefix = prefix
-        self.logger.info(f'\nInsert handle: subscribing to {Name.to_str(self.prefix) + "/insert"}')
+        self.logger.info(f'Insert handle: subscribing to {Name.to_str(self.prefix) + "/insert"}')
         self.pb.subscribe(self.prefix + ['insert'], self._on_insert_msg)
         # start to announce process status
         # await self._schedule_announce_process_status(period=3)

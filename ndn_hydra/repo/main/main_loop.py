@@ -87,7 +87,7 @@ class MainLoop:
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        self.logger.debug(f"Remaining space for node {self.config['node_name']} is: {remaining_space}")
+        self.logger.debug(f"\nRemaining space for node {self.config['node_name']} is: {remaining_space}")
 
         # Create FavorParameter and fill its fields
         favor_parameters = FavorParameters()
