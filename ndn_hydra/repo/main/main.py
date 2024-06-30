@@ -9,6 +9,7 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
+import logging
 from argparse import ArgumentParser
 from typing import Dict
 from threading import Thread
@@ -180,9 +181,10 @@ class HydraNodeThread(Thread):
                 pass
 
         # logging
-        SVSyncLogger.config(False, None, logging.INFO)
+        SVSyncLogger.config(False, None, logging.CRITICAL)
 
         log_level = getattr(logging, self.config['logger_level'].upper(), logging.INFO)
+
         logging.basicConfig(level=log_level,
                             format='%(created)f  %(levelname)-8s  %(message)s',
                             filename=self.config['logging_path'],
@@ -190,6 +192,9 @@ class HydraNodeThread(Thread):
         console = logging.StreamHandler()
         console.setLevel(log_level)
         logging.getLogger().addHandler(console)
+
+        for lib_logger in 'ndn':
+            logging.getLogger(lib_logger).setLevel(logging.WARNING)
 
         # NDN
         app = NDNApp()

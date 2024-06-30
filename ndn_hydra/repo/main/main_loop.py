@@ -138,8 +138,12 @@ class MainLoop:
 
         self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
                           f"\n\tNode {self.config['node_name']} favor is: {self_favor}")
+
         self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
-                          f"\n\tGlobal view for node {self.config['node_name']} is:\n {self.global_view}")
+                          f"\n\tGlobal view for node {self.config['node_name']} is:"
+                          f"----------/----------/----------/----------"
+                          f"\n{self.global_view}"
+                          f"----------/----------/----------/----------")
 
     def backup_list_check(self):
         underreplicated_files = self.global_view.get_underreplicated_files()
