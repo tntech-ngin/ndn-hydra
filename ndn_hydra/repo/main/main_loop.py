@@ -87,7 +87,7 @@ class MainLoop:
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        self.logger.debug(f"\nRemaining space for node {self.config['node_name']} is: {remaining_space}")
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] Remaining space for node {self.config['node_name']} is: {remaining_space}")
 
         # Create FavorParameter and fill its fields
         favor_parameters = FavorParameters()
@@ -135,8 +135,8 @@ class MainLoop:
         self.global_view.update_node(self.config['node_name'], self_favor, next_state_vector)
         self.svs.publishData(message_to_send.encode())
 
-        self.logger.debug(f"\nNode {self.config['node_name']} favor is: {self_favor}")
-        self.logger.debug(f"\nGlobal view for node {self.config['node_name']} is: {self.global_view}")
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] Node {self.config['node_name']} favor is: {self_favor}")
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] Global view for node {self.config['node_name']} is:\n\t {self.global_view}")
 
     def backup_list_check(self):
         underreplicated_files = self.global_view.get_underreplicated_files()
@@ -195,7 +195,8 @@ class MainLoop:
             message.type = MessageTypes.CLAIM
             message.value = claim_message.encode()
             self.svs.publishData(message.encode())
-            self.logger.info(f"\n[MSG][CLAIM.R]* Node name={self.config['node_name']};"
+            self.logger.info(f"\n[MSG][CLAIM.R]* "
+                             f"\n\tNode name={self.config['node_name']};"
                              f"\n\tFile name={backupable_file['file_name']}")
 
     def store(self, file_name: str):
@@ -210,7 +211,8 @@ class MainLoop:
 
         self.global_view.store_file(file_name, self.config['node_name'])
         self.svs.publishData(message.encode())
-        self.logger.info(f"[MSG][STORE]* Node name={self.config['node_name']};"
+        self.logger.info(f"\n[MSG][STORE]* "
+                         f"\n\tNode name={self.config['node_name']};"
                          f"\n\tfile={file_name}")
 
     def fetch_file(self, file_name: str, packets: int, packet_size: int, fetch_path: str):

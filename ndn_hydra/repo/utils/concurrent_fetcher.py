@@ -68,9 +68,9 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
                 progress_bar.update(1)
                 break
             except InterestNack as e:
-                logging.info(f'Nacked with reason={e.reason} {Name.to_str(int_name)}')
+                logging.info(f'\nNacked with reason={e.reason} {Name.to_str(int_name)}')
             except InterestTimeout:
-                logging.info(f'Timeout {Name.to_str(int_name)}')
+                logging.info(f'\nTimeout {Name.to_str(int_name)}')
         semaphore.release()
         received_or_fail.set()
 

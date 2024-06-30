@@ -60,7 +60,7 @@ class QueryHandle(object):
         if not int_param.must_be_fresh or not int_param.can_be_prefix:
             return 
         if not _app_param:
-            self.logger.info('Query handle: No querytype')
+            self.logger.info('\nQuery handle: No querytype')
             return
 
         query = Name.from_bytes(_app_param)
@@ -68,19 +68,19 @@ class QueryHandle(object):
         query = Name.to_str(query)
 
         if querytype == "nodes":
-            self.logger.info(f'[CMD][QUERY]    query received: nodes')
+            self.logger.info(f'\n[CMD][QUERY]    query received: nodes')
             nodes = self.global_view.get_nodes()
             nodenamestrlist = " ".join([key["node_name"] for key in nodes])
             self.app.put_data(int_name, content=bytes(nodenamestrlist.encode()), freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "exnodes":
-            self.logger.info(f'[CMD][QUERY]    query received: exnodes')
+            self.logger.info(f'\n[CMD][QUERY]    query received: exnodes')
             nodes = self.global_view.get_nodes(True)
             nodenamestrlist = " ".join([key["node_name"] for key in nodes])
             self.app.put_data(int_name, content=bytes(nodenamestrlist.encode()), freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "files":
-            self.logger.info(f'[CMD][QUERY]    query received: files')
+            self.logger.info(f'\n[CMD][QUERY]    query received: files')
             files = self.global_view.get_files()
             filelist = FileList()
             filelist.list = []
@@ -94,7 +94,7 @@ class QueryHandle(object):
             self.app.put_data(int_name, content=filelist.encode(), freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "file":
-            self.logger.info(f'[CMD][QUERY]    query received: file')
+            self.logger.info(f'\n[CMD][QUERY]    query received: file')
             files = self.global_view.get_files()
             filename = query[5:]
             filecontent = None
@@ -110,7 +110,7 @@ class QueryHandle(object):
             self.app.put_data(int_name, content=filecontent, freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "prefix":
-            self.logger.info(f'[CMD][QUERY]    query received: prefix')
+            self.logger.info(f'\n[CMD][QUERY]    query received: prefix')
             files = self.global_view.get_files()
             prefix = query[7:]
             filelist = FileList()
@@ -126,6 +126,6 @@ class QueryHandle(object):
             self.app.put_data(int_name, content=filelist.encode(), freshness_period=3000, content_type=ContentType.BLOB)
             return
         else:
-            self.logger.info(f'[CMD][QUERY]    unknown query received')
+            self.logger.info(f'\n[CMD][QUERY]    unknown query received')
             self.app.put_data(int_name, content=None, freshness_period=3000, content_type=ContentType.NACK)
             return

@@ -35,10 +35,11 @@ class UpdateMessage(SpecificMessage):
         file_name = Name.to_str(self.message.file_name)
         expiration_time = self.message.expiration_time
 
-        self.logger.info(f"[MSG][UPDATE]   fil={file_name}")
+        self.logger.info(f"\n[MSG][UPDATE]   "
+                         f"\n\tFile name={file_name}")
         file = global_view.get_file(file_name)
         if not file:
-            self.logger.warning('nothing to update')
+            self.logger.warning('\n*** Nothing to update')
         else:
             global_view.update_file(file_name, expiration_time)
 
