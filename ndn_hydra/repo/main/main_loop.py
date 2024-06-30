@@ -195,7 +195,8 @@ class MainLoop:
             message.type = MessageTypes.CLAIM
             message.value = claim_message.encode()
             self.svs.publishData(message.encode())
-            self.logger.info(f"[MSG][CLAIM.R]* nam={self.config['node_name']};fil={backupable_file['file_name']}")
+            self.logger.info(f"\n[MSG][CLAIM.R]* Node name={self.config['node_name']};"
+                             f"\n\tFile name={backupable_file['file_name']}")
 
     def store(self, file_name: str):
         store_message = StoreMessageTlv()
