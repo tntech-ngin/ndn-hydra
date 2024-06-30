@@ -87,7 +87,8 @@ class MainLoop:
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] Remaining space for node {self.config['node_name']} is: {remaining_space}")
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
+                          f"\n\tRemaining space for node {self.config['node_name']} is: {remaining_space}")
 
         # Create FavorParameter and fill its fields
         favor_parameters = FavorParameters()
@@ -135,8 +136,10 @@ class MainLoop:
         self.global_view.update_node(self.config['node_name'], self_favor, next_state_vector)
         self.svs.publishData(message_to_send.encode())
 
-        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] Node {self.config['node_name']} favor is: {self_favor}")
-        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] Global view for node {self.config['node_name']} is:\n\t {self.global_view}")
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
+                          f"\n\tNode {self.config['node_name']} favor is: {self_favor}")
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
+                          f"\n\tGlobal view for node {self.config['node_name']} is:\n {self.global_view}")
 
     def backup_list_check(self):
         underreplicated_files = self.global_view.get_underreplicated_files()
