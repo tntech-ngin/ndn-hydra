@@ -181,18 +181,17 @@ class HydraNodeThread(Thread):
                 pass
 
         # logging
-        SVSyncLogger.config(False, None, logging.WARNING)
+        # SVSyncLogger.config(False, None, logging.WARNING)
 
         log_level = getattr(logging, self.config['logger_level'].upper(), logging.INFO)
 
         logging.basicConfig(level=log_level,
-                            format='%(created)f  %(levelname)-8s  %(message)s',
+                            format='%(name)f  %(levelname)-8s  %(message)s',
                             filename=self.config['logging_path'],
                             filemode='w')
         console = logging.StreamHandler()
         console.setLevel(log_level)
-        formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)-8s %(message)s')
-        console.setFormatter(formatter)
+
         logging.getLogger().addHandler(console)
 
         for lib_logger in ['ndn', 'ndn.svs', 'nfd']:
