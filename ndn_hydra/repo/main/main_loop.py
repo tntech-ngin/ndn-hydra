@@ -46,7 +46,11 @@ class MainLoop:
         self.favor = 0
 
     async def start(self):
-        self.svs = SVSync(self.app, Name.normalize(self.config['repo_prefix'] + "/group"), Name.normalize(self.node_name), self.svs_missing_callback, storage=self.svs_storage)
+        self.svs = SVSync(self.app,
+                          Name.normalize(self.config['repo_prefix'] + "/group"),
+                          Name.normalize(self.node_name),
+                          self.svs_missing_callback,
+                          storage=self.svs_storage)
         await aio.sleep(5)
         while True:
             await aio.sleep(self.config['loop_period'] / 1000.0)
@@ -232,5 +236,9 @@ class MainLoop:
         current_time = time.time()
         hours_since_last_collection = (current_time - self.last_garbage_collect_t) / (60 * 60)
         if hours_since_last_collection >= 24:
-            collect_db_garbage(self.global_view, self.data_storage, self.svs, self.config, self.logger)
+            collect_db_garbage(self.global_view,
+                               self.data_storage,
+                               self.svs,
+                               self.config,
+                               logging.getLogger('garbage_collector'))
             self.last_garbage_collect_t = time.time()
