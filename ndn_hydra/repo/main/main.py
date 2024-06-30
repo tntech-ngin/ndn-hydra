@@ -194,10 +194,10 @@ class HydraNodeThread(Thread):
 
         logging.getLogger().addHandler(console)
 
-        if log_level != "CRITICAL":
-            logging.getLogger('SVSyncLogger').setLevel(logging.CRITICAL)
-        else:
-            logging.getLogger('SVSyncLogger').setLevel(logging.CRITICAL)
+        # if log_level != "CRITICAL":
+        #     logging.getLogger('SVSyncLogger').setLevel(logging.CRITICAL)
+        # else:
+        #     logging.getLogger('SVSyncLogger').setLevel(logging.CRITICAL)
 
         # NDN
         app = NDNApp()
