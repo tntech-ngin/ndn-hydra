@@ -181,7 +181,7 @@ class HydraNodeThread(Thread):
                 pass
 
         # logging
-        SVSyncLogger.config(False, None, logging.CRITICAL)
+        SVSyncLogger.config(False, None, logging.WARNING)
 
         log_level = getattr(logging, self.config['logger_level'].upper(), logging.INFO)
 

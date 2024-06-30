@@ -143,7 +143,7 @@ class MainLoop:
                           f"\n\tGlobal view for node {self.config['node_name']} is:"
                           f"\n\n----------/----------/----------/----------"
                           f"\n{self.global_view}"
-                          f"\n----------/----------/----------/----------\n")
+                          f"----------/----------/----------/----------\n")
 
     def backup_list_check(self):
         underreplicated_files = self.global_view.get_underreplicated_files()
