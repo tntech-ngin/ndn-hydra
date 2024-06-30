@@ -88,6 +88,8 @@ def process_cmd_opts():
         parser.add_argument("-v", "--version", action="store_true", dest="version", default=False, required=False)
         parser.add_argument("-rp", "--repoprefix", action="store", dest="repo_prefix", default=False, required=False)
         parser.add_argument("-n", "--nodename", action="store", dest="node_name", default=False, required=False)
+        parser.add_argument("-d", "--debugger", action="store_true", dest="debug", default=False, required=False)
+        parser.add_argument("-cr", "--critical", action="store_true", dest="debug", default=False, required=False)
 
         # Interpret Informational Arguments
         interpret_version()
@@ -122,13 +124,18 @@ def process_cmd_opts():
             "network_cost": default_config_file['default_config']['favor']['network_cost'],
             "storage_cost": default_config_file['default_config']['favor']['storage_cost'],
             "remaining_storage": default_config_file['default_config']['favor']['remaining_storage'],
-            "rw_speed": default_config_file['default_config']['favor']['rw_speed']
+            "rw_speed": default_config_file['default_config']['favor']['rw_speed'],
+            "logger_level": default_config_file['default_config']['logger_level'],
         }
 
         if cli_args.repo_prefix is not False:
             config_data["repo_prefix"] = process_name(cli_args.repo_prefix)
         if cli_args.node_name is not False:
             config_data["node_name"] = process_name(cli_args.node_name)
+        if cli_args.debugger is not False:
+            config_data["logger_level"] = "DEBUG"
+        if cli_args.critical is not False:
+            config_data["logger_level"] = "CRITICAL"
 
         workpath = "{home}/.ndn/repo{repo_prefix}/{node_name}".format(
             home=os.path.expanduser("~"),
@@ -174,12 +181,13 @@ class HydraNodeThread(Thread):
 
         # logging
         SVSyncLogger.config(False, None, logging.INFO)
-        logging.basicConfig(level=logging.INFO,
+        log_level = self.config["logger_level"]
+        logging.basicConfig(level=log_level,
                             format='%(created)f  %(levelname)-8s  %(message)s',
                             filename=self.config['logging_path'],
                             filemode='w')
         console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
+        console.setLevel(log_level)
         logging.getLogger().addHandler(console)
 
         # NDN

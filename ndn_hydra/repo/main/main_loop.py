@@ -30,7 +30,7 @@ from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
 
 
 class MainLoop:
-    def __init__(self, app:NDNApp, config:Dict, global_view:GlobalView, data_storage:Storage, svs_storage:Storage, file_fetcher:FileFetcher):
+    def __init__(self, app: NDNApp, config: Dict, global_view: GlobalView, data_storage: Storage, svs_storage: Storage, file_fetcher: FileFetcher):
         self.app = app
         self.config = config
         self.global_view = global_view
@@ -42,7 +42,7 @@ class MainLoop:
         self.logger = logging.getLogger()
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
-        self.last_garbage_collect_t = time.time() # time in seconds
+        self.last_garbage_collect_t = time.time()  # time in seconds
         self.favor = 0
 
     async def start(self):
@@ -86,6 +86,8 @@ class MainLoop:
 
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
+
+        self.logger.debug(f"Remaining space for node {self.config['node_name']} is: {remaining_space}")
 
         # Create FavorParameter and fill its fields
         favor_parameters = FavorParameters()
@@ -133,6 +135,9 @@ class MainLoop:
         self.global_view.update_node(self.config['node_name'], self_favor, next_state_vector)
         self.svs.publishData(message_to_send.encode())
 
+        self.logger.debug(f"\nNode {self.config['node_name']} favor is: {self_favor}")
+        self.logger.debug(f"\nGlobal view for node {self.config['node_name']} is: {self.global_view}")
+
     def backup_list_check(self):
         underreplicated_files = self.global_view.get_underreplicated_files()
         for underreplicated_file in underreplicated_files:
@@ -160,7 +165,7 @@ class MainLoop:
                 if backuped_by['node_name'] == self.config['node_name']:
                     already_in = True
                     break
-            if already_in == True:
+            if already_in is True:
                 continue
             if len(backupable_file['backups']) == 0 and len(backupable_file['stores']) == 0:
                 continue
@@ -204,7 +209,8 @@ class MainLoop:
 
         self.global_view.store_file(file_name, self.config['node_name'])
         self.svs.publishData(message.encode())
-        self.logger.info(f"[MSG][STORE]*   nam={self.config['node_name']};fil={file_name}")
+        self.logger.info(f"[MSG][STORE]* Node name={self.config['node_name']};"
+                         f"\n\tfile={file_name}")
 
     def fetch_file(self, file_name: str, packets: int, packet_size: int, fetch_path: str):
         self.file_fetcher.fetch_file_from_client(file_name, packets, packet_size, fetch_path)
