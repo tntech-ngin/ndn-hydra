@@ -24,18 +24,16 @@ from ndn_hydra.repo.modules.read_config import read_config_file
 
 
 def process_cmd_opts():
-    def interpret_version() -> None:
-        set = True if "-v" in sys.argv else False
-        if set and (len(sys.argv) - 1 < 2):
+    def interpret_version(args) -> None:
+        if args.version and (len(sys.argv) - 1 < 2):
             try:
                 print("ndn-hydra " + pkg_resources.require("ndn-hydra")[0].version)
             except pkg_resources.DistributionNotFound:
-                print("ndn-hydra source,undetermined")
+                print("ndn-hydra source, undetermined")
             sys.exit(0)
 
-    def interpret_help() -> None:
-        set = True if "-h" in sys.argv else False
-        if set:
+    def interpret_help(args) -> None:
+        if args.help:
             if len(sys.argv) - 1 < 2:
                 print("* Basic initialization:")
                 print("    ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME")
@@ -45,12 +43,14 @@ def process_cmd_opts():
                 print("    ('python3 ./examples/repo.py' instead of 'ndn-hydra-repo' if from source.)")
                 print("")
                 print("* Informative arguments:")
-                print("    -h, --help                       |   shows this help message and exits.")
-                print("    -v, --version                    |   shows the current version and exits.")
+                print("    -h, --help                        |   shows this help message and exits.")
+                print("    -v, --version                     |   shows the current version and exits.")
                 print("")
                 print("* Optional arguments:")
-                print("    -rp, --repoprefix REPO_PREFIX    |   repo (group) prefix. Example: \"/hydra\"")
-                print("    -n, --nodename NODE_NAME         |   node name. Example: \"node01\"")
+                print("    -rp, --repoprefix REPO_PREFIX     |   repo (group) prefix. Example: \"/hydra\"")
+                print("    -n,  --nodename NODE_NAME         |   node name. Example: \"node01\"")
+                print("    -d,  --debugger                   |   enable debugging mode")
+                print("    -cr, --critical                   |   enable critical logging level")
                 print("")
                 print("* Default configuration:")
                 print("    The default configuration is in the config.yaml file in the repo folder: ")
@@ -88,15 +88,15 @@ def process_cmd_opts():
         parser.add_argument("-v", "--version", action="store_true", dest="version", default=False, required=False)
         parser.add_argument("-rp", "--repoprefix", action="store", dest="repo_prefix", default=False, required=False)
         parser.add_argument("-n", "--nodename", action="store", dest="node_name", default=False, required=False)
-        parser.add_argument("-d", "--debugger", action="store_true", dest="debug", default=False, required=False)
+        parser.add_argument("-d", "--debugger", action="store_true", dest="debugger", default=False, required=False)
         parser.add_argument("-cr", "--critical", action="store_true", dest="critical", default=False, required=False)
-
-        # Interpret Informational Arguments
-        interpret_version()
-        interpret_help()
 
         # Getting all Arguments
         cli_args = parser.parse_args()
+
+        # Interpret Informational Arguments
+        interpret_version(cli_args)
+        interpret_help(cli_args)
 
         return cli_args
 
