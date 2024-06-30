@@ -89,7 +89,7 @@ def process_cmd_opts():
         parser.add_argument("-rp", "--repoprefix", action="store", dest="repo_prefix", default=False, required=False)
         parser.add_argument("-n", "--nodename", action="store", dest="node_name", default=False, required=False)
         parser.add_argument("-d", "--debugger", action="store_true", dest="debug", default=False, required=False)
-        parser.add_argument("-cr", "--critical", action="store_true", dest="debug", default=False, required=False)
+        parser.add_argument("-cr", "--critical", action="store_true", dest="critical", default=False, required=False)
 
         # Interpret Informational Arguments
         interpret_version()
@@ -181,7 +181,8 @@ class HydraNodeThread(Thread):
 
         # logging
         SVSyncLogger.config(False, None, logging.INFO)
-        log_level = self.config["logger_level"]
+
+        log_level = getattr(logging, self.config['logger_level'].upper(), logging.INFO)
         logging.basicConfig(level=log_level,
                             format='%(created)f  %(levelname)-8s  %(message)s',
                             filename=self.config['logging_path'],
