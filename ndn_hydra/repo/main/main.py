@@ -191,6 +191,8 @@ class HydraNodeThread(Thread):
                             filemode='w')
         console = logging.StreamHandler()
         console.setLevel(log_level)
+        formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)-8s %(message)s')
+        console.setFormatter(formatter)
         logging.getLogger().addHandler(console)
 
         for lib_logger in ['ndn', 'ndn.svs', 'nfd']:
