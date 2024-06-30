@@ -39,7 +39,7 @@ class MainLoop:
         self.file_fetcher = file_fetcher
         self.file_fetcher.store_func = self.store
         self.svs = None
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger('ndn')
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
         self.last_garbage_collect_t = time.time()  # time in seconds
@@ -91,7 +91,7 @@ class MainLoop:
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
 
-        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
+        logging.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
                           f"\n\tRemaining space for node {self.config['node_name']} is: {remaining_space}")
 
         # Create FavorParameter and fill its fields
