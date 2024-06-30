@@ -186,12 +186,11 @@ class HydraNodeThread(Thread):
         log_level = getattr(logging, self.config['logger_level'].upper(), logging.INFO)
 
         logging.basicConfig(level=log_level,
-                            format='%(name)f  %(levelname)-8s  %(message)s',
+                            format='%(created)f  %(levelname)-8s  %(message)s',
                             filename=self.config['logging_path'],
                             filemode='w')
         console = logging.StreamHandler()
         console.setLevel(log_level)
-
         logging.getLogger().addHandler(console)
 
         # if log_level != "CRITICAL":
@@ -241,7 +240,7 @@ def main() -> int:
         return 0
 
     except Exception as e:
-        print(f"An error occurred running the main thread: {e}")
+        logging.warning(f"\nAn error occurred running the main thread: {e}")
         return 1
 
 
