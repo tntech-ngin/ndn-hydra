@@ -34,8 +34,6 @@ class DataStorage(SqliteStorage):
                 total_deleted += c.rowcount
 
             self.conn.commit()
-            self.conn.execute('VACUUM')
-
         except sqlite3.Error as e:
             self.conn.rollback()
             print(f"SQLite error: {e}")
