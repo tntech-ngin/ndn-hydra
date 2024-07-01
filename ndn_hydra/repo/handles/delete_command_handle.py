@@ -11,7 +11,6 @@
 
 import asyncio as aio
 import logging
-import time
 from ndn.app import NDNApp
 from ndn.encoding import Name, NonStrictName, Component
 from ndn.storage import Storage
@@ -23,9 +22,6 @@ from ndn_hydra.repo.main.main_loop import MainLoop
 from ndn_hydra.repo.handles.protocol_handle_base import ProtocolHandle
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.file_remover import remove_file
-from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
-from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
-
 
 class DeleteCommandHandle(ProtocolHandle):
     """
@@ -86,7 +82,8 @@ class DeleteCommandHandle(ProtocolHandle):
         # Delete from global view
         self.global_view.delete_file(file_name)
         # Remove from data_storage from this node if present
-        aio.get_event_loop().run_in_executor(None, remove_file, self.config, self.data_storage, file)
+        if self.config['node_name'] in file['stores']:
+            remove_file(self.data_storage, file)
 
         # remove tlv
         favor = self.global_view.get_node(self.config['node_name'])['favor']

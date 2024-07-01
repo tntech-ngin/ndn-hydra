@@ -20,6 +20,7 @@ import sys, os
 from ndn.svs import SVSyncLogger
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
+from ndn_hydra.repo.modules.data_storage import DataStorage
 from ndn_hydra.repo.modules.read_config import read_config_file
 
 
@@ -188,7 +189,7 @@ class HydraNodeThread(Thread):
         # Post-start
         async def start_main_loop():
             # databases
-            data_storage = SqliteStorage(self.config['data_storage_path'])
+            data_storage = DataStorage(self.config['data_storage_path'])
             global_view = GlobalView(self.config['global_view_path'])
             svs_storage = SqliteStorage(self.config['svs_storage_path'])
             pb = PubSub(app)

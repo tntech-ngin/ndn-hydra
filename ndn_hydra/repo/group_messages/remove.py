@@ -9,7 +9,6 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
-import os
 import asyncio as aio
 from typing import Callable
 from ndn.encoding import *
@@ -42,6 +41,7 @@ class RemoveMessage(SpecificMessage):
             # Delete from global view
             global_view.delete_file(file_name)
             # Remove from data_storage from this node if present
-            aio.get_event_loop().run_in_executor(None, remove_file, config, data_storage, file)
+            if config['node_name'] in file['stores']:
+                remove_file(data_storage, file)
 
         global_view.update_node(node_name, float(self.message.favor.tobytes().decode()), self.seqno)
