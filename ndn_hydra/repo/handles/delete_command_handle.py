@@ -53,7 +53,7 @@ class DeleteCommandHandle(ProtocolHandle):
         :param name: NonStrictName. The name prefix to listen on.
         """
         self.prefix = prefix
-        self.logger.info(f'Insert handle: subscribing to {Name.to_str(self.prefix) + "/delete"}')
+        self.logger.info(f'\nInsert handle: subscribing to {Name.to_str(self.prefix) + "/delete"}')
         self.pb.subscribe(self.prefix + ['delete'], self._on_delete_msg)
         # start to announce process status
         # await self._schedule_announce_process_status(period=3)
@@ -64,7 +64,7 @@ class DeleteCommandHandle(ProtocolHandle):
             # if cmd.name == None:
             #     raise DecodeError()
         except (DecodeError, IndexError) as exc:
-            logging.warning('Parameter interest decoding failed')
+            logging.warning('\nParameter interest decoding failed')
             return
         aio.ensure_future(self._process_delete(cmd))
 
@@ -73,10 +73,10 @@ class DeleteCommandHandle(ProtocolHandle):
         Process delete command.
         """
         file_name = Name.to_str(cmd.file_name)
-        self.logger.info(f"[CMD][DELETE]   file {file_name}")
+        self.logger.info(f"\n[CMD][DELETE]  file={file_name}")
         file = self.global_view.get_file(file_name)
-        if file == None:
-            self.logger.debug("file does not exist")
+        if file is None:
+            self.logger.debug("\nFile does not exist")
             return
 
         # Delete from global view
@@ -97,4 +97,4 @@ class DeleteCommandHandle(ProtocolHandle):
         message.value = remove_message.encode()
 
         self.main_loop.svs.publishData(message.encode())
-        self.logger.info(f"[MSG][REMOVE]*  fil={file_name}")
+        self.logger.info(f"\n[MSG][REMOVE]*  file={file_name}")

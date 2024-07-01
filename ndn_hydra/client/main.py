@@ -128,7 +128,6 @@ class HydraClient:
         return await self.cinsert.insert_file(file_name, path)
 
     async def delete(self, file_name: FormalName) -> bool:
-
         return await self.cdelete.delete_file(file_name)
 
     async def fetch(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:

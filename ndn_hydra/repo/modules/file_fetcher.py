@@ -36,27 +36,27 @@ class FileFetcher:
 
     def fetch_file_from_client(self, file_name: str, packets: int, packet_size: int, fetch_path: str):
         if file_name in self.fetching:
-            self.logger.info("FileFetcher: Already fetching")
+            self.logger.info("\nFileFetcher: Already fetching")
             return
         if not self.store_func:
-            self.logger.info("FileFetcher: No storage function defined")
+            self.logger.info("\nFileFetcher: No storage function defined")
             return
         self.fetching.append(file_name)
         aio.ensure_future(self._fetch_file_helper(file_name, packets, packet_size, fetch_path))
     
     def fetch_file_from_node(self, file_name: str, packets: int, packet_size: int):
         if file_name in self.fetching:
-            self.logger.info("FileFetcher: Already fetching")
+            self.logger.info("\nFileFetcher: Already fetching")
             return
         if not self.store_func:
-            self.logger.info("FileFetcher: No storage function defined")
+            self.logger.info("\nFileFetcher: No storage function defined")
             return    
         self.fetching.append(file_name)
         # Randomly select a node to fetch file from
         file_info = self.global_view.get_file(file_name)
         on_list = file_info["stores"]
         if not on_list:
-            self.logger.info("FileFetcher: File not in stores")
+            self.logger.info("\nFileFetcher: File not in stores")
             return
         active_nodes = set([node['node_name'] for node in self.global_view.get_nodes()])
         on_list = [x for x in on_list if x in active_nodes]
@@ -68,7 +68,10 @@ class FileFetcher:
         aio.ensure_future(self._fetch_file_helper(file_name, packets, packet_size, fetch_path))
 
     async def _fetch_file_helper(self, file_name: str, packets: int, packet_size: int, fetch_path: str):        
-        self.logger.info(f"\n[ACT][FETCH]*   fil={file_name};pcks={packets};fetch_path={fetch_path}")
+        self.logger.info(f"\n[ACT][FETCH]*  "
+                         f"\n\tFile name={file_name};"
+                         f"\n\tPackets={packets};"
+                         f"\n\tfetch_path={fetch_path}")
         start = time.time()
 
         async for (_, _, content, data_bytes, key) in concurrent_fetcher(self.app, fetch_path, file_name, 0, packets-1, aio.Semaphore(15)):
@@ -76,7 +79,9 @@ class FileFetcher:
 
         end = time.time()
         duration = end - start
-        self.logger.info(f"\n[ACT][FETCHED]* pcks={packets};duration={duration}")
+        self.logger.info(f"\n[ACT][FETCHED]* "
+                         f"\n\tpackets={packets};"
+                         f"\n\tduration={duration}")
         self.store_func(file_name)
         try:
             self.fetching.remove(file_name)

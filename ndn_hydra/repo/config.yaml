@@ -6,6 +6,7 @@ default_config:
   global_view_path: $HOME/.ndn/hydra/node1/global_view.db
   svs_storage_path: $HOME/.ndn/hydra/node1/svs.db
   logging_path: $HOME/.ndn/hydra/node1/session.log
+  logger_level: INFO
 
   timers:
     loop_period: 5000

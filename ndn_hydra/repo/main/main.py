@@ -9,6 +9,7 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
+import logging
 from argparse import ArgumentParser
 from typing import Dict
 from threading import Thread
@@ -25,18 +26,16 @@ from ndn_hydra.repo.modules.read_config import read_config_file
 
 
 def process_cmd_opts():
-    def interpret_version() -> None:
-        set = True if "-v" in sys.argv else False
-        if set and (len(sys.argv) - 1 < 2):
+    def interpret_version(args) -> None:
+        if args.version and (len(sys.argv) - 1 < 2):
             try:
                 print("ndn-hydra " + pkg_resources.require("ndn-hydra")[0].version)
             except pkg_resources.DistributionNotFound:
-                print("ndn-hydra source,undetermined")
+                print("ndn-hydra source, undetermined")
             sys.exit(0)
 
-    def interpret_help() -> None:
-        set = True if "-h" in sys.argv else False
-        if set:
+    def interpret_help(args) -> None:
+        if args.help:
             if len(sys.argv) - 1 < 2:
                 print("* Basic initialization:")
                 print("    ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME")
@@ -46,12 +45,14 @@ def process_cmd_opts():
                 print("    ('python3 ./examples/repo.py' instead of 'ndn-hydra-repo' if from source.)")
                 print("")
                 print("* Informative arguments:")
-                print("    -h, --help                       |   shows this help message and exits.")
-                print("    -v, --version                    |   shows the current version and exits.")
+                print("    -h, --help                        |   shows this help message and exits.")
+                print("    -v, --version                     |   shows the current version and exits.")
                 print("")
                 print("* Optional arguments:")
-                print("    -rp, --repoprefix REPO_PREFIX    |   repo (group) prefix. Example: \"/hydra\"")
-                print("    -n, --nodename NODE_NAME         |   node name. Example: \"node01\"")
+                print("    -rp, --repoprefix REPO_PREFIX     |   repo (group) prefix. Example: \"/hydra\"")
+                print("    -n,  --nodename NODE_NAME         |   node name. Example: \"node01\"")
+                print("    -d,  --debugger                   |   enable debugging mode")
+                print("    -cr, --critical                   |   enable critical logging level")
                 print("")
                 print("* Default configuration:")
                 print("    The default configuration is in the config.yaml file in the repo folder: ")
@@ -89,13 +90,15 @@ def process_cmd_opts():
         parser.add_argument("-v", "--version", action="store_true", dest="version", default=False, required=False)
         parser.add_argument("-rp", "--repoprefix", action="store", dest="repo_prefix", default=False, required=False)
         parser.add_argument("-n", "--nodename", action="store", dest="node_name", default=False, required=False)
-
-        # Interpret Informational Arguments
-        interpret_version()
-        interpret_help()
+        parser.add_argument("-d", "--debugger", action="store_true", dest="debugger", default=False, required=False)
+        parser.add_argument("-cr", "--critical", action="store_true", dest="critical", default=False, required=False)
 
         # Getting all Arguments
         cli_args = parser.parse_args()
+
+        # Interpret Informational Arguments
+        interpret_version(cli_args)
+        interpret_help(cli_args)
 
         return cli_args
 
@@ -123,13 +126,18 @@ def process_cmd_opts():
             "network_cost": default_config_file['default_config']['favor']['network_cost'],
             "storage_cost": default_config_file['default_config']['favor']['storage_cost'],
             "remaining_storage": default_config_file['default_config']['favor']['remaining_storage'],
-            "rw_speed": default_config_file['default_config']['favor']['rw_speed']
+            "rw_speed": default_config_file['default_config']['favor']['rw_speed'],
+            "logger_level": default_config_file['default_config']['logger_level'],
         }
 
         if cli_args.repo_prefix is not False:
             config_data["repo_prefix"] = process_name(cli_args.repo_prefix)
         if cli_args.node_name is not False:
             config_data["node_name"] = process_name(cli_args.node_name)
+        if cli_args.debugger is not False:
+            config_data["logger_level"] = "DEBUG"
+        if cli_args.critical is not False:
+            config_data["logger_level"] = "CRITICAL"
 
         workpath = "{home}/.ndn/repo{repo_prefix}/{node_name}".format(
             home=os.path.expanduser("~"),
@@ -174,14 +182,20 @@ class HydraNodeThread(Thread):
                 pass
 
         # logging
-        SVSyncLogger.config(False, None, logging.INFO)
-        logging.basicConfig(level=logging.INFO,
-                            format='%(created)f  %(levelname)-8s  %(message)s',
+
+        log_level = getattr(logging, self.config['logger_level'].upper(), logging.INFO)
+
+        logging.basicConfig(level=log_level,
+                            format='%(levelname)-8s  %(message)s',
                             filename=self.config['logging_path'],
                             filemode='w')
         console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
+        console.setLevel(log_level)
         logging.getLogger().addHandler(console)
+
+        SVSyncLogger.config(False, None, logging.CRITICAL)
+
+        logging.getLogger('ndn').setLevel(logging.WARNING)
 
         # NDN
         app = NDNApp()
@@ -225,7 +239,7 @@ def main() -> int:
         return 0
 
     except Exception as e:
-        print(f"An error occurred running the main thread: {e}")
+        logging.warning(f"\nAn error occurred running the main thread: {e}")
         return 1
 
 

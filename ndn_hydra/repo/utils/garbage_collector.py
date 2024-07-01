@@ -14,7 +14,7 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
     """
     Removes files that have not been accessed in the last month from a node's databases.
     """
-    logger.info("GARBAGE COLLECTOR: Collecting DB garbage...")    
+    logger.info("\nGARBAGE COLLECTOR: Collecting DB garbage...")
     
     # Remove files that have expired (as based on the expiration_time configuration) 
     for file in global_view.get_files():
@@ -30,5 +30,5 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
                 remove_file(data_storage, file)
                 logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
 
-    logger.info("GARBAGE COLLECTOR: Finished collecting DB garbage.")
+    logger.info("\nGARBAGE COLLECTOR: Finished collecting DB garbage.")
 
