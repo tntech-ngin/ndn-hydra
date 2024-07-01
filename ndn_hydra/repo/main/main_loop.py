@@ -30,7 +30,7 @@ from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
 
 
 class MainLoop:
-    def __init__(self, app:NDNApp, config:Dict, global_view:GlobalView, data_storage:Storage, svs_storage:Storage, file_fetcher:FileFetcher):
+    def __init__(self, app: NDNApp, config: Dict, global_view: GlobalView, data_storage: Storage, svs_storage: Storage, file_fetcher: FileFetcher):
         self.app = app
         self.config = config
         self.global_view = global_view
@@ -39,14 +39,18 @@ class MainLoop:
         self.file_fetcher = file_fetcher
         self.file_fetcher.store_func = self.store
         self.svs = None
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger('ndn')
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
-        self.last_garbage_collect_t = time.time() # time in seconds
+        self.last_garbage_collect_t = time.time()  # time in seconds
         self.favor = 0
 
     async def start(self):
-        self.svs = SVSync(self.app, Name.normalize(self.config['repo_prefix'] + "/group"), Name.normalize(self.node_name), self.svs_missing_callback, storage=self.svs_storage)
+        self.svs = SVSync(self.app,
+                          Name.normalize(self.config['repo_prefix'] + "/group"),
+                          Name.normalize(self.node_name),
+                          self.svs_missing_callback,
+                          storage=self.svs_storage)
         await aio.sleep(5)
         while True:
             await aio.sleep(self.config['loop_period'] / 1000.0)
@@ -86,6 +90,9 @@ class MainLoop:
 
         node_path = "/".join(self.config['data_storage_path'].split("/")[:-1])
         remaining_space = get_remaining_space(node_path)
+
+        logging.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
+                          f"\n\tRemaining space for node {self.config['node_name']} is: {remaining_space}")
 
         # Create FavorParameter and fill its fields
         favor_parameters = FavorParameters()
@@ -133,6 +140,15 @@ class MainLoop:
         self.global_view.update_node(self.config['node_name'], self_favor, next_state_vector)
         self.svs.publishData(message_to_send.encode())
 
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
+                          f"\n\tNode {self.config['node_name']} favor is: {self_favor}")
+
+        self.logger.debug(f"\n[MAIN LOOP][SEND_HEARTBEAT] "
+                          f"\n\tGlobal view for node {self.config['node_name']} is:"
+                          f"\n\n----------/----------/----------/----------"
+                          f"\n{self.global_view}"
+                          f"----------/----------/----------/----------\n")
+
     def backup_list_check(self):
         underreplicated_files = self.global_view.get_underreplicated_files()
         for underreplicated_file in underreplicated_files:
@@ -160,7 +176,7 @@ class MainLoop:
                 if backuped_by['node_name'] == self.config['node_name']:
                     already_in = True
                     break
-            if already_in == True:
+            if already_in is True:
                 continue
             if len(backupable_file['backups']) == 0 and len(backupable_file['stores']) == 0:
                 continue
@@ -190,7 +206,9 @@ class MainLoop:
             message.type = MessageTypes.CLAIM
             message.value = claim_message.encode()
             self.svs.publishData(message.encode())
-            self.logger.info(f"[MSG][CLAIM.R]* nam={self.config['node_name']};fil={backupable_file['file_name']}")
+            self.logger.info(f"\n[MSG][CLAIM.R]* "
+                             f"\n\tNode name={self.config['node_name']};"
+                             f"\n\tFile name={backupable_file['file_name']}")
 
     def store(self, file_name: str):
         store_message = StoreMessageTlv()
@@ -204,7 +222,9 @@ class MainLoop:
 
         self.global_view.store_file(file_name, self.config['node_name'])
         self.svs.publishData(message.encode())
-        self.logger.info(f"[MSG][STORE]*   nam={self.config['node_name']};fil={file_name}")
+        self.logger.info(f"\n[MSG][STORE]* "
+                         f"\n\tNode name={self.config['node_name']};"
+                         f"\n\tfile={file_name}")
 
     def fetch_file(self, file_name: str, packets: int, packet_size: int, fetch_path: str):
         self.file_fetcher.fetch_file_from_client(file_name, packets, packet_size, fetch_path)
@@ -216,5 +236,9 @@ class MainLoop:
         current_time = time.time()
         hours_since_last_collection = (current_time - self.last_garbage_collect_t) / (60 * 60)
         if hours_since_last_collection >= 24:
-            collect_db_garbage(self.global_view, self.data_storage, self.svs, self.config, self.logger)
+            collect_db_garbage(self.global_view,
+                               self.data_storage,
+                               self.svs,
+                               self.config,
+                               self.logger)
             self.last_garbage_collect_t = time.time()

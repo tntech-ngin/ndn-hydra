@@ -33,8 +33,9 @@ class InsertCommandHandle(ProtocolHandle):
     InsertCommandHandle processes insert command handles, and deletes corresponding data stored
     in the database.
     """
+
     def __init__(self, app: NDNApp, data_storage: Storage, pb: PubSub, config: dict,
-                main_loop: MainLoop, global_view: GlobalView):
+                 main_loop: MainLoop, global_view: GlobalView):
         """
         :param app: NDNApp.
         :param data_storage: Storage.
@@ -57,7 +58,7 @@ class InsertCommandHandle(ProtocolHandle):
         :param name: NonStrictName. The name prefix to listen on.
         """
         self.prefix = prefix
-        self.logger.info(f'Insert handle: subscribing to {Name.to_str(self.prefix) + "/insert"}')
+        self.logger.info(f'\nInsert handle: subscribing to {Name.to_str(self.prefix) + "/insert"}')
         self.pb.subscribe(self.prefix + ['insert'], self._on_insert_msg)
         # start to announce process status
         # await self._schedule_announce_process_status(period=3)
@@ -68,7 +69,7 @@ class InsertCommandHandle(ProtocolHandle):
             # if cmd.file == None:
             #    raise DecodeError()
         except (DecodeError, IndexError) as exc:
-            logging.warning('Parameter interest decoding failed')
+            self.logger.warning('\nParameter interest decoding failed')
             return
         aio.ensure_future(self._process_insert(cmd))
 
@@ -83,16 +84,16 @@ class InsertCommandHandle(ProtocolHandle):
         packet_size = cmd.file.packet_size
         size = cmd.file.size
         fetch_path = cmd.fetch_path
-        expiration_time = int(time.time() + (self.config['file_expiration'] * 60 * 60)) # convert hours to seconds
+        expiration_time = int(time.time() + (self.config['file_expiration'] * 60 * 60))  # convert hours to seconds
         # Set file to not expire if file_expiration in config is set to 0
         if self.config['file_expiration'] == 0:
             expiration_time = 0
-        self.logger.info(f"[CMD][INSERT]   file {file_name}")
+        self.logger.info(f"\n[CMD][INSERT]  File to be inserted: {file_name}")
 
         nodes = self.global_view.get_nodes()
         desired_copies = self.replication_degree
         if len(nodes) < (desired_copies + 2):
-            self.logger.warning("not enough nodes")  # TODO: notify the client?
+            self.logger.warning("\nNot enough nodes to insert file.")  # TODO: notify the client?
             return
 
         # select sessions based on the top k favor nodes
@@ -106,8 +107,8 @@ class InsertCommandHandle(ProtocolHandle):
         # if pickself:
         #     # TODO: fetch and store this file
         #     pass
-            # print("pick myself")
-            # picked_sessions = list(filter(lambda x: x['id'] != self.config['session_id'], picked_sessions))
+        # print("pick myself")
+        # picked_sessions = list(filter(lambda x: x['id'] != self.config['session_id'], picked_sessions))
 
         backups = []
         backup_list = []
@@ -122,9 +123,13 @@ class InsertCommandHandle(ProtocolHandle):
 
         # apply globalview and send msg thru SVS
         try:
-            next_state_vector = self.main_loop.svs.getCore().getStateTable().getSeqno(Name.to_str(Name.from_str(self.config['node_name']))) + 1
+            next_state_vector = self.main_loop.svs.getCore().getStateTable().getSeqno(
+                Name.to_str(Name.from_str(self.config['node_name']))) + 1
         except TypeError:
             next_state_vector = 0
+
+        self.logger.debug(f"\nFavor for node {self.config['node_name']} before insertion is: "
+                          f"{self.global_view.get_node(self.config['node_name'])['favor']}\n")
 
         self.global_view.add_file(
             file_name,
@@ -167,4 +172,14 @@ class InsertCommandHandle(ProtocolHandle):
         bak = ""
         for backup in backup_list:
             bak = bak + backup[0] + ","
-        self.logger.info(f"[MSG][ADD]*     nam={self.config['node_name']};fil={file_name};cop={desired_copies};pck={packets};pck_size={packet_size};siz={size};bak={bak};exp={expiration_time}")
+
+        self.logger.info(
+            f"\n[MSG][ADD]* "
+            f"\n\tnode_name={self.config['node_name']};"
+            f"\n\tfile={file_name};"
+            f"\n\tcopies={desired_copies};"
+            f"\n\tpackets={packets};"
+            f"\n\tpacket_size={packet_size};"
+            f"\n\tsize={size};"
+            f"\n\tbak={bak};"
+            f"\n\texpiration_time={expiration_time}")
