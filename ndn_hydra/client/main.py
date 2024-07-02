@@ -154,7 +154,7 @@ async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
         tic = time.perf_counter()
         await client.delete(filename)
         toc = time.perf_counter()
-        print("\nClient finished Delete Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
+        print(f"\nClient finished Delete Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
     elif args.function == "fetch":
         tic = time.perf_counter()
         await client.fetch(filename, args.path, True)

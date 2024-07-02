@@ -1,6 +1,5 @@
 import time
 import logging
-import os
 import asyncio as aio
 from ndn.svs import SVSync
 from ndn.storage import Storage
@@ -25,10 +24,11 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
         if current_time >= expire_time and expire_time != 0:
             # Delete from global view
             global_view.delete_file(file['file_name'])
-            logger.info(f"\nGARBAGE COLLECTOR: Removed {file['file_name']} from global view.")
-            # Remove from data_storage from this node
-            aio.get_event_loop().run_in_executor(None, remove_file, config, data_storage, file)
-            logger.info(f"\nGARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
+            logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from global view.")
+            # Remove from data_storage from this node if present
+            if config['node_name'] in file['stores']:
+                remove_file(data_storage, file)
+                logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
 
     logger.info("\nGARBAGE COLLECTOR: Finished collecting DB garbage.")
 
