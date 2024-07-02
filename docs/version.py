@@ -2,7 +2,7 @@
 # NDN Hydra Version
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
+#  @Date:    07-02-2024
 #  @Authors: Please check AUTHORS.rst
 #  @Source-Code:   https://github.com/justincpresley/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
@@ -10,4 +10,4 @@
 # -------------------------------------------------------------
 
 # Version of Hydra according to pip
-__version__ = "0.3.0"
+__version__ = "0.3.20"
