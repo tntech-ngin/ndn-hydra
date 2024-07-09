@@ -7,8 +7,7 @@
 # If there are multiple subscribers reachable, the nearest subscriber will be
 # notified of the published message in an any-cast style.
 #
-# @Author jonnykong@cs.ucla.edu
-# @Date   2020-05-08
+# @Author: Please check Authors.rst
 # -----------------------------------------------------------------------------
 
 
