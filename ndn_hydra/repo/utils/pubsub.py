@@ -8,7 +8,6 @@
 # notified of the published message in an any-cast style.
 #
 # @Author jonnykong@cs.ucla.edu
-# @Date   2020-05-08
 # -----------------------------------------------------------------------------
 
 

@@ -1,5 +1,4 @@
 #  @Project: NDN Hydra
-#  @Date:    2024-03-04
 #  @Authors: Please check AUTHORS.rst
 #  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
