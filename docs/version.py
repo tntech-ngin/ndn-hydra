@@ -2,9 +2,8 @@
 # NDN Hydra Version
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    07-02-2024
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
