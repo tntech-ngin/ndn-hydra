@@ -1,1 +1,2 @@
 include ndn_hydra/repo/config.yaml
+include docs/version.py
