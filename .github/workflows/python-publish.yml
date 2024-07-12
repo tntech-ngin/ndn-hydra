@@ -46,7 +46,7 @@ jobs:
         new_version=""
         
         # Extract version from commit messages
-        new_version=$(echo "$commit_messages" | grep -oP "$bump_message \K[0-9]+\.[0-9]+" | sort -V | tail -n 1)
+        new_version=$(echo "$commit_messages" | grep -oP "$bump_message \K[0-9]+\.[0-9]+\.[0-9]+" | sort -V | tail -n 1)
         
         if [[ $new_version ]]; then
           echo "Version bump detected: $new_version"
