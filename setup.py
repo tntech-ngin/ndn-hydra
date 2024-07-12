@@ -13,7 +13,7 @@ import re
 from setuptools import setup, find_packages
 from typing import List
 
-with io.open("docs/version.py", "rt", encoding="utf8") as f:
+with io.open("./docs/version.py", "rt", encoding="utf8") as f:
     version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 with io.open("README.rst", "rt", encoding="utf8") as f:
@@ -54,7 +54,7 @@ setup(
         'Programming Language :: Python :: 3.10'
     ],
     keywords='NDN HYDRA',
-    packages=find_packages(exclude=['tests', 'examples', 'docs', 'notes']),
+    packages=find_packages(exclude=['tests', 'examples', 'notes']),
     include_package_data=True,
     package_data={'ndn_hydra.repo': ['config.yaml']},
     install_requires=_parse_requirements('docs/requirements.txt'),
