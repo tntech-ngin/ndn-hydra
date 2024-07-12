@@ -54,7 +54,7 @@ setup(
         'Programming Language :: Python :: 3.10'
     ],
     keywords='NDN HYDRA',
-    packages=find_packages(exclude=['tests', 'examples', 'docs', 'notes']),
+    packages=find_packages(exclude=['tests', 'examples', 'notes']),
     include_package_data=True,
     package_data={'ndn_hydra.repo': ['config.yaml']},
     install_requires=_parse_requirements('docs/requirements.txt'),
