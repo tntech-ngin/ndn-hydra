@@ -16,6 +16,7 @@ on:
 jobs:
   update-version:
     name: Update Version
+    if: "!contains(github.event.head_commit.message, 'Bump version')"
     runs-on: ubuntu-latest
 
     steps:
@@ -35,47 +36,24 @@ jobs:
     - name: Determine version bump
       id: version
       run: |
-        minor_message="minor version to"
-        major_message="major version to"
-        patch_message="patch version to"
+        bump_message="version to"
         
         # Get the commit messages for the last 10 commits
         commit_messages=$(git log -n 10 --pretty=format:%B)
         
         echo "Commit messages: $commit_messages"
         
-        # Extract versions from commit messages
-        minor_versions=$(echo "$commit_messages" | grep -oP "$minor_message \K[0-9]+\.[0-9]+" | sort -V | tail -n 1)
-        major_versions=$(echo "$commit_messages" | grep -oP "$major_message \K[0-9]+" | sort -V | tail -n 1)
-        patch_versions=$(echo "$commit_messages" | grep -oP "$patch_message \K[0-9]+\.[0-9]+\.[0-9]+" | sort -V | tail -n 1)
-
         new_version=""
         
-        # Determine the highest version bump
-        if [[ $patch_versions ]]; then
-          new_version="$patch_versions"
-        fi
-
-        if [[ $minor_versions ]]; then
-          minor_version="$minor_versions.0"
-          if [[ ! $new_version || $(echo -e "$minor_version\n$new_version" | sort -V | tail -n 1) == $minor_version ]]; then
-            new_version="$minor_version"
-          fi
-        fi
-
-        if [[ $major_versions ]]; then
-          major_version="$major_versions.0.0"
-          if [[ ! $new_version || $(echo -e "$major_version\n$new_version" | sort -V | tail -n 1) == $major_version ]]; then
-            new_version="$major_version"
-          fi
-        fi
+        # Extract version from commit messages
+        new_version=$(echo "$commit_messages" | grep -oP "$bump_message \K[0-9]+\.[0-9]+" | sort -V | tail -n 1)
         
         if [[ $new_version ]]; then
           echo "Version bump detected: $new_version"
           echo "::set-output name=version::$new_version"
         else
           echo "No version bump found in the commit messages."
-          exit 1
+          exit 0
         fi
 
     - name: Bump version
