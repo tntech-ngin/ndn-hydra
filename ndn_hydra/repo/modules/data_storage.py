@@ -4,17 +4,18 @@ from typing import List
 from ndn.storage import SqliteStorage
 from ndn.encoding import Name, NonStrictName
 
+
 # DataStorage adds batch remove packets method
 # to the SqliteStorage
 class DataStorage(SqliteStorage):
-    def __init__(self, db_path: str, write_period:int=10, initialize:bool=True):
+    def __init__(self, db_path: str, write_period: int = 10, initialize: bool = True):
         super().__init__(db_path, write_period, initialize)
         # self.conn.execute('PRAGMA journal_mode=wal')  # Enable WAL mode
 
     def remove_packets(self, names: List[NonStrictName]) -> int:
-        if self.initialized != True:
+        if self.initialized is not True:
             raise self.UninitializedError("The storage is not initialized.")
-        
+
         keys = [self._get_name_bytes_wo_tl(Name.normalize(name)) for name in names]
         if not keys:
             return 0
@@ -46,4 +47,4 @@ class DataStorage(SqliteStorage):
         except sqlite3.Error as e:
             print(f"SQLite error during VACUUM: {e}")
 
-        return total_deleted 
+        return total_deleted

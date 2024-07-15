@@ -20,8 +20,9 @@ from ndn.name_tree import NameTrie
 from ndn.types import InterestNack, InterestTimeout
 import os
 
+
 class PubSub(object):
-    def __init__(self, app: NDNApp, prefix: NonStrictName=None, forwarding_hint: NonStrictName=None):
+    def __init__(self, app: NDNApp, prefix: NonStrictName = None, forwarding_hint: NonStrictName = None):
         """
         Initialize a ``PubSub`` instance with identity ``prefix`` and can be reached at \
             ``forwarding_hint``.
@@ -39,9 +40,9 @@ class PubSub(object):
         self.publisher_prefix = prefix
         self.forwarding_hint = forwarding_hint
         self.base_prefix = None
-        self.published_data = NameTrie()    # name -> packet
+        self.published_data = NameTrie()  # name -> packet
         self.topic_to_cb = NameTrie()
-        self.nonce_processed = set()        # used by subscriber to de-duplicate notify interests
+        self.nonce_processed = set()  # used by subscriber to de-duplicate notify interests
 
     def set_publisher_prefix(self, prefix: NonStrictName):
         """
@@ -85,7 +86,6 @@ class PubSub(object):
         except ValueError as esc:
             # duplicate registration
             pass
-
 
     def subscribe(self, topic: NonStrictName, cb: callable):
         """
@@ -183,7 +183,7 @@ class PubSub(object):
         Async helper for ``_on_notify_interest()``.
         """
         logging.debug(f'\nReceived notify interest: {Name.to_str(int_name)}')
-        topic = int_name[:-2]   # remove digest and `notify`
+        topic = int_name[:-2]  # remove digest and `notify`
 
         # parse notify interest
         app_param = NotifyAppParam.parse(app_param)
@@ -266,6 +266,7 @@ class PubSub(object):
 
 class ForwardingHint(TlvModel):
     name = NameField()
+
 
 class NotifyAppParam(TlvModel):
     """
