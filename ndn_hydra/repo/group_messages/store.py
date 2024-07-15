@@ -13,16 +13,20 @@ from ndn.encoding import *
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 from ndn_hydra.repo.modules.global_view import GlobalView
 
+
 class StoreMessageTypes:
     NODE_NAME = 84
     FAVOR = 86
+
+
 class StoreMessageTlv(TlvModel):
     node_name = BytesField(StoreMessageTypes.NODE_NAME)
     favor = BytesField(StoreMessageTypes.FAVOR)
     file_name = NameField()
 
+
 class StoreMessage(SpecificMessage):
-    def __init__(self, nid:str, seqno:int, raw_bytes:bytes):
+    def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(StoreMessage, self).__init__(nid, seqno)
         self.message = StoreMessageTlv.parse(raw_bytes)
 

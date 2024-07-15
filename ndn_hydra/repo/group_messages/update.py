@@ -13,10 +13,12 @@ from ndn.encoding import *
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 
+
 class UpdateMessageTypes:
     NODE_NAME = 84
     FAVOR = 86
     EXPIRATION_DATE = 95
+
 
 class UpdateMessageTlv(TlvModel):
     node_name = BytesField(UpdateMessageTypes.NODE_NAME)
@@ -24,8 +26,9 @@ class UpdateMessageTlv(TlvModel):
     file_name = NameField()
     expiration_time = UintField(UpdateMessageTypes.EXPIRATION_DATE)
 
+
 class UpdateMessage(SpecificMessage):
-    def __init__(self, nid:str, seqno:int, raw_bytes:bytes):
+    def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(UpdateMessage, self).__init__(nid, seqno)
         self.message = UpdateMessageTlv.parse(raw_bytes)
 

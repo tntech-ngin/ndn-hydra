@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS files (
     fetch_path TEXT NOT NULL,
     expiration_time INTEGER NOT NULL
 );
-""" # remove origin_node_name, and fetch_path
+"""  # remove origin_node_name, and fetch_path
 sql_create_stores_tables = """
 CREATE TABLE IF NOT EXISTS stores (
     id INTEGER PRIMARY KEY,
@@ -57,8 +57,9 @@ CREATE TABLE IF NOT EXISTS pending_stores (
 );
 """
 
+
 class GlobalView:
-    def __init__(self, db:str):
+    def __init__(self, db: str):
         self.db = os.path.expanduser(db)
         if len(os.path.dirname(self.db)) > 0 and not os.path.exists(os.path.dirname(self.db)):
             try:
@@ -99,14 +100,14 @@ class GlobalView:
     def close(self):
         self.connection.close()
 
-
     def __get_connection(self):
         try:
             return sqlite3.connect(self.db)
         except Error as e:
             print(e)
         return None
-    def __execute_sql(self, sql:str):
+
+    def __execute_sql(self, sql: str):
         result = []
         conn = self.__get_connection()
         if conn is not None:
@@ -119,7 +120,8 @@ class GlobalView:
                 print(e)
             conn.close()
         return result
-    def __execute_sql_qmark(self, sql:str, par:Tuple):
+
+    def __execute_sql_qmark(self, sql: str, par: Tuple):
         result = []
         conn = self.__get_connection()
         if conn is not None:
@@ -132,6 +134,7 @@ class GlobalView:
                 print(e)
             conn.close()
         return result
+
     def __create_tables(self):
         self.__execute_sql(sql_create_nodes_tables)
         self.__execute_sql(sql_create_files_tables)
@@ -139,7 +142,7 @@ class GlobalView:
         self.__execute_sql(sql_create_backups_tables)
         self.__execute_sql(sql_create_pending_stores_tables)
 
-    def __rerank_backups(self, file_name:str, node_name:str):
+    def __rerank_backups(self, file_name: str, node_name: str):
         sql = """
         SELECT DISTINCT file_name, node_name, rank
         FROM backups
@@ -157,7 +160,7 @@ class GlobalView:
             """
             self.__execute_sql_qmark(sql, (file_name, rank))
 
-    def get_node(self, node_name:str):
+    def get_node(self, node_name: str):
         sql = """
         SELECT DISTINCT node_name, favor, state_vector, expired
         FROM nodes
@@ -173,7 +176,7 @@ class GlobalView:
             'expired': False if (result[0][3] == 0) else True
         }
 
-    def get_nodes(self, include_expired:bool=False):
+    def get_nodes(self, include_expired: bool = False):
         if include_expired:
             sql = """
             SELECT DISTINCT node_name, favor, state_vector, expired
@@ -196,7 +199,7 @@ class GlobalView:
             })
         return nodes
 
-    def get_top_k_nodes(self, k:int):
+    def get_top_k_nodes(self, k: int):
         # Get top k nodes based on the favor value
         sql = """
         SELECT DISTINCT node_name, favor, state_vector, expired
@@ -215,7 +218,7 @@ class GlobalView:
             })
         return nodes
 
-    def update_node(self, node_name:str, favor:float, state_vector:int):
+    def update_node(self, node_name: str, favor: float, state_vector: int):
         sql = """
         INSERT OR REPLACE INTO nodes
             (node_name, favor, state_vector, expired)
@@ -224,7 +227,7 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (node_name, favor, state_vector, node_name))
 
-    def renew_node(self, node_name:str):
+    def renew_node(self, node_name: str):
         sql = """
         UPDATE nodes
         SET expired = 0
@@ -232,7 +235,7 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (node_name,))
 
-    def expire_node(self, node_name:str):
+    def expire_node(self, node_name: str):
         # stores
         sql = """
         DELETE FROM stores WHERE node_name = ?
@@ -266,11 +269,11 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (node_name,))
 
-    def __split_digests(self, digests:bytes, size:int):
+    def __split_digests(self, digests: bytes, size: int):
         digests_bytes = bytes(digests)
-        return [digests_bytes[i:i+size] for i in range(0, len(digests_bytes), size)]
+        return [digests_bytes[i:i + size] for i in range(0, len(digests_bytes), size)]
 
-    def get_file(self, file_name:str):
+    def get_file(self, file_name: str):
         sql = """
         SELECT DISTINCT
             file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time
@@ -328,20 +331,22 @@ class GlobalView:
         files = self.get_files()
         backupable_files = []
         for file in files:
-            if( len(file['stores']) + len(file['backups']) ) < (file['desired_copies'] * 2):
+            if (len(file['stores']) + len(file['backups'])) < (file['desired_copies'] * 2):
                 backupable_files.append(file)
         return backupable_files
 
-    def add_file(self, file_name:str, size:int, origin_node_name:str, fetch_path:str, packet_size:int, packets:int, desired_copies:int, expiration_time:int):
+    def add_file(self, file_name: str, size: int, origin_node_name: str, fetch_path: str, packet_size: int,
+                 packets: int, desired_copies: int, expiration_time: int):
         sql = """
         INSERT OR IGNORE INTO files
             (file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time)
         VALUES
             (?, ?, ?, ?, ?, ?, ?, ?)
         """
-        self.__execute_sql_qmark(sql, (file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time))
+        self.__execute_sql_qmark(sql, (
+        file_name, desired_copies, packets, size, origin_node_name, fetch_path, packet_size, expiration_time))
 
-    def delete_file(self, file_name:str):
+    def delete_file(self, file_name: str):
         # stores
         sql = """
         DELETE FROM stores WHERE file_name = ?
@@ -378,7 +383,7 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (file_name,))
 
-    def update_file(self, file_name:str, expiration_time:int):
+    def update_file(self, file_name: str, expiration_time: int):
         sql = """
         UPDATE files
         SET expiration_time = ?
@@ -386,7 +391,7 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (expiration_time, file_name))
 
-    def store_file(self, file_name:str, node_name:str):
+    def store_file(self, file_name: str, node_name: str):
         # rerank backuped_by
         self.__rerank_backups(file_name, node_name)
         # remove from backuped_by
@@ -403,7 +408,7 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (file_name, node_name))
 
-    def set_backups(self, file_name:str, backup_list:List[Tuple[str, str]]):
+    def set_backups(self, file_name: str, backup_list: List[Tuple[str, str]]):
         # remove previous backups
         sql = """
         DELETE FROM backups WHERE (file_name = ?)
@@ -421,7 +426,7 @@ class GlobalView:
             """
             self.__execute_sql_qmark(sql, (file_name, backup[0], rank, backup[1]))
 
-    def add_backup(self, file_name:str, node_name:str, rank:int, nonce:str):
+    def add_backup(self, file_name: str, node_name: str, rank: int, nonce: str):
         # delete all backups with larger rank value
         sql = """
         DELETE FROM backups
@@ -437,7 +442,7 @@ class GlobalView:
         """
         self.__execute_sql_qmark(sql, (file_name, node_name, rank, nonce))
 
-    def get_stores(self, file_name:str):
+    def get_stores(self, file_name: str):
         sql = """
         SELECT DISTINCT file_name, node_name
         FROM stores
@@ -450,7 +455,7 @@ class GlobalView:
             stores.append(result[1])
         return stores
 
-    def get_backups(self, file_name:str):
+    def get_backups(self, file_name: str):
         sql = """
         SELECT DISTINCT file_name, node_name, rank, nonce
         FROM backups
@@ -467,7 +472,7 @@ class GlobalView:
             })
         return backups
 
-    def get_pending_stores(self, file_name:str):
+    def get_pending_stores(self, file_name: str):
         sql = """
         SELECT DISTINCT file_name, node_name
         FROM pending_stores
@@ -479,7 +484,7 @@ class GlobalView:
             pending_stores.append(result[1])
         return pending_stores
 
-    def add_pending_store(self, file_name:str, node_name:str):
+    def add_pending_store(self, file_name: str, node_name: str):
         sql = """
         INSERT OR IGNORE INTO pending_stores
             (file_name, node_name)

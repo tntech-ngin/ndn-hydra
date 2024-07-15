@@ -22,14 +22,16 @@ from ndn_hydra.repo.handles.protocol_handle_base import ProtocolHandle
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.file_remover import remove_file
 
+
 class DeleteCommandHandle(ProtocolHandle):
     """
     DeleteCommandHandle processes delete command handles, and deletes corresponding data stored
     in the database.
     TODO: Add validator
     """
+
     def __init__(self, app: NDNApp, data_storage: Storage, pb: PubSub, config: dict,
-                main_loop: MainLoop, global_view: GlobalView):
+                 main_loop: MainLoop, global_view: GlobalView):
         """
         :param app: NDNApp.
         :param data_storage: Storage.
