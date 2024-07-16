@@ -7,7 +7,7 @@ from ndn.encoding import Name, NonStrictName
 
 # DataStorage adds additional methods to the SqliteStorage
 class DataStorage(SqliteStorage):
-    def __init__(self, db_path: str, write_period: int=10, initialize: bool=True):
+    def __init__(self, db_path: str, write_period: int = 10, initialize: bool = True):
         super().__init__(db_path, write_period, initialize)
         self.db_cache = {}
         self.db_cache_timeout = 15 * 60 # 15 minutes
@@ -15,7 +15,7 @@ class DataStorage(SqliteStorage):
         # self.conn.execute('PRAGMA journal_mode=wal')  # Enable WAL mode
 
 
-    def _prepare_cache(self, file_name: str, total_segments: int, can_be_prefix:bool=False, must_be_fresh:bool=False) -> None:
+    def _prepare_cache(self, file_name: str, total_segments: int, can_be_prefix: bool = False, must_be_fresh: bool = False) -> None:
         try: 
             all_keys = [file_name + "/seg=" + str(i) for i in range(total_segments)]
             batch_keys_b = [self._get_name_bytes_wo_tl(Name.normalize(key)) for key in all_keys]
@@ -52,7 +52,7 @@ class DataStorage(SqliteStorage):
             cursor.close()
 
 
-    def get_packet(self, segment_comp: str, total_segments: int, file_name: str, can_be_prefix:bool=False, must_be_fresh:bool=False) -> List[bytes]:
+    def get_packet(self, segment_comp: str, total_segments: int, file_name: str, can_be_prefix: bool = False, must_be_fresh: bool = False) -> List[bytes]:
         key = file_name + segment_comp
 
         # If in cache, return from cache
@@ -77,7 +77,7 @@ class DataStorage(SqliteStorage):
     def remove_packets(self, names: List[NonStrictName]) -> int:
         if not self.initialized:
             raise self.UninitializedError("The storage is not initialized.")
-        
+
         keys = [self._get_name_bytes_wo_tl(Name.normalize(name)) for name in names]
         if not keys:
             return 0
@@ -111,4 +111,4 @@ class DataStorage(SqliteStorage):
         except sqlite3.Error as e:
             print(f"SQLite error during VACUUM: {e}")
 
-        return total_deleted 
+        return total_deleted

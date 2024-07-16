@@ -2,9 +2,8 @@
 # NDN Hydra Delete Command Handle
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -23,14 +22,16 @@ from ndn_hydra.repo.handles.protocol_handle_base import ProtocolHandle
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.file_remover import remove_file
 
+
 class DeleteCommandHandle(ProtocolHandle):
     """
     DeleteCommandHandle processes delete command handles, and deletes corresponding data stored
     in the database.
     TODO: Add validator
     """
+
     def __init__(self, app: NDNApp, data_storage: Storage, pb: PubSub, config: dict,
-                main_loop: MainLoop, global_view: GlobalView):
+                 main_loop: MainLoop, global_view: GlobalView):
         """
         :param app: NDNApp.
         :param data_storage: Storage.

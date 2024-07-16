@@ -2,9 +2,8 @@
 # NDN Hydra Remove Group Message
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -16,16 +15,20 @@ from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.specific_message import SpecificMessage
 from ndn_hydra.repo.modules.file_remover import remove_file
 
+
 class RemoveMessageTypes:
     NODE_NAME = 84
     FAVOR = 86
+
+
 class RemoveMessageTlv(TlvModel):
     node_name = BytesField(RemoveMessageTypes.NODE_NAME)
     favor = BytesField(RemoveMessageTypes.FAVOR)
     file_name = NameField()
 
+
 class RemoveMessage(SpecificMessage):
-    def __init__(self, nid:str, seqno:int, raw_bytes:bytes):
+    def __init__(self, nid: str, seqno: int, raw_bytes: bytes):
         super(RemoveMessage, self).__init__(nid, seqno)
         self.message = RemoveMessageTlv.parse(raw_bytes)
 

@@ -2,7 +2,6 @@
 # NDN Hydra Pip Setup
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
 #  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
@@ -14,7 +13,7 @@ import re
 from setuptools import setup, find_packages
 from typing import List
 
-with io.open("docs/version.py", "rt", encoding="utf8") as f:
+with io.open("./docs/version.py", "rt", encoding="utf8") as f:
     version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 with io.open("README.rst", "rt", encoding="utf8") as f:
@@ -55,9 +54,9 @@ setup(
         'Programming Language :: Python :: 3.10'
     ],
     keywords='NDN HYDRA',
-    packages=find_packages(exclude=['tests', 'examples', 'docs', 'notes']),
+    packages=find_packages(exclude=['tests', 'examples', 'notes']),
     include_package_data=True,
-    package_data={'ndn_hydra.repo': ['config.yaml']},
+    package_data={'ndn_hydra.repo': ['config.yaml', 'docs/version.py', 'docs/requirements.txt']},
     install_requires=_parse_requirements('docs/requirements.txt'),
     python_requires=">=3.8",
     entry_points={
