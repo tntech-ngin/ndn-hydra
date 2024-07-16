@@ -56,7 +56,7 @@ class HydraFetchClient(object):
         start_index = 0
         end_index = None
         data_name, meta_info, content, data_bytes = await self.app.express_interest(
-            name_at_repo, need_raw_packet=True, can_be_prefix=True, must_be_fresh=False, lifetime=2000)
+            name_at_repo, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=5 * 60 * 1000)
 
         if meta_info.content_type == ContentType.NACK:
             print("Distributed Repo does not have that file.")

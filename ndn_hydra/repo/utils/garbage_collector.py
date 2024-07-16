@@ -32,3 +32,14 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
 
     logger.info("\nGARBAGE COLLECTOR: Finished collecting DB garbage.")
 
+
+def collect_db_cache_garbage(data_storage: Storage, logger: logging.Logger) -> None:
+    """
+    Removes packets that have expired from the cache of a node's databases.
+    """
+    logger.info("\nGARBAGE COLLECTOR: Collecting DB cache garbage...")
+    
+    # Remove packets that have expired
+    data_storage.remove_expired_cache()
+    
+    logger.info("\nGARBAGE COLLECTOR: Finished collecting DB cache garbage.")

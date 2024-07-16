@@ -23,7 +23,7 @@ from ndn.storage import Storage, SqliteStorage
 from ndn_hydra.repo.modules import *
 from ndn_hydra.repo.group_messages import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
-from ndn_hydra.repo.utils.garbage_collector import collect_db_garbage
+from ndn_hydra.repo.utils.garbage_collector import collect_db_garbage, collect_db_cache_garbage
 from ndn_hydra.repo.utils.concurrent_fetcher import concurrent_fetcher
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
 from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
@@ -43,6 +43,7 @@ class MainLoop:
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
         self.last_garbage_collect_t = time.time()  # time in seconds
+        self.last_cache_garbage_collect_t = time.time()  # time in seconds
         self.favor = 0
 
     async def start(self):
@@ -231,9 +232,11 @@ class MainLoop:
 
     def check_garbage(self):
         """
-        Checks for database garbage daily.
+        Checks for database and cache garbage.
         """
         current_time = time.time()
+
+        # Every 24 hours, collect database garbage
         hours_since_last_collection = (current_time - self.last_garbage_collect_t) / (60 * 60)
         if hours_since_last_collection >= 24:
             collect_db_garbage(self.global_view,
@@ -242,3 +245,10 @@ class MainLoop:
                                self.config,
                                self.logger)
             self.last_garbage_collect_t = time.time()
+
+        # Every 15 minutes, collect cache garbage
+        minutes_since_last_cache_collection = (current_time - self.last_cache_garbage_collect_t) / 60
+        if minutes_since_last_cache_collection >= 15:
+            collect_db_cache_garbage(self.data_storage, self.logger)
+            self.last_cache_garbage_collect_t = time.time()
+
