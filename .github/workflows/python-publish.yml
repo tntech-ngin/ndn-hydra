@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/ndn-hydra-repo  # TODO: Replace <package-name> with our PyPI project name
+      url: https://pypi.org/p/ndn-hydra-repo
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
