@@ -26,7 +26,7 @@ def _parse_requirements(filename: str) -> List[str]:
 
 
 setup(
-    name='ndn-hydra',
+    name='ndn-hydra-repo',
     version=version,
     description='ndn-hydra: An NDN distributed repository with resiliency coded in python.',
     long_description=long_description,
