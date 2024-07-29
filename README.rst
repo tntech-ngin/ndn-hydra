@@ -1,7 +1,7 @@
 ndn-hydra: an NDN distributed repo
 ==================================
 
-An Named Data Networking (NDN) Distributed Repo implementation using python-ndn_ nicknamed ``ndn-hydra``.
+A Named Data Networking (NDN) Distributed Repo implementation using python-ndn_ nicknamed ``ndn-hydra``.
 
 Hydra uses ndn-python-svs_ (StateVectorSync) to communicate in a distributed environment and
 ndn-python-storage_ for its storage options.
