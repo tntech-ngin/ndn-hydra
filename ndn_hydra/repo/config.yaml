@@ -25,3 +25,10 @@ default_config:
     network_cost: 0
     storage_cost: 0
     remaining_storage: 0
+
+  security:
+    trust_anchor: N/A
+    lvs_model: N/A
+    box_sqlite3_path: N/A
+    tpm: N/A
+
