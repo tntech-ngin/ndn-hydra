@@ -46,6 +46,8 @@ class MainLoop:
         self.file_fetcher = file_fetcher
         self.file_fetcher.store_func = self.store
         self.svs = None
+        self.sec_ops = None
+        self.envelope = None
         self.logger = logging.getLogger('ndn')
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'],

@@ -8,26 +8,24 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
-import logging, random, base64
-from argparse import ArgumentParser
+import os
+import sys
+import asyncio
+import pkg_resources
 from typing import Dict
 from threading import Thread
-import pkg_resources
+from argparse import ArgumentParser
+# NDN
 from ndn.app import NDNApp
 from ndn.encoding import Name
 from ndn.storage import SqliteStorage
-from ndn.app_support.light_versec.binary import LvsModel
-from ndn.security import TpmFile
-import ndn.app_support.light_versec.checker as chk
-import sys, os
 from ndn.svs import SVSyncLogger
+# Local libs
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
 from ndn_hydra.repo.modules.data_storage import DataStorage
 from ndn_hydra.repo.modules.read_config import read_config_file
-from envelope.envelope import EnvelopeBase
-from envelope.impl.storage import Sqlite3Box
-from envelope.impl import EnvelopeImpl
+from ndn_hydra.repo.modules.prepare_keys import prepare_keys
 
 
 def process_cmd_opts():
@@ -43,7 +41,8 @@ def process_cmd_opts():
         if args.help:
             if len(sys.argv) - 1 < 2:
                 print("* Basic initialization:")
-                print("    ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME -a TRUST_ANCHOR -l LVS_MODEL -b SQLITE3_BOX -t TPM")
+                print(
+                    "    ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME -a TRUST_ANCHOR -l LVS_MODEL -b SQLITE3_BOX -t TPM")
                 print("")
                 print("    ndn-hydra-repo: hosting a node for hydra, the NDN distributed repo.")
                 print("* Examples:")
@@ -58,7 +57,8 @@ def process_cmd_opts():
                 print("    -n,  --nodename NODE_NAME         |   node name. Example: \"node01\"")
                 print("    -d,  --debugger                   |   enable debugging mode")
                 print("    -cr, --critical                   |   enable critical logging level")
-                print("  -a, --anchor TRUST_ANCHOR        |   trust anchor file encoded in base64. Example: \"hydra.ndncert\"")
+                print(
+                    "  -a, --anchor TRUST_ANCHOR        |   trust anchor file encoded in base64. Example: \"hydra.ndncert\"")
                 print("  -l, --lvsmodel LVS_MODEL         |   lvs model file encoded in base64. Example: \"hydra.lvs\"")
                 print("  -b, --box SQLITE3_BOX            |   sqlite3 box db path. Example: \"RepoNodeCerts.db\"")
                 print("  -t, --tpm TPM                    |   ndn-cxx style tpm path. Example: \"~/.ndn/ndn-sec-keys\"")
@@ -155,6 +155,14 @@ def process_cmd_opts():
             config_data["logger_level"] = "DEBUG"
         if cli_args.critical is not False:
             config_data["logger_level"] = "CRITICAL"
+        if cli_args.trust_anchor is not False:
+            config_data["trust_anchor"] = process_name(cli_args.trust_anchor)
+        if cli_args.lvs_model is not False:
+            config_data["lvs_model"] = process_name(cli_args.lvs_model)
+        if cli_args.box_sqlite3_path is not False:
+            config_data["box_sqlite3_path"] = process_name(cli_args.box_sqlite3_path)
+        if cli_args.tpm is not False:
+            config_data["tpm"] = process_name(cli_args.tpm)
 
         workpath = "{home}/.ndn/repo{repo_prefix}/{node_name}".format(
             home=os.path.expanduser("~"),
@@ -217,6 +225,9 @@ class HydraNodeThread(Thread):
         # NDN
         app = NDNApp()
 
+        # Prepare keys that will be used by envelope
+        asyncio.run(prepare_keys(self.config['repo_prefix'], self.config['node_id'], app))
+
         # Post-start
         async def start_main_loop():
             # databases
@@ -236,7 +247,7 @@ class HydraNodeThread(Thread):
                 data_storage,
                 svs_storage,
                 file_fetcher,
-                using_envelope = True
+                using_envelope=True
             )
 
             # handles (reads, commands & queries)
