@@ -1,6 +1,5 @@
 import time
 import logging
-import asyncio as aio
 from ndn.svs import SVSync
 from ndn.storage import Storage
 from ndn.encoding import Name, Component
@@ -31,15 +30,3 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
                 logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
 
     logger.info("\nGARBAGE COLLECTOR: Finished collecting DB garbage.")
-
-
-def collect_db_cache_garbage(data_storage: Storage, logger: logging.Logger) -> None:
-    """
-    Removes packets that have expired from the cache of a node's databases.
-    """
-    logger.info("\nGARBAGE COLLECTOR: Collecting DB cache garbage...")
-    
-    # Remove packets that have expired
-    data_storage.remove_expired_cache()
-    
-    logger.info("\nGARBAGE COLLECTOR: Finished collecting DB cache garbage.")
