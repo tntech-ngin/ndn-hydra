@@ -54,7 +54,10 @@ class HydraFetchClient(object):
         start_index = 0
         end_index = None
         data_name, meta_info, content, data_bytes = await self.app.express_interest(
-            name_at_repo, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=5 * 60 * 1000)
+            name_at_repo, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=4000)
+
+        forwarding_hint = []
+        name_at_repo = name_at_repo[:-1]
 
         forwarding_hint = []
         name_at_repo = name_at_repo[:-1]

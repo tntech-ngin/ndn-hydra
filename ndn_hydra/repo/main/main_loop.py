@@ -22,7 +22,7 @@ from ndn.storage import Storage, SqliteStorage
 from ndn_hydra.repo.modules import *
 from ndn_hydra.repo.group_messages import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
-from ndn_hydra.repo.utils.garbage_collector import collect_db_garbage, collect_db_cache_garbage
+from ndn_hydra.repo.utils.garbage_collector import collect_db_garbage
 from ndn_hydra.repo.utils.concurrent_fetcher import concurrent_fetcher
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
 from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
@@ -244,10 +244,3 @@ class MainLoop:
                                self.config,
                                self.logger)
             self.last_garbage_collect_t = time.time()
-
-        # Every 15 minutes, collect cache garbage
-        minutes_since_last_cache_collection = (current_time - self.last_cache_garbage_collect_t) / 60
-        if minutes_since_last_cache_collection >= 15:
-            collect_db_cache_garbage(self.data_storage, self.logger)
-            self.last_cache_garbage_collect_t = time.time()
-

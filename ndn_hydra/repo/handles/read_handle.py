@@ -77,7 +77,9 @@ class ReadHandle(object):
         file_name = self._get_file_name_from_interest(Name.to_str(int_name[:-1]))
         best_id = self._best_id_for_file(file_name)
         segment_comp = "/" + Component.to_str(int_name[-1])
-        total_segments = int(self.global_view.get_file(file_name)["packets"])
+
+        if int_param.must_be_fresh and segment_comp != "/seg=0":
+            return
 
         if int_param.must_be_fresh and segment_comp != "/seg=0":
             return
@@ -98,15 +100,11 @@ class ReadHandle(object):
                 self._reset_file_expiration(file_name)
 
             # serving my own data
-            data_bytes = self.data_storage.get_packet(segment_comp, total_segments, file_name, int_param.can_be_prefix)
+            data_bytes = self.data_storage.get_packet(file_name + segment_comp, int_param.can_be_prefix)
             if data_bytes == None:
                 return
 
-            self.logger.debug(f'\nRead handle: serve data {Name.to_str(int_name)}')
-            _, _, content, _ = parse_data(data_bytes)
-            # print("serve"+file_name + segment_comp+"   "+Name.to_str(name))
-            final_id = Component.from_number(total_segments-1, Component.TYPE_SEGMENT)
-            self.app.put_data(int_name, content=content, content_type=ContentType.BLOB, final_block_id=final_id)
+            self.app.put_raw_packet(data_bytes)
         else:
             if segment_comp == "/seg=0":
                 self.logger.info(f'\n[CMD][FETCH]    linked to another node')

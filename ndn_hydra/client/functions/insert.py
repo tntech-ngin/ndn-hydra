@@ -62,12 +62,12 @@ class HydraInsertClient(object):
             final_block_id = Component.from_segment(seg_cnt - 1)
             inner_packets = [self.app.prepare_data(packet_prefix + [Component.from_segment(i)],
                                                   data[i * SEGMENT_SIZE:(i + 1) * SEGMENT_SIZE],
-                                                  freshness_period=10000,
+                                                  freshness_period=0,
                                                   final_block_id=final_block_id)
                             for i in range(seg_cnt)]
             self.packets = [self.app.prepare_data(publish_prefix + [Component.from_segment(i)],
                                                     packet,
-                                                    freshness_period=10000,
+                                                    freshness_period=0,
                                                     final_block_id=final_block_id)
                             for i, packet in enumerate(inner_packets)]
 
