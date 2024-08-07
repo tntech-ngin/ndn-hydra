@@ -20,11 +20,6 @@ jobs:
       with:
         python-version: "3.x"
 
-    - name: Fetch all commit messages
-      run: |
-        git fetch --prune --unshallow
-        git fetch --all
-
     - name: Determine version bump
       id: version
       run: |
@@ -60,26 +55,13 @@ jobs:
         if [ ! -f docs/version.py ]; then
           echo "__version__ = \"$version\"" > docs/version.py
         else
-          # Update version in docs/version.py
-          echo "Updating docs/version.py to version $version"
-          sed -i "s/__version__ = \".*\"/__version__ = \"$version\"/" docs/version.py
+          echo "Updating to version $version"
         fi
         
         if git diff --quiet; then
           echo "No changes to commit."
           exit 0
         fi
-
-    - name: Commit and push version bump
-      if: success()
-      env:
-        GH_PAT: ${{ secrets.BUMP_VERSION_GABRIEL }}
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add docs/version.py
-        git commit -m "Bump version to $version"
-        git push https://x-access-token:${{ secrets.BUMP_VERSION_GABRIEL }}@github.com/${{ github.repository }}.git HEAD:main
 
   build:
     name: Build distribution 📦
@@ -106,9 +88,6 @@ jobs:
     name: Publish Python 🐍 distribution 📦 to PyPI
     needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/ndn-hydra-repo  # TODO: Replace <package-name> with our PyPI project name
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
@@ -136,7 +115,7 @@ jobs:
           name: python-package-distributions
           path: dist/
       - name: Sign the dists with Sigstore
-        uses: sigstore/gh-action-sigstore-python@v2
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:
           inputs: ./dist/*.tar.gz ./dist/*.whl
       - name: Create GitHub Release
@@ -147,3 +126,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: gh release upload '${{ github.ref_name }}' dist/** --repo '${{ github.repository }}'
+
+  publish-to-testpypi:
+    name: Publish Python 🐍 distribution 📦 to TestPyPI
+    needs:
+      - build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/ndn-hydra-repo
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Publish distribution 📦 to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
