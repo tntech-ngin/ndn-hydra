@@ -42,6 +42,7 @@ class MainLoop:
         self.node_name = self.config['node_name']
         self.tracker = HeartbeatTracker(self.node_name, global_view, config['loop_period'], config['heartbeat_rate'], config['tracker_rate'], config['beats_to_fail'], config['beats_to_renew'])
         self.last_garbage_collect_t = time.time()  # time in seconds
+        self.last_cache_garbage_collect_t = time.time()  # time in seconds
         self.favor = 0
 
     async def start(self):
@@ -230,9 +231,11 @@ class MainLoop:
 
     def check_garbage(self):
         """
-        Checks for database garbage daily.
+        Checks for database and cache garbage.
         """
         current_time = time.time()
+
+        # Every 24 hours, collect database garbage
         hours_since_last_collection = (current_time - self.last_garbage_collect_t) / (60 * 60)
         if hours_since_last_collection >= 24:
             collect_db_garbage(self.global_view,

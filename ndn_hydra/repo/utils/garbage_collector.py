@@ -1,6 +1,5 @@
 import time
 import logging
-import asyncio as aio
 from ndn.svs import SVSync
 from ndn.storage import Storage
 from ndn.encoding import Name, Component
@@ -31,4 +30,3 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
                 logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
 
     logger.info("\nGARBAGE COLLECTOR: Finished collecting DB garbage.")
-

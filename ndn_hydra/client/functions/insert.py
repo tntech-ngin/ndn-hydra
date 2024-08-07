@@ -39,7 +39,10 @@ class HydraInsertClient(object):
         Insert a file associated with a file name to the remote repo
         """
         size, seg_cnt = 0, 0
-        fetch_file_prefix = self.client_prefix + [Component.from_str("upload")] + file_name
+        # The prefix to be stored in the repo
+        packet_prefix = self.repo_prefix + file_name
+        # The prefix to be published from the client
+        publish_prefix = self.client_prefix + file_name
 
         # Check if the file already exists
         query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
@@ -56,13 +59,19 @@ class HydraInsertClient(object):
             data = f.read()
             size = len(data)
             seg_cnt = (len(data) + SEGMENT_SIZE - 1) // SEGMENT_SIZE
-            self.packets = [self.app.prepare_data(fetch_file_prefix + [Component.from_segment(i)],
+            final_block_id = Component.from_segment(seg_cnt - 1)
+            inner_packets = [self.app.prepare_data(packet_prefix + [Component.from_segment(i)],
                                                   data[i * SEGMENT_SIZE:(i + 1) * SEGMENT_SIZE],
-                                                  freshness_period=10000,
-                                                  final_block_id=Component.from_segment(seg_cnt - 1))
+                                                  freshness_period=0,
+                                                  final_block_id=final_block_id)
                             for i in range(seg_cnt)]
+            self.packets = [self.app.prepare_data(publish_prefix + [Component.from_segment(i)],
+                                                    packet,
+                                                    freshness_period=0,
+                                                    final_block_id=final_block_id)
+                            for i, packet in enumerate(inner_packets)]
 
-        print(f'\nCreated {seg_cnt} chunks under name {Name.to_str(fetch_file_prefix)}')
+        print(f'\nCreated {seg_cnt} chunks under name {Name.to_str(publish_prefix)}')
 
         def on_interest(int_name, _int_param, _app_param):
             seg_no = Component.to_number(int_name[-1]) if Component.get_type(
@@ -73,7 +82,7 @@ class HydraInsertClient(object):
                 toc = time.perf_counter()
                 print(f"The publication is complete! - total time (with disk): {toc - tic:0.4f} secs")
 
-        self.app.route(fetch_file_prefix)(on_interest)
+        self.app.route(publish_prefix)(on_interest)
 
         file = File()
         file.file_name = file_name
@@ -82,7 +91,7 @@ class HydraInsertClient(object):
         file.size = size
         cmd = InsertCommand()
         cmd.file = file
-        cmd.fetch_path = fetch_file_prefix
+        cmd.fetch_path = publish_prefix
         cmd_bytes = cmd.encode()
 
         # publish msg to repo's insert topic

@@ -14,7 +14,6 @@ import time
 from ndn.app import NDNApp
 from ndn.encoding import FormalName, Component, Name, ContentType
 import os
-from time import sleep
 from ndn_hydra.repo.utils.concurrent_fetcher import concurrent_fetcher
 
 
@@ -37,7 +36,7 @@ class HydraFetchClient(object):
         :param local_filename: str. The filename of the retrieved file on the local file system.
         :param overwrite: If true, existing files are replaced.
         """
-        name_at_repo = self.repo_prefix + [Component.from_str("fetch")] + file_name + [Component.from_segment(0)]
+        name_at_repo = self.repo_prefix + file_name + [Component.from_segment(0)]
 
         # If no local filename is provided, store file with last name component
         # of repo filename
@@ -55,18 +54,22 @@ class HydraFetchClient(object):
         start_index = 0
         end_index = None
         data_name, meta_info, content, data_bytes = await self.app.express_interest(
-            name_at_repo, need_raw_packet=True, can_be_prefix=True, must_be_fresh=False, lifetime=2000)
+            name_at_repo, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=4000)
+
+        forwarding_hint = []
+        name_at_repo = name_at_repo[:-1]
 
         if meta_info.content_type == ContentType.NACK:
             print("Distributed Repo does not have that file.")
             return
         elif meta_info.content_type == ContentType.LINK:
             print(f"First Packet Content: {bytes(content).decode()}")
-            name_at_repo = Name.from_str(bytes(content).decode())
+            # name_at_repo = Name.from_str(bytes(content).decode())
             end_index = Component.to_number(meta_info.final_block_id)
+            forwarding_hint = [(1, bytes(content).decode())]
         else:
             # print(type(content))
-            name_at_repo = name_at_repo[:-1]
+            # name_at_repo = name_at_repo[:-1]
             start_index = start_index + 1
             end_index = Component.to_number(meta_info.final_block_id)
 
@@ -77,7 +80,7 @@ class HydraFetchClient(object):
 
         # Fetch the rest of the file.
         if start_index <= end_index:
-            async for (_, _, content, _, _) in concurrent_fetcher(self.app, name_at_repo, Name.from_str(local_filename), start_index, end_index, Semaphore(10)):
+            async for (_, _, content, _, _) in concurrent_fetcher(self.app, name_at_repo, Name.from_str(local_filename), start_index, end_index, Semaphore(10), forwarding_hint=forwarding_hint):
                 b_array.extend(content)
 
         # After b_array is filled, sort out what to do with the data.

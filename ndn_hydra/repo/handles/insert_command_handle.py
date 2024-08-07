@@ -44,6 +44,7 @@ class InsertCommandHandle(ProtocolHandle):
         :param global_view: Global View.
         """
         super(InsertCommandHandle, self).__init__(app, data_storage, pb, config)
+        self.app = app
         self.prefix = None
         self.main_loop = main_loop
         self.global_view = global_view
@@ -152,7 +153,7 @@ class InsertCommandHandle(ProtocolHandle):
         add_message.node_name = self.config['node_name'].encode()
         add_message.favor = str(favor).encode()
         add_message.file = File()
-        add_message.file.file_name = cmd.file.file_name
+        add_message.file.file_name = cmd.file.file_name[-2:]
         add_message.file.packets = packets
         add_message.file.packet_size = packet_size
         add_message.file.size = size
