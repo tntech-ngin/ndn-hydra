@@ -8,20 +8,24 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
-import logging
-from argparse import ArgumentParser
+import os
+import sys
+import asyncio
+import pkg_resources
 from typing import Dict
 from threading import Thread
-import pkg_resources
+from argparse import ArgumentParser
+# NDN
 from ndn.app import NDNApp
 from ndn.encoding import Name
 from ndn.storage import SqliteStorage
-import sys, os
 from ndn.svs import SVSyncLogger
+# Local libs
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
 from ndn_hydra.repo.modules.data_storage import DataStorage
 from ndn_hydra.repo.modules.read_config import read_config_file
+from ndn_hydra.repo.modules.prepare_keys import prepare_keys
 
 
 def process_cmd_opts():
@@ -37,7 +41,8 @@ def process_cmd_opts():
         if args.help:
             if len(sys.argv) - 1 < 2:
                 print("* Basic initialization:")
-                print("    ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME")
+                print(
+                    "    ndn-hydra-repo [-h] [-v] -rp REPO_PREFIX -n NODE_NAME -a TRUST_ANCHOR -l LVS_MODEL -b SQLITE3_BOX -t TPM")
                 print("")
                 print("    ndn-hydra-repo: hosting a node for hydra, the NDN distributed repo.")
                 print("* Examples:")
@@ -52,6 +57,11 @@ def process_cmd_opts():
                 print("    -n,  --nodename NODE_NAME         |   node name. Example: \"node01\"")
                 print("    -d,  --debugger                   |   enable debugging mode")
                 print("    -cr, --critical                   |   enable critical logging level")
+                print(
+                    "  -a, --anchor TRUST_ANCHOR        |   trust anchor file encoded in base64. Example: \"hydra.ndncert\"")
+                print("  -l, --lvsmodel LVS_MODEL         |   lvs model file encoded in base64. Example: \"hydra.lvs\"")
+                print("  -b, --box SQLITE3_BOX            |   sqlite3 box db path. Example: \"RepoNodeCerts.db\"")
+                print("  -t, --tpm TPM                    |   ndn-cxx style tpm path. Example: \"~/.ndn/ndn-sec-keys\"")
                 print("")
                 print("* Default configuration:")
                 print("    The default configuration is in the config.yaml file in the repo folder: ")
@@ -91,6 +101,10 @@ def process_cmd_opts():
         parser.add_argument("-n", "--nodename", action="store", dest="node_name", default=False, required=False)
         parser.add_argument("-d", "--debugger", action="store_true", dest="debugger", default=False, required=False)
         parser.add_argument("-cr", "--critical", action="store_true", dest="critical", default=False, required=False)
+        parser.add_argument("-a", "--anchor", action="store", dest="trust_anchor", required=True)
+        parser.add_argument("-l", "--lvsmodel", action="store", dest="lvs_model", required=True)
+        parser.add_argument("-b", "--box", action="store", dest="box_sqlite3_path", required=True)
+        parser.add_argument("-t", "--tpm", action="store", dest="tpm", required=True)
 
         # Getting all Arguments
         cli_args = parser.parse_args()
@@ -127,6 +141,10 @@ def process_cmd_opts():
             "remaining_storage": default_config_file['default_config']['favor']['remaining_storage'],
             "rw_speed": default_config_file['default_config']['favor']['rw_speed'],
             "logger_level": default_config_file['default_config']['logger_level'],
+            "trust_anchor": default_config_file['default_config']['security']['trust_anchor'],
+            "lvs_model": default_config_file['default_config']['security']['lvs_model'],
+            "box_sqlite3_path": default_config_file['default_config']['security']['box_sqlite3_path'],
+            "tpm": default_config_file['default_config']['security']['tpm'],
         }
 
         if cli_args.repo_prefix is not False:
@@ -137,6 +155,14 @@ def process_cmd_opts():
             config_data["logger_level"] = "DEBUG"
         if cli_args.critical is not False:
             config_data["logger_level"] = "CRITICAL"
+        if cli_args.trust_anchor is not False:
+            config_data["trust_anchor"] = process_name(cli_args.trust_anchor)
+        if cli_args.lvs_model is not False:
+            config_data["lvs_model"] = process_name(cli_args.lvs_model)
+        if cli_args.box_sqlite3_path is not False:
+            config_data["box_sqlite3_path"] = process_name(cli_args.box_sqlite3_path)
+        if cli_args.tpm is not False:
+            config_data["tpm"] = process_name(cli_args.tpm)
 
         workpath = "{home}/.ndn/repo{repo_prefix}/{node_name}".format(
             home=os.path.expanduser("~"),
@@ -199,6 +225,9 @@ class HydraNodeThread(Thread):
         # NDN
         app = NDNApp()
 
+        # Prepare keys that will be used by envelope
+        asyncio.run(prepare_keys(self.config['repo_prefix'], self.config['node_id'], app))
+
         # Post-start
         async def start_main_loop():
             # databases
@@ -211,7 +240,15 @@ class HydraNodeThread(Thread):
             file_fetcher = FileFetcher(app, global_view, data_storage, self.config)
 
             # main_loop (svs)
-            main_loop = MainLoop(app, self.config, global_view, data_storage, svs_storage, file_fetcher)
+            main_loop = MainLoop(
+                app,
+                self.config,
+                global_view,
+                data_storage,
+                svs_storage,
+                file_fetcher,
+                using_envelope=True
+            )
 
             # handles (reads, commands & queries)
             read_handle = ReadHandle(app, data_storage, global_view, main_loop, self.config)
