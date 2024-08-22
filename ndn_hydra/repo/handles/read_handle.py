@@ -25,6 +25,7 @@ class ReadHandle(object):
     """
     ReadHandle processes ordinary interests, and return corresponding data if exists.
     """
+
     def __init__(self, app: NDNApp, data_storage: Storage, global_view: GlobalView, main_loop: MainLoop, config: dict):
         """
         :param app: NDNApp.
@@ -46,6 +47,9 @@ class ReadHandle(object):
         # self.listen(Name.from_str(self.repo_prefix + self.command_comp))
         # self.listen(Name.from_str(self.repo_prefix + self.node_comp  + self.node_name))
         self.listen(Name.from_str(self.repo_prefix + self.node_name))
+
+        self.listen(Name.from_str(self.repo_prefix + self.command_comp))
+        self.listen(Name.from_str(self.repo_prefix + self.node_comp + self.node_name + self.command_comp))
 
     def listen(self, prefix):
         """
@@ -85,7 +89,7 @@ class ReadHandle(object):
             if segment_comp == "/seg=0":
                 self.logger.info(f'\n[CMD][FETCH]    nacked due to no file')
 
-            # nack due to lack of avaliability
+            # nack due to lack of availability
             self.app.put_data(int_name, content=None, content_type=ContentType.NACK)
             self.logger.info(f"\nRead handle: data not found {Name.to_str(int_name)}")
             return
@@ -101,7 +105,12 @@ class ReadHandle(object):
             if data_bytes == None:
                 return
 
-            self.app.put_raw_packet(data_bytes)
+            self.logger.debug(f'\nRead handle: serve data {Name.to_str(int_name)}')
+            _, _, content, _ = parse_data(data_bytes)
+            # print("serve"+file_name + segment_comp+"   "+Name.to_str(name))
+            final_id = Component.from_number(int(self.global_view.get_file(file_name)["packets"]) - 1,
+                                             Component.TYPE_SEGMENT)
+            self.app.put_data(int_name, content=content, content_type=ContentType.BLOB, final_block_id=final_id)
         else:
             if segment_comp == "/seg=0":
                 self.logger.info(f'\n[CMD][FETCH]    linked to another node')
@@ -109,20 +118,22 @@ class ReadHandle(object):
             # create a link to a node who has the content
             new_name = self.repo_prefix + best_id + file_name
             link_content = bytes(new_name.encode())
-            final_id = Component.from_number(total_segments-1, Component.TYPE_SEGMENT)
+            final_id = Component.from_number(int(self.global_view.get_file(file_name)["packets"]) - 1,
+                                             Component.TYPE_SEGMENT)
             self.app.put_data(int_name, content=link_content, content_type=ContentType.LINK, final_block_id=final_id)
 
     def _get_file_name_from_interest(self, int_name):
         file_name = int_name[len(self.repo_prefix):]
         if file_name[0:len(self.node_comp)] == self.node_comp:
-            return file_name[(len(self.node_comp)+len(self.node_name)):]
-        return file_name
+            return file_name[(len(self.node_comp) + len(self.node_name) + len(self.command_comp)):]
+        else:
+            return file_name[(len(self.command_comp)):]
 
     def _best_id_for_file(self, file_name: str):
         file_info = self.global_view.get_file(file_name)
         if not file_name or not file_info:
             return None
-        active_nodes = set( [x['node_name'] for x in self.global_view.get_nodes()] )
+        active_nodes = set([x['node_name'] for x in self.global_view.get_nodes()])
         on_list = file_info["stores"]
         if not on_list:
             return None

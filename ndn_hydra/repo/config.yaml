@@ -27,8 +27,8 @@ default_config:
     remaining_storage: 0
 
   security:
-    trust_anchor: N/A
-    lvs_model: N/A
-    box_sqlite3_path: N/A
-    tpm: N/A
+    trust_anchor: $HOME/.ndn/hydra/node1/secParams/anchor.ndncert
+    lvs_model: $HOME/.ndn/hydra/node1/secParams/model.lvs
+    box_sqlite3_path: $HOME/.ndn/hydra/node1/secParams/RepoNodeCerts-$1.db
+    tpm: $HOME/.ndn/hydra/node1/secParams/RepoNodeSecurityPrivKeys
 

@@ -32,7 +32,7 @@ class HydraFetchClient(object):
     async def fetch_file(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
         """
         Fetch a file from remote repo, and write to the current working directory.
-        :param name_at_repo: NonStrictName. The name with which this file is stored in the repo.
+        :param file_name: NonStrictName. The name with which this file is stored in the repo.
         :param local_filename: str. The filename of the retrieved file on the local file system.
         :param overwrite: If true, existing files are replaced.
         """

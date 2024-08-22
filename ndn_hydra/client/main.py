@@ -23,7 +23,7 @@ from ndn_hydra.client.functions import *
 def parse_hydra_cmd_opts() -> Namespace:
     def interpret_version() -> None:
         set = True if "-v" in sys.argv else False
-        if set and (len(sys.argv)-1 < 2):
+        if set and (len(sys.argv) - 1 < 2):
             try:
                 print("ndn-hydra " + pkg_resources.require("ndn-hydra")[0].version)
             except pkg_resources.DistributionNotFound:
@@ -33,7 +33,7 @@ def parse_hydra_cmd_opts() -> Namespace:
     def interpret_help() -> None:
         set = True if "-h" in sys.argv else False
         if set:
-            if (len(sys.argv)-1 < 2):
+            if (len(sys.argv) - 1 < 2):
                 print("usage: ndn-hydra-client [-h] [-v] {insert,delete,fetch,query} ...")
                 print("    ndn-hydra-client: a client made specifically for hydra, the NDN distributed repo.")
                 print("    ('python3 ./examples/client.py' instead of 'ndn-hydra-client' if from source.)")
@@ -69,37 +69,38 @@ def parse_hydra_cmd_opts() -> Namespace:
                 print("        -r, --repoprefix REPO     |   a proper name of the repo prefix.")
                 print("        -q, --query QUERY         |   the type of query desired.")
                 print("     optional args:")
-                print("        -s, --sessionid SESSIONID |   certain sessionid-node targeted for query, default closest node.")
+                print(
+                    "        -s, --sessionid SESSIONID |   certain sessionid-node targeted for query, default closest node.")
                 print("")
                 print("Thank you for using hydra.")
             sys.exit(0)
+
     # Command Line Parser
-    parser = ArgumentParser(prog="ndn-hydra-client",add_help=False,allow_abbrev=False)
-    parser.add_argument("-h","--help",action="store_true",dest="help",default=False,required=False)
-    parser.add_argument("-v","--version",action="store_true",dest="version",default=False,required=False)
-    subparsers = parser.add_subparsers(dest="function",required=True)
+    parser = ArgumentParser(prog="ndn-hydra-client", add_help=False, allow_abbrev=False)
+    parser.add_argument("-h", "--help", action="store_true", dest="help", default=False, required=False)
+    parser.add_argument("-v", "--version", action="store_true", dest="version", default=False, required=False)
+    subparsers = parser.add_subparsers(dest="function", required=True)
 
     # Define All Subparsers
-    insertsp = subparsers.add_parser('insert',add_help=False)
-    insertsp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
-    insertsp.add_argument("-f","--filename",action="store",dest="filename",required=True)
-    insertsp.add_argument("-p","--path",action="store",dest="path",required=True)
-    insertsp.add_argument("-w","--wait",action="store",dest="wait",required=True)
+    insertsp = subparsers.add_parser('insert', add_help=False)
+    insertsp.add_argument("-r", "--repoprefix", action="store", dest="repo", required=True)
+    insertsp.add_argument("-f", "--filename", action="store", dest="filename", required=True)
+    insertsp.add_argument("-p", "--path", action="store", dest="path", required=True)
+    insertsp.add_argument("-w", "--wait", action="store", dest="wait", required=True)
 
-    deletesp = subparsers.add_parser('delete',add_help=False)
-    deletesp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
-    deletesp.add_argument("-f","--filename",action="store",dest="filename",required=True)
+    deletesp = subparsers.add_parser('delete', add_help=False)
+    deletesp.add_argument("-r", "--repoprefix", action="store", dest="repo", required=True)
+    deletesp.add_argument("-f", "--filename", action="store", dest="filename", required=True)
 
-    fetchsp = subparsers.add_parser('fetch',add_help=False)
-    fetchsp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
-    fetchsp.add_argument("-f","--filename",action="store",dest="filename",required=True)
-    fetchsp.add_argument("-p","--path",action="store",dest="path",default="./fetchedHydraFile", required=False)
+    fetchsp = subparsers.add_parser('fetch', add_help=False)
+    fetchsp.add_argument("-r", "--repoprefix", action="store", dest="repo", required=True)
+    fetchsp.add_argument("-f", "--filename", action="store", dest="filename", required=True)
+    fetchsp.add_argument("-p", "--path", action="store", dest="path", default="./fetchedHydraFile", required=False)
 
-    querysp = subparsers.add_parser('query',add_help=False)
-    querysp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
-    querysp.add_argument("-q","--query",action="store",dest="query",required=True)
-    querysp.add_argument("-n","--nodename",action="store",dest="nodename",default=None, required=False)
-
+    querysp = subparsers.add_parser('query', add_help=False)
+    querysp.add_argument("-r", "--repoprefix", action="store", dest="repo", required=True)
+    querysp.add_argument("-q", "--query", action="store", dest="query", required=True)
+    querysp.add_argument("-n", "--nodename", action="store", dest="nodename", default=None, required=False)
 
     # Interpret Informational Arguments
     interpret_version()
@@ -118,22 +119,22 @@ def parse_hydra_cmd_opts() -> Namespace:
 
 class HydraClient:
     def __init__(self, app: NDNApp, client_prefix: FormalName, repo_prefix: FormalName) -> None:
-        self.cinsert = HydraInsertClient(app, client_prefix, repo_prefix)
-        self.cdelete = HydraDeleteClient(app, client_prefix, repo_prefix)
-        self.cfetch = HydraFetchClient(app, client_prefix, repo_prefix)
-        self.cquery = HydraQueryClient(app, client_prefix, repo_prefix)
+        self.insert_client = HydraInsertClient(app, client_prefix, repo_prefix)
+        self.delete_client = HydraDeleteClient(app, client_prefix, repo_prefix)
+        self.fetch_client = HydraFetchClient(app, client_prefix, repo_prefix)
+        self.query_client = HydraQueryClient(app, client_prefix, repo_prefix)
 
     async def insert(self, file_name: FormalName, path: str) -> bool:
-        return await self.cinsert.insert_file(file_name, path)
+        return await self.insert_client.insert_file(file_name, path)
 
     async def delete(self, file_name: FormalName) -> bool:
-        return await self.cdelete.delete_file(file_name)
+        return await self.delete_client.delete_file(file_name)
 
     async def fetch(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
-        return await self.cfetch.fetch_file(file_name, local_filename, overwrite)
+        return await self.fetch_client.fetch_file(file_name, local_filename, overwrite)
 
-    async def query(self, query: Name, node_name: str=None) -> None:
-        return await self.cquery.send_query(query, node_name)
+    async def query(self, query: Name, node_name: str = None) -> None:
+        return await self.query_client.send_query(query, node_name)
 
 
 async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
