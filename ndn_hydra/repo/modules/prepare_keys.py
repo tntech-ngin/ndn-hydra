@@ -21,15 +21,15 @@ from envelope.impl.storage import Sqlite3Box
 async def prepare_keys(group_prefix, nodeids: List, app):
     # /hydra/node/n1/hydra/group/data/1
     lvs_text = r'''
-    #KEY: "KEY"/_/_/_
-    #site: "hydra"
-    #nodePrefix: #site/node/_
-    #groupSyncInterestSend: #site/sync/_ <= #node
-    #groupSyncInterestReceive: #site/sync/_/_ <= #node
-    #groupData1: #nodePrefix/#site/group/_ <= #node
-    #groupData2: #nodePrefix/#site/group/data/_ <= #node
-    #node: #site/node/_/#KEY <= #root
-    #root: #site/#KEY
+        #KEY: "KEY"/_/_/_
+        #site: "hydra"
+        #nodePrefix: #site/node/_
+        #groupSyncInterestSend: #site/sync/_ <= #node
+        #groupSyncInterestReceive: #site/sync/_/_ <= #node
+        #groupData1: #nodePrefix/#site/group/_ <= #node
+        #groupData2: #nodePrefix/#site/group/data/_ <= #node
+        #node: #site/node/_/#KEY <= #root
+        #root: #site/#KEY
     '''
     basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
     sec_params_dir = os.path.join(basedir, 'secParams')

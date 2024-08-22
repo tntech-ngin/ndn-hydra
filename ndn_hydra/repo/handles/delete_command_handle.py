@@ -76,6 +76,7 @@ class DeleteCommandHandle(ProtocolHandle):
         file_name = Name.to_str(cmd.file_name)
         self.logger.info(f"\n[CMD][DELETE]  file={file_name}")
         file = self.global_view.get_file(file_name)
+
         if file is None:
             self.logger.debug("\nFile does not exist")
             return
@@ -92,6 +93,7 @@ class DeleteCommandHandle(ProtocolHandle):
         remove_message.node_name = self.config['node_name'].encode()
         remove_message.favor = str(favor).encode()
         remove_message.file_name = cmd.file_name
+
         # remove msg
         message = Message()
         message.type = MessageTypes.REMOVE

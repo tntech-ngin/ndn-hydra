@@ -18,11 +18,11 @@ from ndn_hydra.repo.utils.pubsub import PubSub
 class HydraDeleteClient(object):
     def __init__(self, app: NDNApp, client_prefix: FormalName, repo_prefix: FormalName) -> None:
         """
-      This client deletes a certain file from the remote repo.
-      :param app: NDNApp.
-      :param client_prefix: NonStrictName. Routable name to client.
-      :param repo_prefix: NonStrictName. Routable name to remote repo.
-      """
+            This client deletes a certain file from the remote repo.
+            :param app: NDNApp.
+            :param client_prefix: NonStrictName. Routable name to client.
+            :param repo_prefix: NonStrictName. Routable name to remote repo.
+        """
         self.app = app
         self.client_prefix = client_prefix
         self.repo_prefix = repo_prefix
@@ -30,7 +30,7 @@ class HydraDeleteClient(object):
 
     async def delete_file(self, file_name: FormalName) -> bool:
         """
-      Delete a file asscoiated with a file name from the remote repo
+      Delete a file associated with a file name from the remote repo
       """
         # send command interest
         cmd = DeleteCommand()
