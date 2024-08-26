@@ -26,7 +26,7 @@ def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSy
             logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from global view.")
             # Remove from data_storage from this node if present
             if config['node_name'] in file['stores']:
-                remove_file(data_storage, file)
+                remove_file(data_storage, file, config)
                 logger.info(f"GARBAGE COLLECTOR: Removed {file['file_name']} from data storage.")
 
     logger.info("\nGARBAGE COLLECTOR: Finished collecting DB garbage.")

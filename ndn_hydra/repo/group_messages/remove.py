@@ -46,6 +46,6 @@ class RemoveMessage(SpecificMessage):
             global_view.delete_file(file_name)
             # Remove from data_storage from this node if present
             if config['node_name'] in file['stores']:
-                remove_file(data_storage, file)
+                remove_file(data_storage, file, config)
 
         global_view.update_node(node_name, float(self.message.favor.tobytes().decode()), self.seqno)

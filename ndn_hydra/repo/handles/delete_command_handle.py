@@ -84,7 +84,7 @@ class DeleteCommandHandle(ProtocolHandle):
         self.global_view.delete_file(file_name)
         # Remove from data_storage from this node if present
         if self.config['node_name'] in file['stores']:
-            remove_file(self.data_storage, file)
+            remove_file(self.data_storage, file, self.config)
 
         # remove tlv
         favor = self.global_view.get_node(self.config['node_name'])['favor']
