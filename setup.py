@@ -49,8 +49,6 @@ setup(
         'Topic :: Internet',
         'Topic :: System :: Networking',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10'
     ],
     keywords='NDN HYDRA',
@@ -58,7 +56,7 @@ setup(
     include_package_data=True,
     package_data={'ndn_hydra.repo': ['config.yaml', 'docs/version.py', 'docs/requirements.txt']},
     install_requires=_parse_requirements('docs/requirements.txt'),
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     entry_points={
         'console_scripts': [
             'ndn-hydra-repo = ndn_hydra.repo.main.main:main',
