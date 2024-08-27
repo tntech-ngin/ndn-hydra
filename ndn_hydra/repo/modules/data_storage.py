@@ -26,6 +26,7 @@ class DataStorage(SqliteStorage):
             return 0
 
         total_deleted = 0
+        cursor = None
 
         try:
             self.conn.execute('BEGIN TRANSACTION')
@@ -46,12 +47,16 @@ class DataStorage(SqliteStorage):
             print(f'SQLite error: {e}')
 
         finally:
-            cursor.close()
+            if cursor:
+                cursor.close()
 
         try:
             self.conn.execute('VACUUM')
 
         except sqlite3.Error as e:
             print(f'SQLite error during VACUUM: {e}')
+
+        # Close connection (remove_packets is performed with a separate connection)
+        self.conn.close()
 
         return total_deleted
