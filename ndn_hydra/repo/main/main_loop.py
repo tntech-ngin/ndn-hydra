@@ -20,15 +20,15 @@ import ndn.app_support.light_versec.checker as chk
 from ndn.app_support.light_versec import LvsModel
 import ndn.app_support.security_v2 as sv2
 from ndn.security.tpm import TpmFile
-from svs.security import SecurityOptions, SigningInfo, ValidatingInfo
+from ndn_python_svs.security import SecurityOptions, SigningInfo, ValidatingInfo
 from ndn_hydra.repo.modules import *
 from ndn_hydra.repo.group_messages import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
 from ndn_hydra.repo.utils.garbage_collector import collect_db_garbage
 from ndn_hydra.repo.modules.favor_calculator import FavorCalculator
 from ndn_hydra.repo.modules.read_remaining_space import get_remaining_space
-from envelope.impl import EnvelopeImpl
-from envelope.impl.storage import Sqlite3Box, ExpressToNetworkBox
+from ndn_lvs_envelope.impl import EnvelopeImpl
+from ndn_lvs_envelope.impl.storage import Sqlite3Box, ExpressToNetworkBox
 
 
 class MainLoop:
