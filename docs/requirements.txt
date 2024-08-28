@@ -1,6 +1,6 @@
 python-ndn>=0.3
 ndn-python-database>=0.2.3
-ndn-svs>=0.3.17
+ndn-python-svs>=0.3.17
 sphinx-autodoc-typehints>=1.17.0
 sphinx-rtd-theme>=1.0.0
 PyYAML>=6.0

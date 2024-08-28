@@ -1,4 +1,3 @@
-import errno
 import os
 import sys
 import base64
@@ -14,8 +13,8 @@ import ndn.app_support.security_v2 as sv2
 import ndn.app_support.light_versec.checker as chk
 import ndn.app_support.light_versec.compiler as cpl
 # Envelope lib
-from envelope.impl import EnvelopeImpl
-from envelope.impl.storage import Sqlite3Box
+from ndn_lvs_envelope.impl import EnvelopeImpl
+from ndn_lvs_envelope.impl.storage import Sqlite3Box
 
 
 async def prepare_keys(group_prefix, nodeids: List, app):
