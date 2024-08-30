@@ -120,7 +120,6 @@ class ReadHandle(object):
 
     def _best_id_for_file(self, file_name: str):
         file_info = self.global_view.get_file(file_name)
-        print(file_info)
         if not file_name or not file_info:
             return None
         active_nodes = set( [x['node_name'] for x in self.global_view.get_nodes()] )
