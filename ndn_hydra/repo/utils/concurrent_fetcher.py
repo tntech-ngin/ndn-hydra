@@ -34,7 +34,7 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
 
     # Progress bar
     total_blocks = final_id - start_block_id + 1
-    progress_bar = tqdm(total=total_blocks, desc='Fetching data', unit='block')
+    progress_bar = tqdm(initial=start_block_id, total=total_blocks, desc='Fetching data', unit='block')
 
     async def _retry(seq: int):
         """
@@ -58,14 +58,14 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
             try:
                 # logging.info('Express Interest: {}'.format(Name.to_str(int_name)))
                 data_name, meta_info, content, data_bytes = await app.express_interest(
-                    int_name, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=4000, **kwargs)
+                    int_name, need_raw_packet=True, can_be_prefix=False, must_be_fresh=seq==0, lifetime=4000, **kwargs)
 
                 # Save data and update final_id
                 # logging.info('Received data: {}'.format(Name.to_str(data_name)))
                 seq_to_data_packet[seq] = (data_name, meta_info, content, data_bytes, key)
                 if meta_info is not None and meta_info.final_block_id is not None:
                     final_id = Component.to_number(meta_info.final_block_id)
-                progress_bar.update(1)
+                progress_bar.update()
                 break
             except InterestNack as e:
                 logging.info(f'\nNacked with reason={e.reason} {Name.to_str(int_name)}')
