@@ -78,7 +78,7 @@ class ReadHandle(object):
         best_id = self._best_id_for_file(file_name)
         segment_comp = "/" + Component.to_str(int_name[-1])
 
-        if int_param.must_be_fresh and segment_comp != "/seg=0":
+        if int_param.must_be_fresh:
             return
 
         if best_id is None:
@@ -120,6 +120,7 @@ class ReadHandle(object):
 
     def _best_id_for_file(self, file_name: str):
         file_info = self.global_view.get_file(file_name)
+        print(file_info)
         if not file_name or not file_info:
             return None
         active_nodes = set( [x['node_name'] for x in self.global_view.get_nodes()] )
