@@ -34,7 +34,7 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
 
     # Progress bar
     total_blocks = final_id - start_block_id + 1
-    progress_bar = tqdm(initial=start_block_id, total=total_blocks, desc='Fetching data', unit='block')
+    progress_bar = tqdm(total=total_blocks, desc='Fetching data', unit='block')
 
     async def _retry(seq: int):
         """
