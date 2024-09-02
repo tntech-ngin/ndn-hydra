@@ -92,6 +92,7 @@ class ReadHandle(object):
 
         total_segments = int(self.global_view.get_file(file_name)["packets"])
         if best_id == self.node_name:
+            self.logger.info(segment_comp)
             if segment_comp == "/seg=0":
                 self.logger.info(f'\n[CMD][FETCH]    serving file')
                 self._reset_file_expiration(file_name)
