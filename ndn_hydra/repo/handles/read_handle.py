@@ -78,7 +78,7 @@ class ReadHandle(object):
         best_id = self._best_id_for_file(file_name)
         segment_comp = "/" + Component.to_str(int_name[-1])
 
-        if int_param.must_be_fresh:
+        if int_param.must_be_fresh and segment_comp != "/seg=0":
             return
 
         if best_id is None:

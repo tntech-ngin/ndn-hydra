@@ -62,19 +62,18 @@ class HydraFetchClient(object):
         if meta_info.content_type == ContentType.NACK:
             print("Distributed Repo does not have that file.")
             return
-        elif meta_info.content_type == ContentType.LINK:
+
+        if meta_info.content_type == ContentType.LINK:
             print(f"First Packet Content: {bytes(content).decode()}")
             # name_at_repo = Name.from_str(bytes(content).decode())
-            end_index = Component.to_number(meta_info.final_block_id)
             forwarding_hint = [(1, bytes(content).decode())]
-        else:
-            # print(type(content))
-            # name_at_repo = name_at_repo[:-1]
-            start_index = start_index + 1
-            end_index = Component.to_number(meta_info.final_block_id)
+        # else:
+        #     # name_at_repo = name_at_repo[:-1]
+        #     # start_index = start_index + 1
+        #     # print(name_at_repo)
+        #     b_array.extend(content)
 
-            # print(name_at_repo)
-            b_array.extend(content)
+        end_index = Component.to_number(meta_info.final_block_id)
 
         # print(Name.to_str(data_name))
 
