@@ -91,6 +91,7 @@ class ReadHandle(object):
             return
 
         total_segments = int(self.global_view.get_file(file_name)["packets"])
+        self.logger.info(best_id, segment_comp)
         if best_id == self.node_name:
             self.logger.info(segment_comp)
             if segment_comp == "/seg=0":
