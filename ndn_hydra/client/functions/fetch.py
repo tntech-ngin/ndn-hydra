@@ -64,7 +64,6 @@ class HydraFetchClient(object):
             return
 
         if meta_info.content_type == ContentType.LINK:
-            print(f"First Packet Content: {bytes(content).decode()}")
             # name_at_repo = Name.from_str(bytes(content).decode())
             forwarding_hint = [(1, bytes(content).decode())]
         # else:
