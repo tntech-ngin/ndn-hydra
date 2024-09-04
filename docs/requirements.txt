@@ -7,3 +7,4 @@ PyYAML>=6.0
 pytest>=7.1.1
 tqdm>=4.66.2
 ndn-lvs-envelope>=0.1.1
+numpy>=2.1.1
