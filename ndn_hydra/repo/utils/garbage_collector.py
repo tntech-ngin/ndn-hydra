@@ -3,7 +3,7 @@ import logging
 from ndn.storage import Storage
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.modules.file_remover import remove_file
-from ndn_python_svs import SVSync
+from svs import SVSync
 
 
 def collect_db_garbage(global_view: GlobalView, data_storage: Storage, svs: SVSync, config: dict, logger: logging.Logger) -> None:
