@@ -19,7 +19,7 @@ from argparse import ArgumentParser
 from ndn.app import NDNApp
 from ndn.encoding import Name
 from ndn.storage import SqliteStorage
-from ndn.svs import SVSyncLogger
+from ndn_python_svs import SVSyncLogger
 # Local libs
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher

@@ -14,13 +14,12 @@ import random
 from typing import Dict
 from ndn.app import NDNApp
 from ndn.encoding import Name, Component
-from ndn.svs import SVSync
 from ndn.storage import Storage, SqliteStorage
 import ndn.app_support.light_versec.checker as chk
 from ndn.app_support.light_versec import LvsModel
 import ndn.app_support.security_v2 as sv2
 from ndn.security.tpm import TpmFile
-from ndn_python_svs.security import SecurityOptions, SigningInfo, ValidatingInfo
+from ndn_python_svs.security import SVSync, SecurityOptions, SigningInfo, ValidatingInfo
 from ndn_hydra.repo.modules import *
 from ndn_hydra.repo.group_messages import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
