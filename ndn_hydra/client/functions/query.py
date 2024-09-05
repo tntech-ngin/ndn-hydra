@@ -34,7 +34,8 @@ class HydraQueryClient(object):
         if not node_name:
             named_query = self.repo_prefix + [Component.from_str("query")]
         else:
-            named_query = self.repo_prefix + [Component.from_str("node")] + [Component.from_str(node_name)] + [Component.from_str("query")]
+            # named_query = self.repo_prefix + [Component.from_str("node")] + [Component.from_str(node_name)] + [Component.from_str("query")]
+            named_query = self.repo_prefix + [Component.from_str(node_name)] + [Component.from_str("query")]
 
         try:
             data_name, meta_info, content = await self.app.express_interest(named_query, Name.to_bytes(query), can_be_prefix=True, must_be_fresh=True, lifetime=3000)
