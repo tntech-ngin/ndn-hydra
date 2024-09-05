@@ -38,7 +38,8 @@ class QueryHandle(object):
         self.node_comp = "/node"
 
         self.listen(Name.from_str(self.repo_prefix + self.command_comp))
-        self.listen(Name.from_str(self.repo_prefix + self.node_comp + self.node_name + self.command_comp))
+        self.listen(Name.from_str(self.repo_prefix + self.node_name + self.command_comp))
+        # self.listen(Name.from_str(self.repo_prefix + self.node_comp + self.node_name + self.command_comp))
 
     def listen(self, prefix):
         """
