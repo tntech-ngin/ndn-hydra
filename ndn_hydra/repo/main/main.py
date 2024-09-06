@@ -100,10 +100,10 @@ def process_cmd_opts():
         parser.add_argument("-n", "--nodename", action="store", dest="node_name", default=False, required=False)
         parser.add_argument("-d", "--debugger", action="store_true", dest="debugger", default=False, required=False)
         parser.add_argument("-cr", "--critical", action="store_true", dest="critical", default=False, required=False)
-        parser.add_argument("-a", "--anchor", action="store", dest="trust_anchor", required=False)
-        parser.add_argument("-l", "--lvsmodel", action="store", dest="lvs_model", required=False)
-        parser.add_argument("-b", "--box", action="store", dest="box_sqlite3_path", required=False)
-        parser.add_argument("-t", "--tpm", action="store", dest="tpm", required=False)
+        parser.add_argument("-a", "--anchor", action="store", dest="trust_anchor", default=False, required=False)
+        parser.add_argument("-l", "--lvsmodel", action="store", dest="lvs_model", default=False, required=False)
+        parser.add_argument("-b", "--box", action="store", dest="box_sqlite3_path", default=False, required=False)
+        parser.add_argument("-t", "--tpm", action="store", dest="tpm", default=False, required=False)
 
         # Getting all Arguments
         cli_args = parser.parse_args()
