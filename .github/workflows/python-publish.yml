@@ -8,14 +8,19 @@ on:
 jobs:
   update-version:
     name: Update Version
-    if: "contains(github.event.head_commit.message, 'Bump version to')"
     runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, 'Bump version to')"
     outputs:
       new_pkg_version: ${{ steps.version.outputs.pkg_version }}
 
     steps:
     - name: Check out repository
       uses: actions/checkout@v4
+
+    - name: Set up Git identity
+      run: |
+        git config --global user.email "gportdev@gmail.com"
+        git config --global user.name "Gabriel Porteiro"
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
