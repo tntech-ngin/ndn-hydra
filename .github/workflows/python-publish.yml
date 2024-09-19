@@ -135,7 +135,7 @@ jobs:
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          version: ${{needs.update-version.outputs.pkg_version}}
+          version: ${{needs.update-version.outputs.new_pkg_version}}
         run: |
           echo "Creating release for version: $version"
           if [ -z "$version" ]; then
