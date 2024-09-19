@@ -63,16 +63,11 @@ jobs:
           echo "__version__ = \"$version\"" > docs/version.py
         else
           echo "Updating to version $version"
-          echo "__version__ = \"$version\"" > docs/version.py
         fi
         
         if git diff --quiet; then
           echo "No changes to commit."
           exit 0
-        else
-            git add docs/version.py
-            git commit -m "Bump version to $version"
-            git push origin refs/heads/main
         fi
 
   build:
@@ -82,10 +77,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Fetch latest changes
-      run: |
-        git config --global --add safe.directory $GITHUB_WORKSPACE
-        git pull origin main  # Ensure you have the latest commit, including the version bump
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
@@ -144,7 +135,7 @@ jobs:
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          version: ${{needs.update-version.outputs.new_pkg_version}}
+          version: ${{needs.update-version.outputs.pkg_version}}
         run: |
           echo "Creating release for version: $version"
           if [ -z "$version" ]; then
