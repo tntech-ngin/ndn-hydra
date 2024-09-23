@@ -41,6 +41,7 @@ class ReadHandle(object):
         self.repo_prefix = config['repo_prefix']
         self.file_expiration = config['file_expiration']
         self.node_comp = "/node"
+        self.command_comp = "/fetch"
         self.logger = logging.getLogger()
 
         self.listen(Name.from_str(self.repo_prefix))
