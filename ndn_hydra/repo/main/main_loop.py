@@ -8,9 +8,7 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
-import base64
-import secrets
-import random
+import os, sys, base64, secrets, random
 from typing import Dict
 from ndn.app import NDNApp
 from ndn.encoding import Name, Component
@@ -54,17 +52,25 @@ class MainLoop:
         self.using_envelope = using_envelope
 
     async def start(self):
-        async def load_envelope(anchor_path, model_path, db_path, tpm_path):
+        async def load_envelope(anchor, model, db, tpm):
             express = ExpressToNetworkBox(self.app)
 
+            basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
+            secParamsdir = os.path.join(basedir, 'secParams')
+            anchor_path = os.path.join(secParamsdir, anchor)
+            model_path = os.path.join(secParamsdir, model)
+            tpm_path = os.path.join(secParamsdir, tpm)
+            db_path = os.path.join(secParamsdir, db)
+
             # move
-            async def moveTo(cert_bytes):
+            async def move_to(cert_bytes):
                 cert_name = sv2.parse_certificate(cert_bytes).name
                 express.put(cert_name, cert_bytes)
                 return False
 
             local_box = Sqlite3Box(db_path)
-            await local_box.search(Name.from_str("/"), moveTo)
+            await local_box.search(Name.from_str("/"), move_to)
+
             security_manager = EnvelopeImpl(self.app, TpmFile(tpm_path), local_box, express)
             with open(anchor_path, "r") as af:
                 anchor_bytes = base64.b64decode(af.read())
@@ -77,8 +83,8 @@ class MainLoop:
             return security_manager
 
         if self.using_envelope:
-            self.envelope = await load_envelope(self.config["trust_anchor"], self.config["lvs_model"],
-                                                self.config["box_sqlite3_path"], self.config["tpm"])
+            self.envelope = await load_envelope(self.config["trust_anchor_path"], self.config["lvs_model_path"],
+                                                self.config["box_sqlite3_path"], self.config["tpm_path"])
             self.sec_ops = SecurityOptions(SigningInfo(SignatureType.DIGEST_SHA256),
                                            ValidatingInfo(ValidatingInfo.get_validator(SignatureType.DIGEST_SHA256)),
                                            SigningInfo(SignatureType.DIGEST_SHA256), [],
