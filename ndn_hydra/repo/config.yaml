@@ -27,8 +27,8 @@ default_config:
     remaining_storage: 0
 
   security:
-    trust_anchor_path: hydra.ndncert
-    lvs_model_path: hydra.lvs
+    trust_anchor_path: anchor.ndncert
+    lvs_model_path: model.lvs
     box_sqlite3_path: RepoNodeCerts.db
-    tpm_path: ndn-sec-keys
+    tpm_path: RepoNodeSecurityPrivKeys
 

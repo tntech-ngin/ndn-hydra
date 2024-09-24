@@ -17,7 +17,7 @@ from envelope.impl import EnvelopeImpl
 from envelope.impl.storage import Sqlite3Box
 
 
-async def prepare_keys(group_prefix, nodeids: List, app):
+async def prepare_keys(group_prefix, node_name, app):
     # /hydra/node/n1/hydra/group/data/1
     lvs_text = r'''
         #KEY: "KEY"/_/_/_
@@ -62,14 +62,13 @@ async def prepare_keys(group_prefix, nodeids: List, app):
         mf.write(base64.b64encode(model.encode()).decode())
 
     # node
-    for node in nodeids:
-        node_key_name, node_key_pub = security_manager.tpm.generate_key(
-            Name.from_str(f"{group_prefix}/node/" + node))
-        node_cert_name = node_key_name + [enc.Component.from_str("noc"), enc.Component.from_version(timestamp())]
-        node_cert_bytes = security_manager.sign_cert(node_cert_name, enc.MetaInfo(content_type=enc.ContentType.KEY,
-                                                                                  freshness_period=3600000),
-                                                     node_key_pub, datetime.utcnow(),
-                                                     datetime.utcnow() + timedelta(days=10))
-        Sqlite3Box.initialize(os.path.join(sec_params_dir, f'RepoNodeCerts-{node}.db'))
-        node_box = Sqlite3Box(os.path.join(sec_params_dir, f'RepoNodeCerts-{node}.db'))
-        node_box.put(node_cert_name, node_cert_bytes)
+    node_key_name, node_key_pub = security_manager.tpm.generate_key(
+        Name.from_str(f"{group_prefix}/{node_name}/" ))
+    node_cert_name = node_key_name + [enc.Component.from_str("noc"), enc.Component.from_version(timestamp())]
+    node_cert_bytes = security_manager.sign_cert(node_cert_name, enc.MetaInfo(content_type=enc.ContentType.KEY,
+                                                                              freshness_period=3600000),
+                                                 node_key_pub, datetime.utcnow(),
+                                                 datetime.utcnow() + timedelta(days=10))
+    Sqlite3Box.initialize(os.path.join(sec_params_dir, 'RepoNodeCerts.db'))
+    node_box = Sqlite3Box(os.path.join(sec_params_dir, 'RepoNodeCerts.db'))
+    node_box.put(node_cert_name, node_cert_bytes)
