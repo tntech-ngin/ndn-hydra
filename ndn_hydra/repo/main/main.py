@@ -154,13 +154,13 @@ def process_cmd_opts():
             config_data["logger_level"] = "DEBUG"
         if cli_args.critical is not False:
             config_data["logger_level"] = "CRITICAL"
-        if cli_args.trust_anchor_path is not False:
+        if cli_args.trust_anchor is not False:
             config_data["trust_anchor_path"] = process_name(cli_args.trust_anchor)
-        if cli_args.lvs_model_path is not False:
+        if cli_args.lvs_model is not False:
             config_data["lvs_model_path"] = process_name(cli_args.lvs_model)
         if cli_args.box_sqlite3_path is not False:
             config_data["box_sqlite3_path"] = process_name(cli_args.box_sqlite3_path)
-        if cli_args.tpm_path is not False:
+        if cli_args.tpm is not False:
             config_data["tpm_path"] = process_name(cli_args.tpm)
 
         workpath = "{home}/.ndn/repo{repo_prefix}/{node_name}".format(
