@@ -17,7 +17,7 @@ from envelope.impl import EnvelopeImpl
 from envelope.impl.storage import Sqlite3Box
 
 
-async def prepare_keys(app, config,):
+async def prepare_keys(group_prefix, node_name, app, config):
     # /hydra/node/n1/hydra/group/data/1
     lvs_text = r'''
         #KEY: "KEY"/_/_/_
@@ -31,8 +31,8 @@ async def prepare_keys(app, config,):
         #root: #site/#KEY
     '''
     basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    sec_params_dir = os.path.join(basedir, config['security']['sec_params_dir'])
-    tpm_path = os.path.join(sec_params_dir, config['security']['tpm_path'])
+    sec_params_dir = os.path.join(basedir, 'secParams')
+    tpm_path = os.path.join(sec_params_dir, 'RepoNodeSecurityPrivKeys')
     os.makedirs(tpm_path, exist_ok=True)
 
     # Cleaning up
@@ -44,7 +44,7 @@ async def prepare_keys(app, config,):
     security_manager = EnvelopeImpl(app, TpmFile(tpm_path))
 
     # Anchor
-    anchor_key_name, anchor_key_pub = security_manager.tpm.generate_key(Name.from_str(config['group_prefix']))
+    anchor_key_name, anchor_key_pub = security_manager.tpm.generate_key(Name.from_str(group_prefix))
     anchor_self_signer = security_manager.tpm.get_signer(anchor_key_name, None)
     anchor_cert_name, anchor_bytes = sv2.self_sign(anchor_key_name, anchor_key_pub, anchor_self_signer)
     logging.info(enc.Name.to_str(anchor_cert_name))
@@ -63,7 +63,7 @@ async def prepare_keys(app, config,):
 
     # node
     node_key_name, node_key_pub = security_manager.tpm.generate_key(
-        Name.from_str(f"{config['group_prefix']}{config['node_name']}/" ))
+        Name.from_str(f"{group_prefix}{node_name}/" ))
     node_cert_name = node_key_name + [enc.Component.from_str("noc"), enc.Component.from_version(timestamp())]
     node_cert_bytes = security_manager.sign_cert(node_cert_name, enc.MetaInfo(content_type=enc.ContentType.KEY,
                                                                               freshness_period=3600000),
