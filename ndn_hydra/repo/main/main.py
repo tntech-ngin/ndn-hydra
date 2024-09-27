@@ -225,7 +225,7 @@ class HydraNodeThread(Thread):
         app = NDNApp()
 
         # Prepare keys that will be used by envelope
-        asyncio.run(prepare_keys(self.config['repo_prefix'], self.config['node_name'], app))
+        asyncio.run(prepare_keys(app, self.config))
 
         # Post-start
         async def start_main_loop():

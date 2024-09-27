@@ -31,4 +31,5 @@ default_config:
     lvs_model_path: model.lvs
     box_sqlite3_path: RepoNodeCerts.db
     tpm_path: RepoNodeSecurityPrivKeys
+    sec_params_dir: secParams
 
