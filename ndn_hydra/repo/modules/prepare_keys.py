@@ -63,7 +63,7 @@ async def prepare_keys(group_prefix, node_name, app):
 
     # node
     node_key_name, node_key_pub = security_manager.tpm.generate_key(
-        Name.from_str(f"{group_prefix}/{node_name}/" ))
+        Name.from_str(f"{group_prefix}{node_name}/" ))
     node_cert_name = node_key_name + [enc.Component.from_str("noc"), enc.Component.from_version(timestamp())]
     node_cert_bytes = security_manager.sign_cert(node_cert_name, enc.MetaInfo(content_type=enc.ContentType.KEY,
                                                                               freshness_period=3600000),
