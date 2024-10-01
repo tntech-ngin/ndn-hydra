@@ -35,7 +35,7 @@ async def prepare_keys(group_prefix, node_name, app, config):
     tpm_path = os.path.join(sec_params_dir, 'RepoNodeSecurityPrivKeys')
     os.makedirs(tpm_path, exist_ok=True)
 
-    logging.debug(f'[Prepare keys] \n Sec Params Dir: {sec_params_dir}, \n TPM Dir: {tpm_path}')
+    logging.debug(f'\n[Prepare keys] \n Sec Params Dir: {sec_params_dir}, \n TPM Dir: {tpm_path}\n')
 
     # Cleaning up
     try:
@@ -49,7 +49,7 @@ async def prepare_keys(group_prefix, node_name, app, config):
     anchor_key_name, anchor_key_pub = security_manager.tpm.generate_key(Name.from_str(group_prefix))
     anchor_self_signer = security_manager.tpm.get_signer(anchor_key_name, None)
 
-    logging.debug(f'[Prepare keys] \n Anchor key name: {anchor_key_name}, \n Anchor self signer: {anchor_self_signer}')
+    logging.debug(f'\n[Prepare keys] \n Anchor key name: {anchor_key_name}, \n Anchor self signer: {anchor_self_signer}\n')
 
     anchor_cert_name, anchor_bytes = sv2.self_sign(anchor_key_name, anchor_key_pub, anchor_self_signer)
     logging.info(enc.Name.to_str(anchor_cert_name))
@@ -70,11 +70,11 @@ async def prepare_keys(group_prefix, node_name, app, config):
     node_key_name, node_key_pub = security_manager.tpm.generate_key(
         Name.from_str(f"{group_prefix}{node_name}/" ))
 
-    logging.debug(f'[Prepare keys] \n Node key name: {node_key_name}, \n Node key pub: {node_key_pub}')
+    logging.debug(f'\n[Prepare keys] \n Node key name: {node_key_name}, \n Node key pub: {node_key_pub}\n')
 
     node_cert_name = node_key_name + [enc.Component.from_str("noc"), enc.Component.from_version(timestamp())]
 
-    logging.debug(f'[Prepare keys] \n Node cert name: {node_cert_name}')
+    logging.debug(f'\n[Prepare keys] \n Node cert name: {node_cert_name}\n')
 
     node_cert_bytes = security_manager.sign_cert(
         node_cert_name,
@@ -84,7 +84,7 @@ async def prepare_keys(group_prefix, node_name, app, config):
         datetime.utcnow() + timedelta(days=10)
     )
 
-    logging.debug(f'[Prepare keys] \n Node cert bytes: {node_cert_bytes}')
+    logging.debug(f'\n[Prepare keys] \n Node cert bytes: {node_cert_bytes}\n')
 
     Sqlite3Box.initialize(os.path.join(sec_params_dir, 'RepoNodeCerts.db'))
     node_box = Sqlite3Box(os.path.join(sec_params_dir, 'RepoNodeCerts.db'))
