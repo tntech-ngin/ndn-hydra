@@ -17,7 +17,7 @@ from envelope.impl import EnvelopeImpl
 from envelope.impl.storage import Sqlite3Box
 
 
-async def prepare_keys(group_prefix, node_name, app, config):
+async def prepare_keys(group_prefix, node_name, app):
     # /hydra/node/n1/hydra/group/data/1
     lvs_text = r'''
         #KEY: "KEY"/_/_/_
@@ -68,7 +68,7 @@ async def prepare_keys(group_prefix, node_name, app, config):
 
     # node
     node_key_name, node_key_pub = security_manager.tpm.generate_key(
-        Name.from_str(f"{group_prefix}{node_name}/" ))
+        Name.from_str(f"{group_prefix}/node{node_name}/" ))
 
     logging.debug(f'\n[Prepare keys] \n Node key name: {node_key_name}, \n Node key pub: {node_key_pub}\n')
 
@@ -86,6 +86,6 @@ async def prepare_keys(group_prefix, node_name, app, config):
 
     logging.debug(f'\n[Prepare keys] \n Node cert bytes: {node_cert_bytes}\n')
 
-    Sqlite3Box.initialize(os.path.join(sec_params_dir, 'RepoNodeCerts.db'))
-    node_box = Sqlite3Box(os.path.join(sec_params_dir, 'RepoNodeCerts.db'))
+    Sqlite3Box.initialize(os.path.join(sec_params_dir, f'RepoNodeCerts-{node_name}.db'))
+    node_box = Sqlite3Box(os.path.join(sec_params_dir, f'RepoNodeCerts-{node_name}.db'))
     node_box.put(node_cert_name, node_cert_bytes)
