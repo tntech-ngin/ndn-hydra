@@ -25,3 +25,11 @@ default_config:
     network_cost: 0
     storage_cost: 0
     remaining_storage: 0
+
+  security:
+    trust_anchor_path: anchor.ndncert
+    lvs_model_path: model.lvs
+    box_sqlite3_path: RepoNodeCerts.db
+    tpm_path: RepoNodeSecurityPrivKeys
+    sec_params_dir: secParams
+
