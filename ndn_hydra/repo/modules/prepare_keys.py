@@ -86,6 +86,6 @@ async def prepare_keys(group_prefix, node_name, app):
 
     logging.debug(f'\n[Prepare keys] \n Node cert bytes: {node_cert_bytes}\n')
 
-    Sqlite3Box.initialize(os.path.join(sec_params_dir, f'RepoNodeCerts-{node_name}.db'))
-    node_box = Sqlite3Box(os.path.join(sec_params_dir, f'RepoNodeCerts-{node_name}.db'))
+    Sqlite3Box.initialize(os.path.join(sec_params_dir, f'RepoNodeCerts-{node_name.slice(1,)}.db'))
+    node_box = Sqlite3Box(os.path.join(sec_params_dir, f'RepoNodeCerts-{node_name.slice(1,)}.db'))
     node_box.put(node_cert_name, node_cert_bytes)
