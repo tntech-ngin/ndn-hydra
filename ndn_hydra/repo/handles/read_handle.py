@@ -2,9 +2,8 @@
 # NDN Hydra Read Handle
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -14,12 +13,13 @@ import logging
 import time
 from secrets import choice
 from ndn.app import NDNApp
-from ndn.encoding import Name, ContentType, Component, parse_data
+from ndn.encoding import Name, ContentType, Component
 from ndn.storage import Storage
 from ndn_hydra.repo.main.main_loop import MainLoop
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.group_messages.update import UpdateMessageTlv
 from ndn_hydra.repo.group_messages.message import Message, MessageTypes
+
 
 class ReadHandle(object):
     """
@@ -39,15 +39,13 @@ class ReadHandle(object):
         self.node_name = config['node_name']
         self.repo_prefix = config['repo_prefix']
         self.file_expiration = config['file_expiration']
-
+        self.node_comp = "/node"
         self.logger = logging.getLogger()
 
-        self.command_comp = "/fetch"
-        self.node_comp = "/node"
-        # config file needed
-
-        self.listen(Name.from_str(self.repo_prefix + self.command_comp))
-        self.listen(Name.from_str(self.repo_prefix + self.node_comp  + self.node_name + self.command_comp))
+        self.listen(Name.from_str(self.repo_prefix))
+        # self.listen(Name.from_str(self.repo_prefix + self.command_comp))
+        # self.listen(Name.from_str(self.repo_prefix + self.node_comp  + self.node_name))
+        self.listen(Name.from_str(self.repo_prefix + self.node_name))
 
     def listen(self, prefix):
         """
@@ -55,14 +53,14 @@ class ReadHandle(object):
         :param prefix: NonStrictName.
         """
         self.app.route(prefix)(self._on_interest)
-        self.logger.info(f'Read handle: listening to {Name.to_str(prefix)}')
+        self.logger.info(f'\nRead handle: listening to {Name.to_str(prefix)}')
 
     def unlisten(self, prefix):
         """
         :param name: NonStrictName.
         """
         aio.ensure_future(self.app.unregister(prefix))
-        self.logger.info(f'Read handle: stop listening to {Name.to_str(prefix)}')
+        self.logger.info(f'\nRead handle: stop listening to {Name.to_str(prefix)}')
 
     def _on_interest(self, int_name, int_param, _app_param):
         """
@@ -74,26 +72,28 @@ class ReadHandle(object):
         Assumptions:
         - A node on the on list will have the file in complete form
         """
-        if int_param.must_be_fresh:
-            return
 
         # get rid of the security part if any on the int_name
         file_name = self._get_file_name_from_interest(Name.to_str(int_name[:-1]))
         best_id = self._best_id_for_file(file_name)
         segment_comp = "/" + Component.to_str(int_name[-1])
 
-        if best_id == None:
+        if int_param.must_be_fresh:
+            return
+
+        if best_id is None:
             if segment_comp == "/seg=0":
-                self.logger.info(f'[CMD][FETCH]    nacked due to no file')
+                self.logger.info(f'\n[CMD][FETCH]    nacked due to no file')
 
             # nack due to lack of avaliability
             self.app.put_data(int_name, content=None, content_type=ContentType.NACK)
-            self.logger.debug(f'Read handle: data not found {Name.to_str(int_name)}')
+            self.logger.info(f"\nRead handle: data not found {Name.to_str(int_name)}")
             return
 
+        total_segments = int(self.global_view.get_file(file_name)["packets"])
         if best_id == self.node_name:
             if segment_comp == "/seg=0":
-                self.logger.info(f'[CMD][FETCH]    serving file')
+                self.logger.info(f'\n[CMD][FETCH]    serving file')
                 self._reset_file_expiration(file_name)
 
             # serving my own data
@@ -101,27 +101,22 @@ class ReadHandle(object):
             if data_bytes == None:
                 return
 
-            self.logger.debug(f'Read handle: serve data {Name.to_str(int_name)}')
-            _, _, content, _ = parse_data(data_bytes)
-            # print("serve"+file_name + segment_comp+"   "+Name.to_str(name))
-            final_id = Component.from_number(int(self.global_view.get_file(file_name)["packets"])-1, Component.TYPE_SEGMENT)
-            self.app.put_data(int_name, content=content, content_type=ContentType.BLOB, final_block_id=final_id)
+            self.app.put_raw_packet(data_bytes)
         else:
             if segment_comp == "/seg=0":
-                self.logger.info(f'[CMD][FETCH]    linked to another node')
+                self.logger.info(f'\n[CMD][FETCH]    linked to another node')
 
             # create a link to a node who has the content
-            new_name = self.repo_prefix + self.node_comp + best_id + self.command_comp + file_name
+            new_name = self.repo_prefix + best_id + file_name
             link_content = bytes(new_name.encode())
-            final_id = Component.from_number(int(self.global_view.get_file(file_name)["packets"])-1, Component.TYPE_SEGMENT)
+            final_id = Component.from_number(total_segments-1, Component.TYPE_SEGMENT)
             self.app.put_data(int_name, content=link_content, content_type=ContentType.LINK, final_block_id=final_id)
 
     def _get_file_name_from_interest(self, int_name):
         file_name = int_name[len(self.repo_prefix):]
         if file_name[0:len(self.node_comp)] == self.node_comp:
-            return file_name[(len(self.node_comp)+len(self.node_name)+len(self.command_comp)):]
-        else:
-            return file_name[(len(self.command_comp)):]
+            return file_name[(len(self.node_comp)+len(self.node_name)):]
+        return file_name
 
     def _best_id_for_file(self, file_name: str):
         file_info = self.global_view.get_file(file_name)
@@ -138,12 +133,12 @@ class ReadHandle(object):
             return choice(on_list)
 
     def _reset_file_expiration(self, file_name):
-        if self.file_expiration == 0: # no need to reset if file_expiration in config is set to 0
+        if self.file_expiration == 0:  # no need to reset if file_expiration in config is set to 0
             return
-        expiration_time = int(time.time() + (self.file_expiration * 60 * 60)) # convert hours to seconds
+        expiration_time = int(time.time() + (self.file_expiration * 60 * 60))  # convert hours to seconds
 
         # update tlv
-        favor = 1.85
+        favor = self.global_view.get_node(self.node_name)['favor']
         update_message = UpdateMessageTlv()
         update_message.node_name = self.node_name.encode()
         update_message.favor = str(favor).encode()
@@ -157,4 +152,3 @@ class ReadHandle(object):
         # publish
         self.global_view.update_file(file_name, expiration_time)
         self.main_loop.svs.publishData(message.encode())
-        self.logger.info(f"[MSG][UPDATE]*  fil={file_name}")

@@ -2,9 +2,8 @@
 # NDN Hydra Concurrent Segment Fetcher
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -21,7 +20,8 @@ from ndn.encoding import Name, NonStrictName, Component
 from tqdm.asyncio import tqdm
 from typing import Optional
 
-#An async-generator to fetch data packets concurrently.
+
+# An async-generator to fetch data packets concurrently.
 async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStrictName, start_block_id: int,
                              end_block_id: Optional[int], semaphore: aio.Semaphore, **kwargs):
     cur_id = start_block_id
@@ -29,7 +29,7 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
     is_failed = False
     tasks = []
     recv_window = cur_id - 1
-    seq_to_data_packet = dict() # Buffer for out-of-order delivery
+    seq_to_data_packet = dict()  # Buffer for out-of-order delivery
     received_or_fail = aio.Event()
 
     # Progress bar
@@ -56,21 +56,21 @@ async def concurrent_fetcher(app: NDNApp, name: NonStrictName, file_name: NonStr
                 received_or_fail.set()
                 return
             try:
-                #logging.info('Express Interest: {}'.format(Name.to_str(int_name)))
+                # logging.info('Express Interest: {}'.format(Name.to_str(int_name)))
                 data_name, meta_info, content, data_bytes = await app.express_interest(
-                    int_name, need_raw_packet=True, can_be_prefix=True, must_be_fresh=False, lifetime=4000, **kwargs)
+                    int_name, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=4000, **kwargs)
 
                 # Save data and update final_id
-                #logging.info('Received data: {}'.format(Name.to_str(data_name)))
+                # logging.info('Received data: {}'.format(Name.to_str(data_name)))
                 seq_to_data_packet[seq] = (data_name, meta_info, content, data_bytes, key)
                 if meta_info is not None and meta_info.final_block_id is not None:
                     final_id = Component.to_number(meta_info.final_block_id)
-                progress_bar.update(1)
+                progress_bar.update()
                 break
             except InterestNack as e:
-                logging.info(f'Nacked with reason={e.reason} {Name.to_str(int_name)}')
+                logging.info(f'\nNacked with reason={e.reason} {Name.to_str(int_name)}')
             except InterestTimeout:
-                logging.info(f'Timeout {Name.to_str(int_name)}')
+                logging.info(f'\nTimeout {Name.to_str(int_name)}')
         semaphore.release()
         received_or_fail.set()
 

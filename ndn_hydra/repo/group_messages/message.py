@@ -2,9 +2,8 @@
 # NDN Hydra General Group Message
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -22,6 +21,7 @@ from ndn_hydra.repo.group_messages.store import StoreMessage
 from ndn_hydra.repo.group_messages.claim import ClaimMessage
 from ndn_hydra.repo.group_messages.heartbeat import HeartbeatMessage
 
+
 class MessageTypes:
     ADD = 1
     REMOVE = 2
@@ -30,11 +30,13 @@ class MessageTypes:
     CLAIM = 5
     HEARTBEAT = 6
 
+
 class Message(TlvModel):
     type = UintField(HydraTlvTypes.MESSAGE_TYPE)
     value = BytesField(HydraTlvTypes.MESSAGE)
+
     @staticmethod
-    def specify(nid:str, seqno:int, message_bytes:bytes) -> Optional[SpecificMessage]:
+    def specify(nid: str, seqno: int, message_bytes: bytes) -> Optional[SpecificMessage]:
         message = Message.parse(message_bytes)
         message_type, message_bytes = message.type, bytes(message.value)
         if message_type == MessageTypes.ADD:

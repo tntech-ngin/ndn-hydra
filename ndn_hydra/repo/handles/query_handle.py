@@ -2,9 +2,8 @@
 # NDN Hydra Query Handle
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -16,6 +15,7 @@ from ndn.encoding import Name, ContentType, Component
 from ndn.storage import Storage
 from ndn_hydra.repo.modules.global_view import GlobalView
 from ndn_hydra.repo.protocol.base_models import FileList, File
+
 
 class QueryHandle(object):
     """
@@ -38,7 +38,8 @@ class QueryHandle(object):
         self.node_comp = "/node"
 
         self.listen(Name.from_str(self.repo_prefix + self.command_comp))
-        self.listen(Name.from_str(self.repo_prefix + self.node_comp  + self.node_name + self.command_comp))
+        self.listen(Name.from_str(self.repo_prefix + self.node_name + self.command_comp))
+        # self.listen(Name.from_str(self.repo_prefix + self.node_comp + self.node_name + self.command_comp))
 
     def listen(self, prefix):
         """
@@ -46,20 +47,20 @@ class QueryHandle(object):
         :param prefix: NonStrictName.
         """
         self.app.route(prefix)(self._on_interest)
-        self.logger.info(f'Query handle: listening to {Name.to_str(prefix)}')
+        self.logger.info(f'\nQuery handle: listening to {Name.to_str(prefix)}')
 
     def unlisten(self, prefix):
         """
         :param name: NonStrictName.
         """
         aio.ensure_future(self.app.unregister(prefix))
-        self.logger.info(f'Query handle: stop listening to {Name.to_str(prefix)}')
+        self.logger.info(f'\nQuery handle: stop listening to {Name.to_str(prefix)}')
 
     def _on_interest(self, int_name, int_param, _app_param):
         if not int_param.must_be_fresh or not int_param.can_be_prefix:
             return 
         if not _app_param:
-            self.logger.info('Query handle: No querytype')
+            self.logger.info('\nQuery handle: No querytype')
             return
 
         query = Name.from_bytes(_app_param)
@@ -67,19 +68,19 @@ class QueryHandle(object):
         query = Name.to_str(query)
 
         if querytype == "nodes":
-            self.logger.info(f'[CMD][QUERY]    query received: nodes')
+            self.logger.info(f'\n[CMD][QUERY]    query received: nodes')
             nodes = self.global_view.get_nodes()
             nodenamestrlist = " ".join([key["node_name"] for key in nodes])
             self.app.put_data(int_name, content=bytes(nodenamestrlist.encode()), freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "exnodes":
-            self.logger.info(f'[CMD][QUERY]    query received: exnodes')
+            self.logger.info(f'\n[CMD][QUERY]    query received: exnodes')
             nodes = self.global_view.get_nodes(True)
             nodenamestrlist = " ".join([key["node_name"] for key in nodes])
             self.app.put_data(int_name, content=bytes(nodenamestrlist.encode()), freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "files":
-            self.logger.info(f'[CMD][QUERY]    query received: files')
+            self.logger.info(f'\n[CMD][QUERY]    query received: files')
             files = self.global_view.get_files()
             filelist = FileList()
             filelist.list = []
@@ -93,7 +94,7 @@ class QueryHandle(object):
             self.app.put_data(int_name, content=filelist.encode(), freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "file":
-            self.logger.info(f'[CMD][QUERY]    query received: file')
+            self.logger.info(f'\n[CMD][QUERY]    query received: file')
             files = self.global_view.get_files()
             filename = query[5:]
             filecontent = None
@@ -109,7 +110,7 @@ class QueryHandle(object):
             self.app.put_data(int_name, content=filecontent, freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "prefix":
-            self.logger.info(f'[CMD][QUERY]    query received: prefix')
+            self.logger.info(f'\n[CMD][QUERY]    query received: prefix')
             files = self.global_view.get_files()
             prefix = query[7:]
             filelist = FileList()
@@ -125,6 +126,6 @@ class QueryHandle(object):
             self.app.put_data(int_name, content=filelist.encode(), freshness_period=3000, content_type=ContentType.BLOB)
             return
         else:
-            self.logger.info(f'[CMD][QUERY]    unknown query received')
+            self.logger.info(f'\n[CMD][QUERY]    unknown query received')
             self.app.put_data(int_name, content=None, freshness_period=3000, content_type=ContentType.NACK)
             return

@@ -7,19 +7,31 @@
 # -------------------------------------------------------------
 import numpy as np
 from ndn.encoding import *
+from typing import Union, Dict
 import shutil
 
 
 class FavorParameterTypes:
-    RTT = 100
-    NETWORK_COST_PER_GB = 0.01
-    STORAGE_COST_PER_GB = 0.014
-    NUM_USERS = 100
-    BANDWIDTH = 25000 #Mbps
-    NETWORK_COST = NETWORK_COST_PER_GB * (BANDWIDTH/(1000*8)) #0.01 USD/GB  
-    RW_SPEED = 6.25
-    TOTAL_STORAGE, USED_STORAGE, REMAINING_STORAGE = shutil.disk_usage(__file__)
-    STORAGE_COST = REMAINING_STORAGE * STORAGE_COST_PER_GB
+    RTT = 501
+    NUM_USERS = 502
+    BANDWIDTH = 503
+    NETWORK_COST = 504
+    STORAGE_COST = 505
+    REMAINING_STORAGE = 506
+    RW_SPEED = 507
+
+
+class FavorWeightsTypes:
+    REMAINING_STORAGE = 508
+    BANDWIDTH = 509
+    RW_SPEED = 510
+
+
+class FavorWeights(TlvModel):
+    remaining_storage = BytesField(FavorWeightsTypes.REMAINING_STORAGE)
+    bandwidth = BytesField(FavorWeightsTypes.BANDWIDTH)
+    rw_speed = BytesField(FavorWeightsTypes.RW_SPEED)
+
 
 class FavorParameters(TlvModel):
     rtt = BytesField(FavorParameterTypes.RTT)
@@ -35,13 +47,14 @@ class FavorCalculator:
     """
     A class for abstracting favor calculations between two nodes.
     """
-    def calculate_favor(self, favor_parameters: FavorParameters) -> float:
-        favor = 0
-        #for param, val in favor_parameters.asdict().items():
-            # print(param, ':', val)
-        #    favor += int(val)
-        # print('favor:', favor)
-        favor = (.3*favor_parameters.remaining_storage + .3*favor_parameters.bandwidth + .4*favor_parameters.rw_speed* + 0.0*favor_parameters.num_users
-                 + 0.0*favor_parameters.network_cost + 0.0*favor_parameters.storage_cost)
+
+    @staticmethod
+    def calculate_favor(
+            favor_parameters: Union[FavorParameters, Dict[str, float]],
+            favor_weights: Union[FavorWeights, Dict[str, float]]
+    ) -> float:
+        favor = (favor_weights['remaining_storage'] * favor_parameters['remaining_storage']
+                 + favor_weights['bandwidth'] * favor_parameters['bandwidth']
+                 + favor_weights['rw_speed'] * favor_parameters['rw_speed'])
         return int(favor)
 

@@ -2,9 +2,8 @@
 # NDN Hydra Client
 # -------------------------------------------------------------
 #  @Project: NDN Hydra
-#  @Date:    2021-01-25
 #  @Authors: Please check AUTHORS.rst
-#  @Source-Code:   https://github.com/justincpresley/ndn-hydra
+#  @Source-Code:   https://github.com/tntech-ngin/ndn-hydra
 #  @Documentation: https://ndn-hydra.readthedocs.io
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
@@ -20,13 +19,17 @@ import time
 import pkg_resources
 from ndn_hydra.client.functions import *
 
+
 def parse_hydra_cmd_opts() -> Namespace:
     def interpret_version() -> None:
         set = True if "-v" in sys.argv else False
         if set and (len(sys.argv)-1 < 2):
-            try: print("ndn-hydra " + pkg_resources.require("ndn-hydra")[0].version)
-            except pkg_resources.DistributionNotFound: print("ndn-hydra source,undetermined")
+            try:
+                print("ndn-hydra " + pkg_resources.require("ndn-hydra")[0].version)
+            except pkg_resources.DistributionNotFound:
+                print("ndn-hydra source,undetermined")
             sys.exit(0)
+
     def interpret_help() -> None:
         set = True if "-h" in sys.argv else False
         if set:
@@ -97,67 +100,75 @@ def parse_hydra_cmd_opts() -> Namespace:
     querysp.add_argument("-q","--query",action="store",dest="query",required=True)
     querysp.add_argument("-n","--nodename",action="store",dest="nodename",default=None, required=False)
 
+
     # Interpret Informational Arguments
     interpret_version()
     interpret_help()
 
     # Getting all Arguments
-    vars = parser.parse_args()
+    parsed_vars = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     # Configure Arguments
-    if vars.function == "insert":
-        if not os.path.isfile(vars.path):
+    if parsed_vars.function == "insert":
+        if not os.path.isfile(parsed_vars.path):
             print('Error: path specified is not an actual file. Unable to insert.')
             sys.exit()
-    return vars
+    return parsed_vars
 
-class HydraClient():
+
+class HydraClient:
     def __init__(self, app: NDNApp, client_prefix: FormalName, repo_prefix: FormalName) -> None:
         self.cinsert = HydraInsertClient(app, client_prefix, repo_prefix)
         self.cdelete = HydraDeleteClient(app, client_prefix, repo_prefix)
         self.cfetch = HydraFetchClient(app, client_prefix, repo_prefix)
         self.cquery = HydraQueryClient(app, client_prefix, repo_prefix)
+
     async def insert(self, file_name: FormalName, path: str) -> bool:
-        return await self.cinsert.insert_file(file_name, path);
+        return await self.cinsert.insert_file(file_name, path)
+
     async def delete(self, file_name: FormalName) -> bool:
-        return await self.cdelete.delete_file(file_name);
+        return await self.cdelete.delete_file(file_name)
+
     async def fetch(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
         return await self.cfetch.fetch_file(file_name, local_filename, overwrite)
+
     async def query(self, query: Name, node_name: str=None) -> None:
         return await self.cquery.send_query(query, node_name)
 
+
 async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
-  repo_prefix = Name.from_str(args.repo)
-  client_prefix = Name.from_str("/client")
-  filename = None
-  client = HydraClient(app, client_prefix, repo_prefix)
+    repo_prefix = Name.from_str(args.repo)
+    client_prefix = Name.from_str("/client")
+    filename = None
+    client = HydraClient(app, client_prefix, repo_prefix)
 
-  if args.function != "query":
-      filename = Name.from_str(args.filename)
+    if args.function != "query":
+        filename = Name.from_str(args.filename)
 
-  if args.function == "insert":
-    await client.insert(filename, args.path)
-    print("Client finished Insert Command!")
-    await asyncio.sleep(float(args.wait))
-  elif args.function == "delete":
-    tic = time.perf_counter()
-    await client.delete(filename)
-    toc = time.perf_counter()
-    print("Client finished Delete Command! - total time (with disk): {toc - tic:0.4f} secs")
-  elif args.function == "fetch":
-    tic = time.perf_counter()
-    await client.fetch(filename, args.path, True)
-    toc = time.perf_counter()
-    print(f"Client finished Fetch Command! - total time (with disk): {toc - tic:0.4f} secs")
-  elif args.function == "query":
-    tic = time.perf_counter()
-    await client.query(Name.from_str(str(args.query)), args.nodename)
-    toc = time.perf_counter()
-    print(f"Client finished Query Command! - total time (with disk): {toc - tic:0.4f} secs")
-  else:
-    print("Not Implemented Yet / Unknown Command.")
+    if args.function == "insert":
+        await client.insert(filename, args.path)
+        print("\nClient finished Insert Command!")
+        await asyncio.sleep(float(args.wait))
+    elif args.function == "delete":
+        tic = time.perf_counter()
+        await client.delete(filename)
+        toc = time.perf_counter()
+        print(f"\nClient finished Delete Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
+    elif args.function == "fetch":
+        tic = time.perf_counter()
+        await client.fetch(filename, args.path, True)
+        toc = time.perf_counter()
+        print(f"\nClient finished Fetch Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
+    elif args.function == "query":
+        tic = time.perf_counter()
+        await client.query(Name.from_str(str(args.query)), args.nodename)
+        toc = time.perf_counter()
+        print(f"\nClient finished Query Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
+    else:
+        print("\nNot Implemented Yet / Unknown Command.")
 
-  app.shutdown()
+    app.shutdown()
+
 
 def main() -> None:
     args = parse_hydra_cmd_opts()
@@ -167,6 +178,7 @@ def main() -> None:
     except (FileNotFoundError, ConnectionRefusedError):
         print('Error: could not connect to NFD.')
         sys.exit()
+
 
 if __name__ == "__main__":
     sys.exit(main())
