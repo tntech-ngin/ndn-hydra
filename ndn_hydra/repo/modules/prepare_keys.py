@@ -19,11 +19,10 @@ from envelope.impl.storage import Sqlite3Box
 
 async def prepare_keys(group_prefix, node_name, app):
     # /hydra/node/n1/hydra/group/data/1 -> Should be /hydra/node1/hydra/group/data/1
-
     lvs_text = r'''
         #KEY: "KEY"/_/_/_
         #site: "hydra"
-        #nodePrefix: #site/node_/
+        #nodePrefix: #site/node/_
         #groupSyncInterestSend: #site/sync/_ <= #node
         #groupSyncInterestReceive: #site/sync/_/_ <= #node
         #groupData1: #nodePrefix/#site/group/_ <= #node
