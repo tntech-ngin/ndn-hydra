@@ -18,7 +18,7 @@ from envelope.impl.storage import Sqlite3Box
 
 
 async def prepare_keys(group_prefix, node_name, app):
-    # /hydra/node/n1/hydra/group/data/1 -> Should be /hydra/node1/hydra/group/data/1
+    # /hydra/node/n1/hydra/group/data/1 -> Need to be /hydra/node1/hydra/group/data/1
     lvs_text = r'''
         #KEY: "KEY"/_/_/_
         #site: "hydra"
@@ -36,6 +36,7 @@ async def prepare_keys(group_prefix, node_name, app):
     os.makedirs(tpm_path, exist_ok=True)
 
     logging.debug(f'\n[Prepare keys] \n Sec Params Dir: {sec_params_dir}, \n TPM Dir: {tpm_path}\n')
+    logging.debug(f'\n[Prepare keys] \n NodeName: {node_name}')
 
     # Cleaning up
     try:
