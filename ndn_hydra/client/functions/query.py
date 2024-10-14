@@ -37,17 +37,23 @@ class HydraQueryClient(object):
             named_query = self.repo_prefix + [Component.from_str("node")] + [Component.from_str(node_name)] + [Component.from_str("query")]
 
         try:
-            data_name, meta_info, content = await self.app.express_interest(named_query, Name.to_bytes(query), can_be_prefix=True, must_be_fresh=True, lifetime=3000)
+            data_name, meta_info, content = await self.app.express_interest(
+                named_query,
+                Name.to_bytes(query),
+                can_be_prefix=True,
+                must_be_fresh=True,
+                lifetime=3000
+            )
 
             if meta_info.content_type == ContentType.NACK:
                 print("Distributed Repo does not know that query.")
             else:
                 querytype = Component.to_str(query[0])
                 if querytype == "nodes":
-                    print(f'List of All Node Names')
+                    print(f'List of all node names')
                     print(f'{bytes(content).decode().split()}')
                 elif querytype == "exnodes":
-                    print(f'List of All Expired Node Names')
+                    print(f'List of all expired node names')
                     print(f'{bytes(content).decode().split()}')
                 elif querytype == "files":
                     filelist = FileList.parse(content)

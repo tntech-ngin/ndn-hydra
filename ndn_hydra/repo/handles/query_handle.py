@@ -59,7 +59,7 @@ class QueryHandle(object):
         if not int_param.must_be_fresh or not int_param.can_be_prefix:
             return 
         if not _app_param:
-            self.logger.info('\nQuery handle: No querytype')
+            self.logger.info('\nQuery handle: No query of this type.')
             return
 
         query = Name.from_bytes(_app_param)
