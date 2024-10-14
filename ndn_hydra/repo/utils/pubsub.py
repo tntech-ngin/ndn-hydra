@@ -13,6 +13,8 @@
 
 import asyncio as aio
 import logging
+from sys import base_prefix
+
 from ndn.app import NDNApp
 from ndn.encoding import TlvModel, ModelField, NameField, BytesField
 from ndn.encoding import Name, NonStrictName, Component, InterestParam
@@ -75,6 +77,7 @@ class PubSub(object):
         if self.base_prefix != None:
             try:
                 await self.app.register(self.base_prefix, func=None)
+                logging.debug(f'\n[SVS] \n Base prefix: {base_prefix}\n')
             except ValueError as esc:
                 pass
 
