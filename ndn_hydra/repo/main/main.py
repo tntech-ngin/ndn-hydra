@@ -17,7 +17,7 @@ from ndn.app import NDNApp
 from ndn.encoding import Name
 from ndn.storage import SqliteStorage
 import sys, os
-from ndn.svs import SVSyncLogger
+from svs import SVSyncLogger
 from ndn_hydra.repo import *
 from ndn_hydra.repo.modules.file_fetcher import FileFetcher
 from ndn_hydra.repo.modules.data_storage import DataStorage

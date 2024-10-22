@@ -17,7 +17,7 @@ from typing import Dict, List
 from ndn.app import NDNApp
 from ndn.encoding import Name, Component
 from ndn.types import InterestNack, InterestTimeout
-from ndn.svs import SVSync
+from svs import SVSync
 from ndn.storage import Storage, SqliteStorage
 from ndn_hydra.repo.modules import *
 from ndn_hydra.repo.group_messages import *

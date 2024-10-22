@@ -1,6 +1,6 @@
 import time
 import logging
-from ndn.svs import SVSync
+from svs import SVSync
 from ndn.storage import Storage
 from ndn.encoding import Name, Component
 from ndn_hydra.repo.modules.global_view import GlobalView
