@@ -1,73 +1,151 @@
 """
  Automate the topology creation to use Hydra
 """
-from typing import List, Dict
-from collections import deque
+from typing import Dict, List, Tuple
+import yaml
 
-# nodes = ["Node1","Node2","Node3","Node4","Node5"]
-def create_graph(nodes: List[str]) -> Dict[str, List[str]]:
-    # Define neighbors
-    graph: Dict[str, List[str]] = {node: [] for node in nodes}
+# Usage example:
+"""
+# Initialize slice, sites, and other parameters
+slice = fabric_slice()
+sites = ["site1", "site2", ...]
+cores = 2
+ram = 4
+disk = 10
+image = "ubuntu-20.04"
 
-    # Create edges between all the nodes
-    for i, node in enumerate(nodes):
-        for j in range(i + 1, len(nodes)):
-            neighbor = nodes[j]
-            graph[node].append(neighbor)
-            graph[neighbor].append(node)
+# Run the automation
+network = main(slice, sites, cores, ram, disk, image)
+"""
+
+class TopologyAutomation:
+    def __init__(self, iface_table, nodes_list, connections, client_nodes_list, client_connections):
+        self.iface_table: Dict[str, List[object]] = iface_table # Store interfaces for each node
+        self.nodes_list: List[str] = nodes_list
+        self.connections: List[Dict[str, List[str]]] = connections
+        self.client_nodes_list: List[str] = client_nodes_list
+        self.client_connections: List[Dict[str, List[str]]] = client_connections
+        self.nodes: Dict[str, object] = {node: {} for node in nodes_list}
+        self.client_nodes: Dict[str, object] = {node: {} for node in client_nodes_list}
+
+    def add_new_node(self, node_name: str, used_slice, site, cores, ram, disk, image) -> None:
+        """Add a node to the network with specified configurations."""
+        print(f"\n > Processing node {node_name}")
+        node = used_slice.add_node(name=node_name, site=site)
+        node.set_capacities(cores=cores, ram=ram, disk=disk)
+        node.set_image(image)
+        self.nodes[node_name] = node
+        self.iface_table[node_name] = []
+
+    def add_interface(self, node_name: str, nic_name: str) -> None:
+        """Add a network interface to a node."""
+        node = self.nodes[node_name]
+        iface = node.add_component(model='NIC_Basic', name=nic_name).get_interfaces()[0]
+        self.iface_table[node_name].append(iface)
+
+    def create_network_connection(
+            self,
+            selected_slice,
+            network_name: str,
+            node1: str,
+            node2: str,
+            interface1_idx: int,
+            interface2_idx: int
+    ) -> None:
+        """Create a network connection between two nodes using specified interfaces."""
+        created_connections = []
+        if (node1, node2) not in created_connections and (node2, node1) not in created_connections:
+            selected_slice.add_l2network(
+                name=network_name,
+                interfaces=[
+                    self.iface_table[node1][interface1_idx],
+                    self.iface_table[node2][interface2_idx]
+                ]
+            )
+            created_connections.append((node1, node2))
+            print(f"\n > Created connection: {network_name} between {node1} and {node2}")
+
+    def setup_network(self, selected_slice, base_network_name: str, nodes: List[str]) -> None:
+        """Create a full mesh network between the specified nodes."""
+
+        # Flatten the connections into a list of tuples first
+        flat_connections = []
+        for conn_dict in self.connections:
+            for source, targets in conn_dict.items():
+                flat_connections.extend((source, target) for target in targets)
+
+        interface_indices = {node: 0 for node in nodes}
+
+        for i, (source_node, target_node) in enumerate(flat_connections):
+
+            network_name = f"{base_network_name}{i}"
+
+            # Create connection using current interface indices
+            self.create_network_connection(
+                selected_slice,
+                network_name,
+                source_node,
+                target_node,
+                interface_indices[source_node],
+                interface_indices[target_node]
+            )
+
+            # Increment interface indices
+            interface_indices[source_node] += 1
+            interface_indices[target_node] += 1
+
+    def setup_client_connections(
+            self,
+            selected_slice,
+            base_network_name: str,
+            client_connections: List[Tuple[str, str]]
+    ) -> None:
+        """Set up connections between client nodes and their designated targets."""
+        for idx, (client, target) in enumerate(client_connections):
+            network_name = f"{base_network_name}{idx}"
+            # Clients typically use their first (and only) interface
+            # Target nodes need to use their next available interface
+            target_interface_idx = len(self.iface_table[target]) - 1
+            self.create_network_connection(selected_slice, network_name, client, target, 0, target_interface_idx)
 
 
-    return graph
+def main(selected_slice, sites, cores, ram, disk, image):
+    with open('../ndn_hydra/repo/config.yaml', 'r') as config_file:
+        config = yaml.safe_load(config_file)
 
-def bfs_shortest_path(graph: Dict[str, List[str]], start: str, goal: str) -> List[str]:
-    queue = deque([[start]])
-    visited = {start}
+    topology = config['default_config']['topology']
 
-    while queue:
-        path = queue.popleft()
-        node = path[-1]
+    nodes_list: List[str] = topology['nodes']
+    connections: List[Tuple[str, str]] = topology['connections']
 
-        if node == goal:
-            return path
+    client_nodes_list: List[str] = topology['client_nodes']
+    client_connections: List[Tuple[str, str]] = topology['client_connections']
 
-        for neighbor in graph.get(node, []):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                new_path = list(path)
-                new_path.append(neighbor)
-                queue.append(new_path)
+    # Initialize automation
+    net_auto = TopologyAutomation({}, nodes_list, connections, client_nodes_list, client_connections)
 
-    return []
+    # Define nodes
+    all_nodes = client_nodes_list + nodes_list
 
-def remove_cycles(topology: Dict[str, Dict[str, List[str]]]) -> Dict[str, Dict[str, List[str]]]:
-    acyclic_topology: Dict[str, Dict[str, List[str]]] = {}
+    # Create all nodes
+    for i, node_name in enumerate(all_nodes):
+        net_auto.add_node(node_name, selected_slice, sites[i % len(sites)], cores, ram, disk, image)
 
-    for source in topology:
-        acyclic_topology[source] = {}
-        for destination, path in topology[source].items():
-            if source not in path[1:]:  # Exclude paths that return to the source
-                acyclic_topology[source][destination] = path
+    # Add interfaces for nodes (need multiple interfaces for full mesh)
+    for node in nodes_list:
+        # Add N-1 interfaces for connections (where N is the number of nodes)
+        for i in range(len(nodes_list) - 1):
+            nic_name = f"{node}_nic_{i}"
+            net_auto.add_interface(node, nic_name)
 
-    return acyclic_topology
+    # Add single interface for client nodes
+    for node in client_nodes_list:
+        net_auto.add_interface(node, f"{node}_nic_0")
 
-def create_topology(graph: Dict[str, List[str]]) -> Dict[str, List[str]]:
-    # Map all the nodes to define sources and destinations
-    # A ---B---C---E---F---> D
-    # Source ----ROUTE-----> Destination
+    # Setup mesh network
+    net_auto.setup_network(selected_slice, "net_", nodes_list)
 
-    # Define the shortest path for each pair of Source and Destination
-    shortest_paths: Dict[str, Dict[str, List[str]]] = {}
+    # Setup client connections
+    net_auto.setup_client_connections(selected_slice, "net_client_", client_connections)
 
-    for source in graph:
-        shortest_paths[source] = {}
-        for destination in graph:
-            if source != destination:
-                path = bfs_shortest_path(graph, source, destination)
-                if path:
-                    shortest_paths[source][destination] = path
-
-    # Drop all the cycles
-    acyclic_topology = remove_cycles(shortest_paths)
-
-    return acyclic_topology
-
+    return net_auto
