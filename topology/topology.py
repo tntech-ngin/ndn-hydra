@@ -98,10 +98,12 @@ class TopologyAutomation:
             self,
             selected_slice,
             base_network_name: str,
-            client_connections: List[Tuple[str, str]]
+            client_connections: List[List[str, str]]
     ) -> None:
         """Set up connections between client nodes and their designated targets."""
-        for idx, (client, target) in enumerate(client_connections):
+        for idx, connection in enumerate(client_connections):
+            client = connection[0]
+            target = connection[1]
             network_name = f"{base_network_name}{idx}"
             # Clients typically use their first (and only) interface
             # Target nodes need to use their next available interface
@@ -129,7 +131,7 @@ def main(selected_slice, sites, cores, ram, disk, image):
 
     # Create all nodes
     for i, node_name in enumerate(all_nodes):
-        net_auto.add_node(node_name, selected_slice, sites[i % len(sites)], cores, ram, disk, image)
+        net_auto.add_new_node(node_name, selected_slice, sites[i % len(sites)], cores, ram, disk, image)
 
     # Add interfaces for nodes (need multiple interfaces for full mesh)
     for node in nodes_list:
