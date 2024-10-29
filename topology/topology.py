@@ -28,6 +28,16 @@ class TopologyAutomation:
         self.nodes: Dict[str, object] = {node: {} for node in nodes_list}
         self.client_nodes: Dict[str, object] = {node: {} for node in client_nodes_list}
 
+        print(f'\n ------ Constructor information ------')
+        print(f'\n iFace table: {self.iface_table}')
+        print(f'\n Nodes: {self.nodes}')
+        print(f'\n Nodes list: {self.nodes_list}')
+        print(f'\n Nodes connections: {self.connections}')
+        print(f'\n Client nodes: {self.client_nodes}')
+        print(f'\n Client nodes list: {self.client_nodes_list}')
+        print(f'\n Client nodes connections: {self.nodes_list}')
+
+    # Working
     def add_new_node(self, node_name: str, used_slice, site, cores, ram, disk, image) -> None:
         """Add a node to the network with specified configurations."""
         print(f"\n > Processing node {node_name}")
@@ -37,12 +47,15 @@ class TopologyAutomation:
         self.nodes[node_name] = node
         self.iface_table[node_name] = []
 
+
     def add_interface(self, node_name: str, nic_name: str) -> None:
         """Add a network interface to a node."""
+        print(f'> Processing interface {nic_name}')
         node = self.nodes[node_name]
         iface = node.add_component(model='NIC_Basic', name=nic_name).get_interfaces()[0]
         self.iface_table[node_name].append(iface)
 
+    # Working
     def create_network_connection(
             self,
             selected_slice,
@@ -63,7 +76,7 @@ class TopologyAutomation:
                 ]
             )
             created_connections.append((node1, node2))
-            print(f"\n > Created connection: {network_name} between {node1} and {node2}")
+            print(f"> Created connection: {network_name} between {node1} and {node2}")
 
     def setup_network(self, selected_slice, base_network_name: str, nodes: List[str]) -> None:
         """Create a full mesh network between the specified nodes."""
@@ -76,6 +89,7 @@ class TopologyAutomation:
 
         interface_indices = {node: 0 for node in nodes}
 
+        print(f'\n> Starting network creation')
         for i, (source_node, target_node) in enumerate(flat_connections):
 
             network_name = f"{base_network_name}{i}"
@@ -98,7 +112,7 @@ class TopologyAutomation:
             self,
             selected_slice,
             base_network_name: str,
-            client_connections: List[List[str, str]]
+            client_connections: List[Tuple[str, str]]
     ) -> None:
         """Set up connections between client nodes and their designated targets."""
         for idx, connection in enumerate(client_connections):
@@ -112,6 +126,8 @@ class TopologyAutomation:
 
 
 def main(selected_slice, sites, cores, ram, disk, image):
+    print(f'Opening YAML file')
+
     with open('../ndn_hydra/repo/config.yaml', 'r') as config_file:
         config = yaml.safe_load(config_file)
 
@@ -123,31 +139,48 @@ def main(selected_slice, sites, cores, ram, disk, image):
     client_nodes_list: List[str] = topology['client_nodes']
     client_connections: List[Tuple[str, str]] = topology['client_connections']
 
+    print(f'\n---------- YAML DATA ----------')
+    print(f'\nNodes: {nodes_list}')
+    print(f'\nConnections: {connections}')
+    print(f'\nClient nodes: {client_nodes_list}')
+    print(f'\nClient connections: {client_connections}')
+    print(f'---------- YAML DATA ----------')
+
     # Initialize automation
+    print(f'\n> Creating instance of Topology Automation class')
     net_auto = TopologyAutomation({}, nodes_list, connections, client_nodes_list, client_connections)
 
     # Define nodes
-    all_nodes = client_nodes_list + nodes_list
+    all_nodes_names = client_nodes_list + nodes_list
+    print(f'\nAll nodes: {all_nodes_names}')
 
     # Create all nodes
-    for i, node_name in enumerate(all_nodes):
+    print(f'\n------ Creating nodes ------')
+    for i, node_name in enumerate(all_nodes_names):
         net_auto.add_new_node(node_name, selected_slice, sites[i % len(sites)], cores, ram, disk, image)
 
     # Add interfaces for nodes (need multiple interfaces for full mesh)
-    for node in nodes_list:
+    print(f'\n------ Creating interfaces ------')
+    for node_name in nodes_list:
         # Add N-1 interfaces for connections (where N is the number of nodes)
         for i in range(len(nodes_list) - 1):
-            nic_name = f"{node}_nic_{i}"
-            net_auto.add_interface(node, nic_name)
+            nic_name = f"{node_name}_nic_{i}"
+            net_auto.add_interface(node_name, nic_name)
 
     # Add single interface for client nodes
-    for node in client_nodes_list:
-        net_auto.add_interface(node, f"{node}_nic_0")
+    print(f'\n------ Creating interfaces for clients ------')
+    for node_name in client_nodes_list:
+        net_auto.add_interface(node_name, f"{node_name}_nic_0")
 
     # Setup mesh network
+    print(f'\n------ Setting up connections ------')
     net_auto.setup_network(selected_slice, "net_", nodes_list)
 
     # Setup client connections
+    print(f'\n------ Setting up client connections ------')
     net_auto.setup_client_connections(selected_slice, "net_client_", client_connections)
+
+    print(f'\n> Submitting slice')
+    slice.submit()
 
     return net_auto
