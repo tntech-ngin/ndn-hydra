@@ -14,6 +14,7 @@ import random
 import time
 import os
 from ndn.app import NDNApp
+from ndn.encoding import parse_data
 from ndn.storage import Storage
 from ndn_hydra.repo.modules import *
 from ndn_hydra.repo.group_messages import *
@@ -81,14 +82,16 @@ class FileFetcher:
         # Custom: save files for dpdk fileserver
         file_path = f"{self.fileserver_path}/{file_name}"
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        f = open(file_path, "wb")
+        f = open(file_path, 'wb')
         # Custom: end
 
-        async for (_, _, content, data_bytes, key) in concurrent_fetcher(self.app, fetch_path, file_name, 0,
+        async for (_, _, _, data_bytes, key) in concurrent_fetcher(self.app, fetch_path, file_name, 0,
                                                                          packets - 1, aio.Semaphore(15)):
-            self.data_storage.put_packet(key, data_bytes)  #TODO: check digest
+            _, _, content, _ = parse_data(data_bytes)
+            self.data_storage.put_packet(key, content)  #TODO: check digest
 
             # Custom: save files for dpdk fileserver
+            _, _, content, _ = parse_data(content)
             f.write(content)
             # Custom: end
 
