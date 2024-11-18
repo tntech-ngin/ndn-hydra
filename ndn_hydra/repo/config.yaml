@@ -25,29 +25,3 @@ default_config:
     network_cost: 0
     storage_cost: 0
     remaining_storage: 0
-
-  topology:
-    client_nodes: [ node1, node6, node11 ]
-    client_connections:
-      node1: [ node2 ]
-      node6: [ node7 ]
-      node11: [ node12 ]
-    nodes: [ node2, node3, node4, node5, node7, node8, node9, node10, node12, node13, node14, node15, node16, node17, node18, node19, node20 ]
-    connections:
-      node2: [ node3, node4 ]
-      node3: [ node2, node5, node7 ]
-      node4: [ node2, node8, node9 ]
-      node5: [ node3, node10 ]
-      node7: [ node3, node8, node13 ]
-      node8: [ node4, node7, node14 ]
-      node9: [ node4, node10, node15 ]
-      node10: [ node5, node9, node16 ]
-      node12: [ node13, node16 ]
-      node13: [ node7, node12, node17 ]
-      node14: [ node8, node15, node18 ]
-      node15: [ node9, node14, node19 ]
-      node16: [ node10, node12, node20 ]
-      node17: [ node13, node18 ]
-      node18: [ node14, node17, node19 ]
-      node19: [ node15, node18, node20 ]
-      node20: [ node16, node19 ]
