@@ -9,8 +9,10 @@
 # -------------------------------------------------------------
 
 from ndn.app import NDNApp
-from ndn.encoding import FormalName, Component, Name, ContentType
+from ndn.encoding import FormalName, Component, Name
+from ndn_hydra.client.functions.query import HydraQueryClient
 import os
+import random
 import subprocess
 
 
@@ -41,27 +43,16 @@ class HydraFetchClientDPDK(object):
             raise FileExistsError("{} already exists".format(local_filename))
 
         # Get repo which holds the file
-        _, meta_info, content, _ = await self.app.express_interest(
-            name_at_repo, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=4000)
-
-        if meta_info.content_type == ContentType.NACK:
-            print('Distributed Repo does not have that file.')
-            return
-
-        source_repo = ''
-        if meta_info.content_type == ContentType.LINK:
-            components = bytes(content).decode().split('/')
-            if len(components) > 2:
-                source_repo = components[2]
-            else:
-                print('Path does not contain enough components. Fetching failed.')
-                return
+        query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
+        query = [Component.from_str("filestores")] + file_name
+        query_result = await query_client.send_query(query)
+        source_repo = random.choice(query_result)
 
         file_name = Name.to_str(file_name)
         command = f'''docker run -t \
             --mount type=volume,source=run-ndn,target=/run/ndn \
             sankalpatimilsina/ndnc:nov-11 \
-            ./sandie-ndn/NDNc/build/ndncft-client --name-prefix /{source_repo} --copy {file_name}'''
+            ./sandie-ndn/NDNc/build/ndncft-client --pipeline-type fixed --lifetime 2000 --name-prefix {source_repo} --copy {file_name}'''
         subprocess.run(command, shell=True)
 
         return name_at_repo

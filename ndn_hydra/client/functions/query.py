@@ -81,6 +81,12 @@ class HydraQueryClient(object):
                             counter = counter + 1
                     else:
                         print(f'No files inserted in the remote repo with prefix {Name.to_str(query[1:])}.')
+                elif querytype == "filestores":
+                    print(f'List of All File Stores for {Name.to_str(query[1:])}:')
+                    stores = bytes(content).decode().split()
+                    for store in stores:
+                        print(store)
+                    return stores
                 else:
                     print("Client does not know that query.")
         except (InterestNack, InterestTimeout, InterestCanceled, ValidationFailure) as e:
