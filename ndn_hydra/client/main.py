@@ -98,6 +98,12 @@ def parse_hydra_cmd_opts() -> Namespace:
     fetchsp.add_argument("-p","--path",action="store",dest="path",default="./fetchedHydraFile", required=False)
     fetchsp.add_argument("-c","--client_prefix",action="store",dest="client_prefix",default="/client1", required=False)
 
+    fetchdpdksp = subparsers.add_parser('fetchdpdk',add_help=False)
+    fetchdpdksp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
+    fetchdpdksp.add_argument("-f","--filename",action="store",dest="filename",required=True)
+    fetchdpdksp.add_argument("-p","--path",action="store",dest="path",default="./fetchedHydraFile", required=False)
+    fetchdpdksp.add_argument("-c","--client_prefix",action="store",dest="client_prefix",default="/client1", required=False)
+
     querysp = subparsers.add_parser('query',add_help=False)
     querysp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
     querysp.add_argument("-q","--query",action="store",dest="query",required=True)
@@ -124,6 +130,7 @@ class HydraClient:
         self.cinsert = HydraInsertClient(app, client_prefix, repo_prefix)
         self.cdelete = HydraDeleteClient(app, client_prefix, repo_prefix)
         self.cfetch = HydraFetchClient(app, client_prefix, repo_prefix)
+        self.cfetchdpdk = HydraFetchClientDPDK(app, client_prefix, repo_prefix)
         self.cquery = HydraQueryClient(app, client_prefix, repo_prefix)
 
     async def insert(self, file_name: FormalName, path: str) -> bool:
@@ -134,6 +141,9 @@ class HydraClient:
 
     async def fetch(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
         return await self.cfetch.fetch_file(file_name, local_filename, overwrite)
+
+    async def fetchdpdk(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
+        return await self.cfetchdpdk.fetch_file_dpdk(file_name, local_filename, overwrite)
 
     async def query(self, query: Name, node_name: str=None) -> None:
         return await self.cquery.send_query(query, node_name)
@@ -160,6 +170,11 @@ async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
     elif args.function == "fetch":
         tic = time.perf_counter()
         await client.fetch(filename, args.path, True)
+        toc = time.perf_counter()
+        print(f"\nClient finished Fetch Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
+    elif args.function == "fetchdpdk":
+        tic = time.perf_counter()
+        await client.fetchdpdk(filename, args.path, True)
         toc = time.perf_counter()
         print(f"\nClient finished Fetch Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
     elif args.function == "query":

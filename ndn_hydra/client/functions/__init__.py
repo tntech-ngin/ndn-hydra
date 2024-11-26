@@ -8,5 +8,6 @@
 
 from .insert import HydraInsertClient
 from .fetch import HydraFetchClient
+from .fetch_dpdk import HydraFetchClientDPDK
 from .delete import HydraDeleteClient
 from .query import HydraQueryClient
