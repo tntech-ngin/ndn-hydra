@@ -48,9 +48,7 @@ class HydraInsertClient(object):
         query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
         query = [Component.from_str("file")] + file_name
         query_result = await query_client.send_query(query)
-        target_file_name = Name.to_str(query)[5:]
-
-        if query_result == target_file_name:
+        if query_result:
             print('File already exists, aborted insertion.')
             return False
 
@@ -62,12 +60,12 @@ class HydraInsertClient(object):
             final_block_id = Component.from_segment(seg_cnt - 1)
             inner_packets = [self.app.prepare_data(packet_prefix + [Component.from_segment(i)],
                                                   data[i * SEGMENT_SIZE:(i + 1) * SEGMENT_SIZE],
-                                                  freshness_period=2000,
+                                                  freshness_period=10000,
                                                   final_block_id=final_block_id)
                             for i in range(seg_cnt)]
             self.packets = [self.app.prepare_data(publish_prefix + [Component.from_segment(i)],
                                                     packet,
-                                                    freshness_period=2000,
+                                                    freshness_period=10000,
                                                     final_block_id=final_block_id)
                             for i, packet in enumerate(inner_packets)]
 

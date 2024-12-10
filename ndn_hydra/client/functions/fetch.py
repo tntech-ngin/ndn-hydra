@@ -14,6 +14,7 @@ import time
 from ndn.app import NDNApp
 from ndn.encoding import FormalName, Component, Name, ContentType
 import os
+from ndn_hydra.client.functions.query import HydraQueryClient
 from ndn_hydra.repo.utils.concurrent_fetcher import concurrent_fetcher
 
 
@@ -49,34 +50,21 @@ class HydraFetchClient(object):
         if os.path.isfile(local_filename) and not overwrite:
             raise FileExistsError("{} already exists".format(local_filename))
 
-        # Ping with only one data packet at the start
-        b_array = bytearray()
-        start_index = 0
-        end_index = None
-        data_name, meta_info, content, data_bytes = await self.app.express_interest(
-            name_at_repo, need_raw_packet=True, can_be_prefix=False, must_be_fresh=False, lifetime=4000)
-
-        forwarding_hint = []
-        name_at_repo = name_at_repo[:-1]
-
-        if meta_info.content_type == ContentType.NACK:
-            print("Distributed Repo does not have that file.")
+        # Get file information
+        query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
+        query = [Component.from_str("file")] + file_name
+        target_file = await query_client.send_query(query)
+        if not target_file:
+            print("Distribution Repo does not have that file.")
             return
+        source_repo = target_file["stores"][0]
+        name_at_repo = name_at_repo[:-1]
+        start_index = 0
+        end_index = target_file["packets"] - 1
+        forwarding_hint = [(1, Name.to_str(self.repo_prefix) + source_repo + Name.to_str(file_name))]
+        b_array = bytearray()
 
-        if meta_info.content_type == ContentType.LINK:
-            # name_at_repo = Name.from_str(bytes(content).decode())
-            forwarding_hint = [(1, bytes(content).decode())]
-        # else:
-        #     # name_at_repo = name_at_repo[:-1]
-        #     # start_index = start_index + 1
-        #     # print(name_at_repo)
-        #     b_array.extend(content)
-
-        end_index = Component.to_number(meta_info.final_block_id)
-
-        # print(Name.to_str(data_name))
-
-        # Fetch the rest of the file.
+        # Fetch the file.
         if start_index <= end_index:
             async for (_, _, content, _, _) in concurrent_fetcher(self.app, name_at_repo, Name.from_str(local_filename), start_index, end_index, Semaphore(10), forwarding_hint=forwarding_hint):
                 b_array.extend(content)
