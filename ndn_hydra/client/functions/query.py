@@ -8,6 +8,7 @@
 #  @Pip-Library:   https://pypi.org/project/ndn-hydra
 # -------------------------------------------------------------
 
+import json
 import logging
 from ndn.app import NDNApp
 from ndn.encoding import FormalName, Component, Name, ContentType
@@ -64,11 +65,11 @@ class HydraQueryClient(object):
                         print(f'No files inserted in the remote repo.')
                 elif querytype == "file":
                     if content:
-                        file = File.parse(content)
+                        file = json.loads(content.tobytes().decode())
                         print(f'File meta-info:')
-                        print(f'\tfile_name: {Name.to_str(file.file_name)}')
-                        print(f'\tsize: {file.size} | packets: {file.packets} | packet_size: {file.packet_size}')
-                        return Name.to_str(file.file_name)
+                        print(f'\tfile_name: {file["file_name"]}')
+                        print(f'\tsize: {file["size"]} | packets: {file["packets"]} | packet_size: {file["packet_size"]}')
+                        return file
                 elif querytype == "prefix":
                     filelist = FileList.parse(content)
                     counter = 1

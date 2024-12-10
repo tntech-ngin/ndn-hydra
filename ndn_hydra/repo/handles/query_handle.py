@@ -9,6 +9,7 @@
 # -------------------------------------------------------------
 
 import asyncio as aio
+import json
 import logging
 from ndn.app import NDNApp
 from ndn.encoding import Name, ContentType, Component
@@ -95,19 +96,20 @@ class QueryHandle(object):
             return
         elif querytype == "file":
             self.logger.info(f'\n[CMD][QUERY]    query received: file')
-            files = self.global_view.get_files()
             filename = query[5:]
-            filecontent = None
-            for index in range(len(files)):
-                if Name.to_str(files[index]["file_name"]) == filename:
-                    file = File()
-                    file.file_name = files[index]["file_name"]
-                    file.packets = files[index]["packets"]
-                    file.packet_size = files[index]["packet_size"]
-                    file.size = files[index]["size"]
-                    filecontent = file.encode()
-                    break
-            self.app.put_data(int_name, content=filecontent, freshness_period=3000, content_type=ContentType.BLOB)
+            file = self.global_view.get_file(filename)
+
+            if file:
+                # If this node has the file, it should be the first in the list
+                # so that clients can prioritize fetching. The full order of the nodes
+                # can later be used to determine which nodes to fetch from.
+                file_stores = file["stores"]
+                if self.node_name in file_stores:
+                    file_stores.remove(self.node_name)
+                    file_stores.insert(0, self.node_name)
+
+                file = json.dumps(file).encode()
+            self.app.put_data(int_name, content=file, freshness_period=3000, content_type=ContentType.BLOB)
             return
         elif querytype == "prefix":
             self.logger.info(f'\n[CMD][QUERY]    query received: prefix')
