@@ -110,7 +110,7 @@ class QueryHandle(object):
                     file_stores.remove(self.node_name)
                     file_stores.insert(0, self.node_name)
                 else:
-                    file_stores = random.shuffle(file_stores)
+                    random.shuffle(file_stores)
 
                 file = json.dumps(file).encode()
             self.app.put_data(int_name, content=file, freshness_period=3000, content_type=ContentType.BLOB)
