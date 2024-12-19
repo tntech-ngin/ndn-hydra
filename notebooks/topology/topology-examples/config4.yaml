@@ -1,0 +1,18 @@
+topology:
+    client_nodes:
+      - node01
+    client_connections:
+      node01:
+        - node02
+    nodes:
+      - node02
+      - node03
+      - node04
+    connections:
+      node02:
+          - node03
+          - node04
+      node03:
+          - node02
+      node04:
+          - node02
