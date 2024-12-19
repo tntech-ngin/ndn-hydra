@@ -1,0 +1,48 @@
+topology:
+    client_nodes:
+      - node01
+      - node04
+      - node08
+    client_connections:
+      node01:
+        - node02
+      node04:
+        - node05
+      node08:
+        - node09
+    nodes:
+      - node02
+      - node03
+      - node05
+      - node06
+      - node07
+      - node09
+      - node10
+    connections:
+      node02:
+          - node03
+          - node06
+          - node07
+      node03:
+          - node02
+          - node05
+          - node06
+      node05:
+          - node03
+          - node09
+      node06:
+          - node02
+          - node03
+          - node10
+      node07:
+          - node02
+          - node09
+          - node10
+      node09:
+          - node05
+          - node07
+          - node10
+      node10:
+          - node06
+          - node07
+          - node09
