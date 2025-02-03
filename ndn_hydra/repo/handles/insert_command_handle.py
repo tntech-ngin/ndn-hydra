@@ -143,7 +143,7 @@ class InsertCommandHandle(ProtocolHandle):
         )
         if pickself:
             # self.global_view.store_file(insertion_id, self.config['session_id'])
-            self.main_loop.fetch_file(file_name, packets, packet_size, Name.to_str(fetch_path))
+            self.main_loop.fetch_file_from_client(file_name, packets, packet_size, Name.to_str(fetch_path))
 
         self.global_view.set_backups(file_name, backup_list)
 
