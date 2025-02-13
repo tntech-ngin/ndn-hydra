@@ -11,11 +11,12 @@ class DataStorage(SqliteStorage):
         self.batch_size = 900
         # self.conn.execute('PRAGMA journal_mode=wal')  # Enable WAL mode
 
-    def put_packet(self, name: NonStrictName, data: bytes) -> None:
+    def put_packet(self, name: NonStrictName, data: bytes, internal: bool = False) -> None:
         if not self.initialized:
             raise self.UninitializedError("The storage is not initialized.")
-        _, _, content, _ = parse_data(data)
-        super().put_packet(name, content)
+        if not internal:
+            _, _, data, _ = parse_data(data)
+        super().put_packet(name, data)
 
     def remove_packets(self, names: List[NonStrictName]) -> int:
         if not self.initialized:

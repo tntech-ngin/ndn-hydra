@@ -85,20 +85,24 @@ def parse_hydra_cmd_opts() -> Namespace:
     insertsp.add_argument("-f","--filename",action="store",dest="filename",required=True)
     insertsp.add_argument("-p","--path",action="store",dest="path",required=True)
     insertsp.add_argument("-w","--wait",action="store",dest="wait",required=True)
+    insertsp.add_argument("-c","--client_prefix",action="store",dest="client_prefix",default="/client1", required=False)
 
     deletesp = subparsers.add_parser('delete',add_help=False)
     deletesp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
     deletesp.add_argument("-f","--filename",action="store",dest="filename",required=True)
+    deletesp.add_argument("-c","--client_prefix",action="store",dest="client_prefix",default="/client1", required=False)
 
     fetchsp = subparsers.add_parser('fetch',add_help=False)
     fetchsp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
     fetchsp.add_argument("-f","--filename",action="store",dest="filename",required=True)
     fetchsp.add_argument("-p","--path",action="store",dest="path",default="./fetchedHydraFile", required=False)
+    fetchsp.add_argument("-c","--client_prefix",action="store",dest="client_prefix",default="/client1", required=False)
 
     querysp = subparsers.add_parser('query',add_help=False)
     querysp.add_argument("-r","--repoprefix",action="store",dest="repo",required=True)
     querysp.add_argument("-q","--query",action="store",dest="query",required=True)
     querysp.add_argument("-n","--nodename",action="store",dest="nodename",default=None, required=False)
+    querysp.add_argument("-c","--client_prefix",action="store",dest="client_prefix",default="/client1", required=False)
 
 
     # Interpret Informational Arguments
@@ -138,7 +142,7 @@ class HydraClient:
 
 async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
     repo_prefix = Name.from_str(args.repo)
-    client_prefix = Name.from_str("/client")
+    client_prefix = Name.from_str(args.client_prefix)
     filename = None
     client = HydraClient(app, client_prefix, repo_prefix)
 

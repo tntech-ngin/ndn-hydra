@@ -11,6 +11,7 @@
 import asyncio as aio
 import json
 import logging
+import random
 from ndn.app import NDNApp
 from ndn.encoding import Name, ContentType, Component
 from ndn.storage import Storage
@@ -100,13 +101,16 @@ class QueryHandle(object):
             file = self.global_view.get_file(filename)
 
             if file:
-                # If this node has the file, it should be the first in the list
-                # so that clients can prioritize fetching. The full order of the nodes
-                # can later be used to determine which nodes to fetch from.
+                # If this node has the file, it should serve the file.
+                # Otherwise, randomly pick a node to serve the file. We shuffle to disregard
+                # any potential previous order. This decision can later be improved by selecting a 
+                # node based on factors like proximity, load, etc.
                 file_stores = file["stores"]
                 if self.node_name in file_stores:
                     file_stores.remove(self.node_name)
                     file_stores.insert(0, self.node_name)
+                else:
+                    random.shuffle(file_stores)
 
                 file = json.dumps(file).encode()
             self.app.put_data(int_name, content=file, freshness_period=3000, content_type=ContentType.BLOB)
