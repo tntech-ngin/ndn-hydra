@@ -10,7 +10,6 @@
 
 import logging
 import time
-from hashlib import blake2b
 from ndn.app import NDNApp
 from ndn.encoding import Name, Component, FormalName
 from ndn_hydra.repo.protocol.base_models import InsertCommand, File
@@ -31,7 +30,9 @@ class HydraInsertClient(object):
         self.app = app
         self.client_prefix = client_prefix
         self.repo_prefix = repo_prefix
-        self.pb = PubSub(self.app, self.client_prefix)
+        # Add a random component to the client prefix to avoid conflicts 
+        # when multiple clients are running on the same host simultaneously
+        self.pb = PubSub(self.app, self.client_prefix + [Component.from_str(str(int(time.time())))])
         self.packets = []
 
     async def insert_file(self, file_name: FormalName, path: str) -> bool:
@@ -96,7 +97,9 @@ class HydraInsertClient(object):
         await self.pb.wait_for_ready()
         is_success = await self.pb.publish(self.repo_prefix + ['insert'], cmd_bytes)
         if is_success:
+            print('\nPublished an insert msg and was acknowledged by a subscriber')
             logging.debug('\nPublished an insert msg and was acknowledged by a subscriber')
         else:
+            print('\nPublished an insert msg but was not acknowledged by a subscriber')
             logging.debug('\nPublished an insert msg but was not acknowledged by a subscriber')
         return is_success

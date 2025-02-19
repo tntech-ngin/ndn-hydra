@@ -9,8 +9,9 @@
 # -------------------------------------------------------------
 
 import logging
+import time
 from ndn.app import NDNApp
-from ndn.encoding import Name, Component, FormalName
+from ndn.encoding import Component, FormalName
 from ndn_hydra.repo.protocol.base_models import DeleteCommand
 from ndn_hydra.repo.utils.pubsub import PubSub
 
@@ -26,7 +27,9 @@ class HydraDeleteClient(object):
         self.app = app
         self.client_prefix = client_prefix
         self.repo_prefix = repo_prefix
-        self.pb = PubSub(self.app, self.client_prefix)
+        # Add a random component to the client prefix to avoid conflicts 
+        # when multiple clients are running on the same host simultaneously
+        self.pb = PubSub(self.app, self.client_prefix + [Component.from_str(str(int(time.time())))])
 
     async def delete_file(self, file_name: FormalName) -> bool:
         """
