@@ -93,8 +93,8 @@ class ReadHandle(object):
         total_segments = int(self.global_view.get_file(file_name)["packets"])
         if best_id == self.node_name:
             if segment_comp == "/seg=0":
-                self.logger.info(f'\n[CMD][FETCH]    serving file')
-                self._reset_file_expiration(file_name)
+                self.logger.info(f'\n[CMD][FETCH]    serving file: {file_name}')
+                # self._reset_file_expiration(file_name)
 
             # serving my own data
             data_bytes = self.data_storage.get_packet(file_name + segment_comp, int_param.can_be_prefix)
@@ -115,7 +115,7 @@ class ReadHandle(object):
     def _get_file_name_from_interest(self, int_name):
         file_name = int_name[len(self.repo_prefix):]
         if file_name[0:len(self.node_comp)] == self.node_comp:
-            return file_name[(len(self.node_comp)+len(self.node_name)):]
+            return file_name[len(self.node_name):]
         return file_name
 
     def _best_id_for_file(self, file_name: str):

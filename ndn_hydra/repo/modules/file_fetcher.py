@@ -41,7 +41,7 @@ class FileFetcher:
 
     def fetch_file_from_client(self, file_name: str, packets: int, packet_size: int, fetch_path: str):
         if file_name in self.fetching:
-            self.logger.info("\nFileFetcher: Already fetching")
+            self.logger.info("\nFileFetcher [Client]: Already fetching")
             return
         if not self.store_func:
             self.logger.info("\nFileFetcher: No storage function defined")
@@ -51,7 +51,7 @@ class FileFetcher:
 
     def fetch_file_from_node(self, file_name: str, packets: int, packet_size: int):
         if file_name in self.fetching:
-            self.logger.info("\nFileFetcher: Already fetching")
+            self.logger.info("\nFileFetcher [Node]: Already fetching")
             return
         if not self.store_func:
             self.logger.info("\nFileFetcher: No storage function defined")
@@ -69,10 +69,11 @@ class FileFetcher:
         if not selected_node:
             return
         # Fetch file from selected node
-        fetch_path = f"{self.repo_prefix}/node/{selected_node}/fetch/{file_name}"
-        aio.ensure_future(self._fetch_file_helper(file_name, packets, packet_size, fetch_path))
+        fetch_path = self.repo_prefix + file_name
+        forwarding_hint = [(1, Name.to_str(self.repo_prefix) + selected_node + Name.to_str(file_name))]
+        aio.ensure_future(self._fetch_file_helper(file_name, packets, packet_size, fetch_path, forwarding_hint=forwarding_hint, internal=True))
 
-    async def _fetch_file_helper(self, file_name: str, packets: int, packet_size: int, fetch_path: str):
+    async def _fetch_file_helper(self, file_name: str, packets: int, packet_size: int, fetch_path: str, forwarding_hint=None, internal=False):
         self.logger.info(f"\n[ACT][FETCH]*  "
                          f"\n\tFile name={file_name};"
                          f"\n\tPackets={packets};"
@@ -86,13 +87,14 @@ class FileFetcher:
         # Custom: end
 
         async for (_, _, _, data_bytes, key) in concurrent_fetcher(self.app, fetch_path, file_name, 0,
-                                                                         packets - 1, aio.Semaphore(15)):
-            _, _, content, _ = parse_data(data_bytes)
-            self.data_storage.put_packet(key, content)  #TODO: check digest
+                                                                         packets - 1, aio.Semaphore(15), forwarding_hint=forwarding_hint):
+            if not internal:
+                _, _, data_bytes, _ = parse_data(data_bytes)
+            self.data_storage.put_packet(key, data_bytes)  #TODO: check digest
 
             # Custom: save files for dpdk fileserver
-            _, _, content, _ = parse_data(content)
-            f.write(content)
+            _, _, data_bytes, _ = parse_data(data_bytes)
+            f.write(data_bytes)
             # Custom: end
 
         # Custom: save files for dpdk fileserver

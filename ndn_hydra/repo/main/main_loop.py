@@ -81,7 +81,7 @@ class MainLoop:
                     continue
                 message = Message.specify(i.nid, i.lowSeqno, message_bytes)
                 self.tracker.reset(i.nid)
-                aio.ensure_future(message.apply(self.global_view, self.data_storage, self.fetch_file, self.svs, self.config))
+                aio.ensure_future(message.apply(self.global_view, self.data_storage, self.fetch_file_from_client, self.svs, self.config))
                 i.lowSeqno = i.lowSeqno + 1
 
     def send_heartbeat(self):
@@ -155,7 +155,7 @@ class MainLoop:
             deficit = underreplicated_file['desired_copies'] - len(underreplicated_file['stores'])
             for backuped_by in underreplicated_file['backups']:
                 if (backuped_by['node_name'] == self.config['node_name']) and (backuped_by['rank'] < deficit):
-                    self.fetch_file(underreplicated_file['file_name'], underreplicated_file['packets'], underreplicated_file['packet_size'], underreplicated_file['fetch_path'])
+                    self.fetch_file_from_node(underreplicated_file['file_name'], underreplicated_file['packets'], underreplicated_file['packet_size'])
 
     def claim(self):
         # TODO: possibility based on # active sessions and period
@@ -226,8 +226,11 @@ class MainLoop:
                          f"\n\tNode name={self.config['node_name']};"
                          f"\n\tfile={file_name}")
 
-    def fetch_file(self, file_name: str, packets: int, packet_size: int, fetch_path: str):
+    def fetch_file_from_client(self, file_name: str, packets: int, packet_size: int, fetch_path: str):
         self.file_fetcher.fetch_file_from_client(file_name, packets, packet_size, fetch_path)
+
+    def fetch_file_from_node(self, file_name: str, packets: int, packet_size: int):
+        self.file_fetcher.fetch_file_from_node(file_name, packets, packet_size)
 
     def check_garbage(self):
         """
