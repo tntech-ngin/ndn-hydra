@@ -47,6 +47,15 @@ class ReadHandle(object):
         # self.listen(Name.from_str(self.repo_prefix + self.node_comp  + self.node_name))
         self.listen(Name.from_str(self.repo_prefix + self.node_name))
 
+        # Tmp: Read count
+        self.read_count = 0
+        aio.ensure_future(self.log_read_requests())
+
+    async def log_read_requests(self):
+        while True:
+            self.logger.info(f'Total read requests received: {self.read_count}')
+            await aio.sleep(10)
+
     def listen(self, prefix):
         """
         This function needs to be called for prefix of all data stored.
@@ -72,6 +81,8 @@ class ReadHandle(object):
         Assumptions:
         - A node on the on list will have the file in complete form
         """
+
+        self.read_count += 1
 
         # get rid of the security part if any on the int_name
         file_name = self._get_file_name_from_interest(Name.to_str(int_name[:-1]))
