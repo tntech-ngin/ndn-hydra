@@ -11,10 +11,10 @@ default_config:
   timers:
     loop_period: 5000
     tracker_rate: 25000
-    heartbeat_rate: 20000
+    heartbeat_rate: 25000
     beats_to_renew: 3
     beats_to_fail: 3
-    replication_degree: 3
+    replication_degree: 4
     file_expiration: 2 # in hours, 0 = never expire
 
   favor:  
