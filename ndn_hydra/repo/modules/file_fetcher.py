@@ -53,7 +53,11 @@ class FileFetcher:
             self.logger.info("\nFileFetcher: No storage function defined")
             return
         self.fetching.append(file_name)
+
         # Randomly select a node to fetch file from
+        # Todo: Global view to update in case of missed updates
+        time.sleep(60) 
+
         file_info = self.global_view.get_file(file_name)
         on_list = file_info["stores"]
         if not on_list:
