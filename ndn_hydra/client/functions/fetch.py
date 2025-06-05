@@ -57,11 +57,13 @@ class HydraFetchClient(object):
         if not target_file:
             print("Distribution Repo does not have that file.")
             return
-        source_repo = target_file["stores"][0]
+
+        source_repo_1 = target_file["stores"][0]
+        source_repo_2 = target_file["stores"][1]
         name_at_repo = name_at_repo[:-1]
         start_index = 0
         end_index = target_file["packets"] - 1
-        forwarding_hint = [(1, Name.to_str(self.repo_prefix) + source_repo + Name.to_str(file_name))]
+        forwarding_hint = [(1, Name.to_str(self.repo_prefix) + source_repo_1 + Name.to_str(file_name)), (2, Name.to_str(self.repo_prefix) + source_repo_2 + Name.to_str(file_name))]
         b_array = bytearray()
 
         # Fetch the file.
