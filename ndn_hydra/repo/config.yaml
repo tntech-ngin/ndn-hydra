@@ -10,8 +10,8 @@ default_config:
 
   timers:
     loop_period: 5000
-    tracker_rate: 25000
-    heartbeat_rate: 20000
+    tracker_rate: 5000
+    heartbeat_rate: 3000
     beats_to_renew: 3
     beats_to_fail: 3
     replication_degree: 3
