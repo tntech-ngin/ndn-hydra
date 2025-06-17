@@ -46,8 +46,10 @@ class HydraQueryClient(object):
             else:
                 querytype = Component.to_str(query[0])
                 if querytype == "nodes":
+                    nodes = bytes(content).decode().split()
                     print(f'List of All Node Names')
-                    print(f'{bytes(content).decode().split()}')
+                    print(nodes)
+                    return nodes
                 elif querytype == "exnodes":
                     print(f'List of All Expired Node Names')
                     print(f'{bytes(content).decode().split()}')

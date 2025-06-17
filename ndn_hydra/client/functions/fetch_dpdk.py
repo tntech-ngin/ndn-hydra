@@ -52,7 +52,7 @@ class HydraFetchClientDPDK(object):
         query = [Component.from_str("nodes")]
         node_list = await query_client.send_query(query)
 
-        file_basename = Name.to_str(file_name).split("/")[-1]
+        file_basename = file_name.split("/")[-1]
         source_repo = None
 
         # Check each node for the file
