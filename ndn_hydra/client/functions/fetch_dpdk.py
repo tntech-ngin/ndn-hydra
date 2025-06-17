@@ -46,6 +46,38 @@ class HydraFetchClientDPDK(object):
         stop_c = f"ndndpdk-ctrl --gqlserver {self.gqlserver} stop-trafficgen --id {tg_id}"
         subprocess.run(stop_c, shell=True)
 
+    async def get_holding_repo(self, file_name: str) -> str:
+        # Get all available nodes
+        query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
+        query = [Component.from_str("nodes")]
+        node_list = await query_client.send_query(query)
+
+        file_basename = Name.to_str(file_name).split("/")[-1]
+        source_repo = None
+
+        # Check each node for the file
+        for node in node_list:
+            # Directory path for this node
+            target_dir = os.path.expanduser(f"~/.ndn/repo/hydra/{node}/fileserver")
+
+            try:
+                # List files in the target directory
+                list_cmd = f"ndndpdk-godemo ls --name {target_dir} 2>/dev/null"
+                result = subprocess.run(list_cmd, shell=True, capture_output=True, text=True, timeout=5)
+                file_list = result.stdout.strip().splitlines()
+
+                if file_basename in file_list:
+                    source_repo = node
+                    break
+            except Exception as e:
+                print(f"Error querying node {node}: {e}")
+                continue
+
+        if not source_repo:
+            raise FileNotFoundError(f"Could not find {file_basename} on any node.")
+
+        return source_repo
+
     async def fetch_file_dpdk(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
         """
         Fetch a file from remote repo, and write to the current working directory.
@@ -61,10 +93,7 @@ class HydraFetchClientDPDK(object):
             raise FileExistsError("{} already exists".format(local_filename))
 
         # Get repo which holds the file
-        query_client = HydraQueryClient(self.app, self.client_prefix, self.repo_prefix)
-        query = [Component.from_str("filestores")] + file_name
-        query_result = await query_client.send_query(query)
-        source_repo = random.choice(query_result)
+        source_repo = await self.get_holding_repo(Name.to_str(file_name))
         file_name = source_repo + Name.to_str(file_name)
 
         # Get fetch args
