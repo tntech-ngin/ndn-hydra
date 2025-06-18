@@ -13,6 +13,7 @@ from ndn.encoding import FormalName, Component, Name
 from ndn_hydra.client.functions.query import HydraQueryClient
 import json
 import os
+import random
 import subprocess
 
 TG_STATE_FILE = "/tmp/tg"
@@ -37,11 +38,10 @@ class HydraFetchClientDPDK(object):
         if tg_id and fetcher_id:
             return tg_id, fetcher_id
 
-        sock_name = "/run/ndn/tg.sock"
         tg_config = json.dumps({
             "face": {
                 "scheme": "memif",
-                "socketName": sock_name,
+                "socketName": "/run/ndn/tg.sock",
                 "id": 1,
                 "role": "client",
                 "dataroom": 9000
@@ -60,6 +60,8 @@ class HydraFetchClientDPDK(object):
             capture_output=True
         )
 
+        if proc.stderr:
+            raise Exception(proc.stderr)
         tg_info = json.loads(proc.stdout)
         tg_id = tg_info["id"]
         fetcher_id = tg_info["fetcher"]["id"]
@@ -92,7 +94,7 @@ class HydraFetchClientDPDK(object):
         node_list = await query_client.send_query(query)
 
         file_basename = file_name.split("/")[-1]
-        source_repo = None
+        candidate_nodes = []
 
         # Check each node for the file
         for node in node_list:
@@ -103,16 +105,16 @@ class HydraFetchClientDPDK(object):
                 file_list = result.stdout.strip().splitlines()
 
                 if file_basename in file_list:
-                    source_repo = node
-                    break
+                    candidate_nodes.append(node)
             except Exception as e:
                 print(f"Error querying node {node}: {e}")
                 continue
 
-        if not source_repo:
+        if not candidate_nodes:
             raise FileNotFoundError(f"Could not find {file_basename} on any node.")
 
-        return source_repo
+        # Pick a node at random
+        return random.choice(candidate_nodes)
 
     async def fetch_file_dpdk(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
         """
