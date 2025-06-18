@@ -13,8 +13,9 @@ from ndn.encoding import FormalName, Component, Name
 from ndn_hydra.client.functions.query import HydraQueryClient
 import json
 import os
-import random
 import subprocess
+
+TG_STATE_FILE = "/tmp/tg"
 
 
 class HydraFetchClientDPDK(object):
@@ -32,19 +33,57 @@ class HydraFetchClientDPDK(object):
         self.gqlserver = gqlserver
 
     def start_tg(self):
-        tg_c = (
-            "jq -n '{ "
-            "face: { scheme: \"memif\", socketName: \"/run/ndn/tg.sock\", id: 1, role: \"client\", dataroom: 9000 }, "
-            "fetcher: { nThreads: 4, nTasks: 7 } }' | "
-            f"ndndpdk-ctrl --gqlserver {self.gqlserver} start-trafficgen"
+        tg_id, fetcher_id = self.load_tg_state()
+        if tg_id and fetcher_id:
+            return tg_id, fetcher_id
+
+        sock_name = "/run/ndn/tg.sock"
+        tg_config = json.dumps({
+            "face": {
+                "scheme": "memif",
+                "socketName": sock_name,
+                "id": 1,
+                "role": "client",
+                "dataroom": 9000
+            },
+            "fetcher": {
+                "nThreads": 4,
+                "nTasks": 7,
+                "windowCapacity": 1048576
+            }
+        })
+
+        proc = subprocess.run(
+            ["ndndpdk-ctrl", "--gqlserver", self.gqlserver, "start-trafficgen"],
+            input=tg_config,
+            text=True,
+            capture_output=True
         )
-        out = subprocess.run(tg_c, shell=True, capture_output=True, text=True).stdout
-        data = json.loads(out)
-        return data["id"], data["fetcher"]["id"]
+
+        tg_info = json.loads(proc.stdout)
+        tg_id = tg_info["id"]
+        fetcher_id = tg_info["fetcher"]["id"]
+        self.save_tg_state(tg_id, fetcher_id)
+
+        return tg_id, fetcher_id
 
     def stop_tg(self, tg_id: str):
         stop_c = f"ndndpdk-ctrl --gqlserver {self.gqlserver} stop-trafficgen --id {tg_id}"
         subprocess.run(stop_c, shell=True)
+
+    def load_tg_state(self):
+        if os.path.exists(TG_STATE_FILE):
+            with open(TG_STATE_FILE, "r") as f:
+                try:
+                    data = json.load(f)
+                    return data["tg_id"], data["fetcher_id"]
+                except (json.JSONDecodeError, KeyError):
+                    pass
+        return None, None
+
+    def save_tg_state(self, tg_id, fetcher_id):
+        with open(TG_STATE_FILE, "w") as f:
+            json.dump({"tg_id": tg_id, "fetcher_id": fetcher_id}, f)
 
     async def get_holding_repo(self, file_name: str) -> str:
         # Get all available nodes
@@ -57,12 +96,9 @@ class HydraFetchClientDPDK(object):
 
         # Check each node for the file
         for node in node_list:
-            # Directory path for this node
-            target_dir = os.path.expanduser(f"~/.ndn/repo/hydra/{node}/fileserver")
-
             try:
                 # List files in the target directory
-                list_cmd = f"ndndpdk-godemo ls --name {target_dir} 2>/dev/null"
+                list_cmd = f"ndndpdk-godemo ls --name {node} 2>/dev/null"
                 result = subprocess.run(list_cmd, shell=True, capture_output=True, text=True, timeout=5)
                 file_list = result.stdout.strip().splitlines()
 
@@ -106,17 +142,32 @@ class HydraFetchClientDPDK(object):
             f"ndndpdk-ctrl --gqlserver {self.gqlserver} start-fetch --fetcher {fetcher_id} "
             f"--filename {local_filename} {fetch_args_out}"
         )
-        task_out = subprocess.run(fetch_c, shell=True, capture_output=True, text=True).stdout
-        task_id = json.loads(task_out)["id"]
+        task_out = subprocess.run(fetch_c, shell=True, capture_output=True, text=True)
+        if task_out.stderr:
+            raise Exception(task_out.stderr)
+        task_id = json.loads(task_out.stdout)["id"]
         
         # Watch fetch (auto-stop)
         log_filename = f"{local_filename}.log"
         watch_c = (
-            f"ndndpdk-ctrl --gqlserver {self.gqlserver} watch-fetch --id {task_id} --auto-stop &> {log_filename}"
+            f"ndndpdk-ctrl --gqlserver {self.gqlserver} watch-fetch --id {task_id} --auto-stop"
         )
-        subprocess.run(watch_c, shell=True)
+        with open(log_filename, "w") as logf:
+            # subprocess.run(watch_c, shell=True, stdout=logf, stderr=logf)
+            process = subprocess.Popen(
+                watch_c,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
+            for line in process.stdout:
+                print(line, end='')
+                logf.write(line)
+            process.wait()
 
         # Stop traffic generator
-        self.stop_tg(tg_id)
+        # self.stop_tg(tg_id)
 
         return name_at_repo
