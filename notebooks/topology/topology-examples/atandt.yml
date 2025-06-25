@@ -1,0 +1,33 @@
+topology:
+  client_nodes: [ node02, node06, node19, node23, node25 ]
+  client_connections:
+    node02: [ node03 ]
+    node06: [ node08 ]
+    node19: [ node21 ]
+    node23: [ node22 ]
+    node25: [ node24 ]
+  nodes: [ node01, node03, node04, node05, node07, node08, node09, node10, node11, node12, node13, node14, node15, node16, node17, node18, node20, node21, node22, node24 ]
+  connections:
+    node01: [ node03, node04, node07 ]
+    node03: [ node01, node02, node04, node05, node07, node08 ]
+    node04: [ node01, node03, node05, node07, node09 ]
+    node05: [ node03, node04, node08 ]
+    node07: [ node01, node03, node04, node09 ]
+    node08: [ node03, node05, node06, node11, node12 ]
+    node09: [ node04, node07, node10, node13, node14 ]
+    node10: [ node09, node11, node14 ]
+    node11: [ node08, node10, node12, node14, node15 ]
+    node12: [ node08, node11, node15 ]
+    node13: [ node09, node14, node16 ]
+    node14: [ node09, node10, node11, node13, node17 ]
+    node15: [ node11, node12, node18 ]
+    node16: [ node13, node17, node21 ]
+    node17: [ node14, node16, node18, node21, node22 ]
+    node18: [ node15, node17 ]
+    node20: [ node21, node22 ]
+    node21: [ node16, node17, node19, node20, node22 ]
+    node22: [ node17, node20, node21, node24 ]
+    node24: [ node22, node25 ]
+
+
+
