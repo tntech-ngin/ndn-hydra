@@ -9,5 +9,6 @@
 from .insert import HydraInsertClient
 from .fetch import HydraFetchClient
 from .fetch_dpdk import HydraFetchClientDPDK
+from .fetch_dpdk_nw import HydraFetchClientDPDKNW
 from .delete import HydraDeleteClient
 from .query import HydraQueryClient

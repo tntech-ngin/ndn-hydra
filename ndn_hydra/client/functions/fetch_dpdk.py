@@ -13,7 +13,6 @@ from ndn.encoding import FormalName, Component, Name
 from ndn_hydra.client.functions.query import HydraQueryClient
 import json
 import os
-import random
 import subprocess
 
 TG_STATE_FILE = "/tmp/tg"
@@ -94,7 +93,7 @@ class HydraFetchClientDPDK(object):
         node_list = await query_client.send_query(query)
 
         file_basename = file_name.split("/")[-1]
-        candidate_nodes = []
+        source_repo = None
 
         # Check each node for the file
         for node in node_list:
@@ -105,16 +104,16 @@ class HydraFetchClientDPDK(object):
                 file_list = result.stdout.strip().splitlines()
 
                 if file_basename in file_list:
-                    candidate_nodes.append(node)
+                    source_repo = node
+                    break
             except Exception as e:
                 print(f"Error querying node {node}: {e}")
                 continue
 
-        if not candidate_nodes:
+        if not source_repo:
             raise FileNotFoundError(f"Could not find {file_basename} on any node.")
 
-        # Pick a node at random
-        return random.choice(candidate_nodes)
+        return source_repo
 
     async def fetch_file_dpdk(self, file_name: FormalName, local_filename: str = None, overwrite: bool = False) -> None:
         """
