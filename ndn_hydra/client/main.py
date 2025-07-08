@@ -187,7 +187,7 @@ async def run_hydra_client(app: NDNApp, args: Namespace) -> None:
         await client.fetchdpdk(filename, args.path, True)
         # toc = time.perf_counter()
         # print(f"\nClient finished Fetch Command! \n\t- total time (with disk): {toc - tic:0.4f} secs\n")
-    elif args.function == "fetchdpdk_nw":
+    elif args.function == "fetchdpdknw":
         # tic = time.perf_counter()
         await client.fetchdpdknw(filename, args.path, True)
         # toc = time.perf_counter()
