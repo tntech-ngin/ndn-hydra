@@ -1,0 +1,31 @@
+# ---------------- Setup NFD ----------------
+sudo apt update
+sudo apt install -y software-properties-common
+sudo add-apt-repository -y ppa:named-data/ppa
+sudo apt update
+sudo apt install -y \
+  nfd libndn-cxx-dev \
+  ndnping ndnpeek ndn-dissect ndnchunks ndnsec jq
+
+if [ ! -f /etc/ndn/nfd.conf ]; then
+  sudo cp /etc/ndn/nfd.conf.sample /etc/ndn/nfd.conf
+fi
+
+# ---------------- Setup NDN-DPDK ----------------
+# ---------------- Dependencies ----------------
+sudo apt install -y --no-install-recommends \
+  git curl ca-certificates \
+  httpie iperf3 jq \
+  libibverbs-dev \
+  linux-image-generic
+
+# ---------------- NDN-DPDK ----------------
+cd /opt
+sudo git clone https://github.com/usnistgov/ndn-dpdk.git
+sudo chown -R $USER:$USER ndn-dpdk
+cd ndn-dpdk
+
+./docs/ndndpdk-depends.sh -y
+corepack pnpm -s install
+NDNDPDK_MK_RELEASE=1 make
+sudo make install
